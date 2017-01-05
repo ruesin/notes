@@ -121,7 +121,10 @@
 # ./scripts/mysql_install_db --user=mysql
 ```
 
-> Installing MySQL system tables..../bin/mysqld: error while loading shared libraries: libaio.so.1: cannot open shared object file: No such file or directory
+> Installing MySQL system tables..../bin/mysqld: error while loading shared libraries: libaio.so.
+>
+> 1: cannot open shared object file: No such file or directory
+
 ```
 # yum install -y libaio
 ```
