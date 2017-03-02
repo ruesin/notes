@@ -403,13 +403,147 @@ If you do not want to use this, either remove it, or use the
 
 ## 三、其他
 
-1. zsh
+### 1. 自动登录
 
-2. 隐藏VMware任务栏窗口
-3. 自动登录
-4. 升级SVN 
-5. 配置git
-6. 文件共享
+```
+# vim /etc/inittab
+id:5:initdefault: 改为 id:3:initdefault:
+# vim /etc/init/tty.conf
+exec /sbin/mingetty $TTY 改为 exec /sbin/mingetty --autologin=root $TTY
+```
+
+参考：http://blog.csdn.net/kpshare/article/details/7523546
 
 
+
+### 2. 隐藏VMware任务栏窗口
+
+1. Windows 自动启动 VMware Authorization Service服务。
+2. 虚拟机→编辑→首选项→工作区→勾选“Workstation 关闭后保持虚拟机运行”。
+
+
+
+
+### 3. 文件共享
+
+#### 1. 宿主机共享目录给虚拟机
+
+1. 虚拟机→安装 Vmware Tools
+2. 开启虚拟机 
+
+```
+# mkdir /mnt/cdrom
+# mount /dev/cdrom /mnt/cdrom 
+
+# cd /tmp
+# mkdir tmp
+# cd tmp
+# tar zvxf /mnt/cdrom/VMwareTools-10.0.10-4301679.tar.gz
+# cd vmware-tools-distrib
+# ./vmware-install.pl
+# shutdown -h now
+```
+
+3. 设置虚拟机，选项中添加共享目录，开机。
+
+```
+# ll /mnt/hgfs
+# ln -s /mnt/hgfs/htdocs/ ~/projects
+#ln -s /mnt/hgfs/share ~/share
+```
+
+#### 2. 虚拟机共享目录给宿主机
+
+...
+
+
+
+### 4. 升级SVN 
+
+```
+# vim /etc/yum.repos.d/wandisco-svn.repo #添加源
+[WandiscoSVN]
+name=Wandisco SVN Repo
+baseurl=http://opensource.wandisco.com/centos/$releasever/svn-1.8/RPMS/$basearch/
+enabled=1
+gpgcheck=0
+
+# yum remove subversion*
+# yum clean all
+# yum install subversion
+```
+
+
+
+### 5. zsh
+
+```
+# echo $SHELL
+# cat /etc/shells
+
+# yum -y install zsh
+# chsh -s /bin/zsh 
+
+# git clone git://github.com/robbyrussell/oh-my-zsh.git ~/.oh-my-zsh
+# cp ~/.oh-my-zsh/templates/zshrc.zsh-template ~/.zshrc
+或
+# wget https://github.com/robbyrussell/oh-my-zsh/raw/master/tools/install.sh -O - | sh
+
+# reboot
+```
+
+> warning: cannot set LC_CTYPE locale
+
+```
+# vim /etc/profile
+export LC_ALL=en_US.UTF-8
+export LC_CTYPE=en_US.UTF-8
+```
+
+
+
+### 6. git
+
+#### 1. 配置
+
+```
+/etc/gitconfig
+~/.gitconfig
+/pathtoproject/.git/config
+
+# git config --global user.name "Ruesin"
+# git config --global user.email ruesin@gmail.com
+
+# git config user.email ruesin@163.com
+
+# git config --global core.editor emacs 
+# git config --global merge.tool vimdiff
+//kdiff3,tkdiff,meld,xxdiff,emerge,vimdiff,gvimdiff,ecmerge,opendiff
+
+# git config --list
+# git config user.name
+
+```
+
+#### 2. 忽略
+```
+# vim .gitignore
+
+# 忽略*.o和*.a文件
+*.[oa]
+# 忽略*.b和*.B文件，my.b除外
+*.[bB]
+!my.b
+# 忽略dbg文件和dbg目录
+dbg
+# 只忽略dbg目录，不忽略dbg文件
+dbg/
+# 只忽略dbg文件，不忽略dbg目录
+dbg
+!dbg/
+# 只忽略当前目录下的dbg文件和目录，子目录的dbg不在忽略范围内
+/dbg
+
+# git rm -r --cached app/test.php
+```
 
