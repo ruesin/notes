@@ -1,0 +1,16 @@
+<!-- 首页 -->
+<section class="section">
+        <section class="left">
+        <div class="list-group">
+            <% page.posts.each(function (post) { %>
+                <li class="list-item">
+                    <!-- /a/<?=$val["id"]?>.html -->
+                    <a href='<%- url_for(post.path) %>'><%= post.title %></a>
+                    <p class="report_time">发布日期：<%- date(post.date, "YYYY-MM-DD") %></p>
+                </li>
+            <% }) %>
+        </div>
+        <%- partial('_partial/paginator') %>
+
+    </section>
+</section>
