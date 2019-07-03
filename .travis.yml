@@ -1,0 +1,27 @@
+language: node_js
+node_js:
+  - '10'
+branches:
+  only:
+    - pages
+before_install:
+  - npm install -g hexo-cli
+install:
+  - cd hexo && npm install
+script:
+  - cd hexo
+  - hexo clean
+  - hexo generate
+after_script:
+  # - hexo deploy
+  - cd hexo/public
+  - git init
+  # - git config user.name "ruesin"
+  # - git config user.email "ruesin@gmail.com"
+  - git remote add origin https://github.com/ruesin/notes.git
+  - git add .
+  - git commit -m "Travis CI Auto Builder at `date +"%Y-%m-%d %H:%M"`"
+  - git push --force --quiet "https://${GIT_TOKEN}@github.com/ruesin/notes.git" master:gh-pages
+env:
+  global:
+    secure: EBUYPnF/JEXMOtktvGxW3Ipc+Ky8SozaAAB9/ISTRyFWwC+PWEjoMlttXHnt2vQtGd0TFE3SM6VgHDpqIdhYxZK6+BSD4cI9z13AqjVJyOHdxHseFVcfcIq5Xu7ao699WpjVp3oM2Pw99Ufixwe9e7a/OMtam1AJC9vP/DNffuBmMp8SXgVsq0Fjn/PSLET4tgxtoiHFOYRmjw0ciTqLSjrRywnEjCplpzMkgxziMDXsJ65lh/OWKe2bFw3IopEgkRNHqKiDwprFkTj/vLKhFEWWLgKFnpVJn0DQC0AgcblWcKBexuwjG3WNuiq0kJWzpF/GxyTCP77rrMNzgxQp76GLube1+peIK8Y6nc+WR9/c6ZT9zq8tTqzBG5ht4xgekLObcLcNIKDMxQGT2nloW0Nh80s2WANTNR5yjUneRmDJ3aVuntfuPHw5lBvrlLp6t0PdVed4vlE/6bWI+Yb/aY9OVrZCBJ0xfcI9/ilJw11ZQF8WHqmB24mAv2XMXycdUR5rDV9y1nEWIDe0SkHnOGTZNbJKm/5u2bvQZCwlWlEoxnDatUB7LvGzdZ27Fg1sv+Fe+5OJ0XclRwS/FW6QQXsx7oQW7dPdCImsNXeOYo5zq2oIQuIPxrUABfKLSbRLU05rTjlcF9YKYjNcRLwGOKrBZhd03wysHApL1Be/h8s=
