@@ -81,4 +81,4 @@ theme: ruesin
 deploy:
   type: git
   repo: https://github.com/ruesin/notes
-  branch: pages
+  branch: master
