@@ -21,4 +21,4 @@ after_script:
   - git remote add origin https://github.com/ruesin/notes.git
   - git add .
   - git commit -m "Travis CI Auto Builder at `date +"%Y-%m-%d %H:%M"`"
-  - git push --force --quiet "https://${GIT_TOKEN}@github.com/ruesin/ruesin.github.io.git" master:gh-pages
+  - git push --force --quiet "https://${GIT_TOKEN}@github.com/ruesin/ruesin.github.io.git" master:master
