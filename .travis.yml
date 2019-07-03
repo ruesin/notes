@@ -16,8 +16,8 @@ after_script:
   # - hexo deploy
   - cd hexo/public
   - git init
-  # - git config user.name "ruesin"
-  # - git config user.email "ruesin@gmail.com"
+  - git config user.name "ruesin"
+  - git config user.email "ruesin@gmail.com"
   - git remote add origin https://github.com/ruesin/notes.git
   - git add .
   - git commit -m "Travis CI Auto Builder at `date +"%Y-%m-%d %H:%M"`"
