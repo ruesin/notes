@@ -23,7 +23,7 @@ categories:
    # reboot
    # ifconfig #查看IP，使用xshell连接
    ```
-
+![aaa](../images/timg.jpeg)
 3. 软件库
 
    ```

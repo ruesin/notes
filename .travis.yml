@@ -4,12 +4,19 @@ node_js:
 cache: npm
 branches:
   only:
-    - master
+    - pages
 before_install:
   - export TZ='Asia/Shanghai'
   - npm install -g hexo-cli
 install:
-  - cd hexo && npm install
+  - cd hexo
+  - npm install
+before_script:
+  - rm -rf ./source/_posts ./source/images
+  - mkdir -p ./source/_posts/
+  - mkdir -p ./source/images/
+  - cp -r ../docs/* ./source/_posts/
+  - cp -r ../images/* ./source/images/
 script:
   - hexo clean
   - hexo generate
@@ -21,4 +28,5 @@ after_script:
   - git remote add origin https://github.com/ruesin/notes.git
   - git add .
   - git commit -m "Travis CI Auto Builder at `date +"%Y-%m-%d %H:%M"`"
-  - git push --force --quiet "https://${GIT_TOKEN}@github.com/ruesin/ruesin.github.io.git" master:master
+  - git push --force --quiet "https://${GIT_TOKEN}@github.com/ruesin/notes.git" master:gh_pages
+  # - git push --force --quiet "https://${GIT_TOKEN}@github.com/ruesin/ruesin.github.io.git" master:master
