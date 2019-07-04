@@ -4,7 +4,7 @@ node_js:
 cache: npm
 branches:
   only:
-    - pages
+    - master
 before_install:
   - export TZ='Asia/Shanghai'
   - npm install -g hexo-cli
