@@ -1,7 +1,9 @@
 # note-book
 Just my notes
 
-- [本地开发环境](./local-development-environment.md)
+- [博客](https://ruesin.github.io/notes/)
+- [分类列表](./summary/category.md)
+- [文章列表](./summary/article.md)
 
   ​
 
