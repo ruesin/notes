@@ -20,7 +20,7 @@ def writeSummary(summary):
         result = '# '+smy[0]+'\n'
         for arc in articles:
             info = arc[1]
-            temp = '- ['+info.get('title')+'](.'+info.get('url')+')\n'
+            temp = '- ['+info.get('title')+'](.'+info.get('url')+') ('+info.get('date')+')\n'
             result += temp
         f.write(result)
         f.close()
@@ -43,7 +43,7 @@ def writeArticle(article_map):
     result = '# 文章\n'
     for arc in article:
         info = arc[1]
-        temp = '- ['+info.get('title')+'](.'+info.get('url')+')\n'
+        temp = '- ['+info.get('title')+'](.'+info.get('url')+') ('+info.get('date')+')\n'
         result += temp
     f.write(result)
     f.close()
@@ -76,23 +76,25 @@ def generateSummary(rootdir):
 
                     if config.get('categories'):
                         categories = config.get('categories')
-                        if isinstance(categories, str):
-                            category.append(categories)
-                        
                         if isinstance(categories,list):
                             for cate in categories:
                                 category.append(cate)
-                    
+                        else:
+                            category.append(categories)
+
                     if config.get('date'):
                         dt = str(config.get('date'))
-                        # re.search( r'\d{4}\-\d{2}\-\d{2}( \d{2}:\d{2}:\d{2})', dt)
-                        # date = int(time.mktime(time.strptime(dt, "%Y-%m-%d %H:%M:%S")))
-                        date = int(time.mktime(time.strptime(dt, "%Y-%m-%d")))
+                        searchDt = re.search( r'(\d{4}\-\d{2}\-\d{2})?( \d{2}:\d{2}:\d{2})?', dt)
+                        if searchDt and searchDt.group(1):
+                            if searchDt.group(2):
+                                date = int(time.mktime(time.strptime(dt, "%Y-%m-%d %H:%M:%S")))
+                            else:
+                                date = int(time.mktime(time.strptime(dt, "%Y-%m-%d")))
                 # else: 
                     # category.append('0')
                 
                 key = str(date) + '_' + title 
-                value = {'title':title, 'url':os.path.join(parent,filename)}
+                value = {'title':title, 'url':os.path.join(parent,filename), 'date':time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(date))}
 
                 for cat in category:
                     if category_map.get(cat):
