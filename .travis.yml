@@ -4,7 +4,7 @@ node_js:
 cache: npm
 branches:
   only:
-    - master
+    - website
 before_install:
   - export TZ='Asia/Shanghai'
   - npm install -g hexo-cli
@@ -18,6 +18,7 @@ before_script:
   - mkdir -p ./source/images/
   - cp -r ../docs/ ./source/_posts/
   - cp -r ../images/ ./source/images/
+  - cp ../CNAME ./source/
 script:
   - hexo clean
   - hexo generate
