@@ -15,7 +15,7 @@ install:
 before_script:
   - rm -rf ./source/_posts/ ./source/images/
   - mkdir -p ./source/_posts/ && mkdir -p ./source/images/
-  - cp -r ../docs/ ./source/_posts/ && ls ../images/ && cp -r ../images/ ./source/images/
+  - cp -r ../docs/ ./source/_posts/ && ls ../images/ && cp -r ../images/* ./source/images/ && ls ./source/images/
   - cp ../CNAME ./source/
 script:
   - hexo clean
