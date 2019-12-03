@@ -1,13 +1,12 @@
 ---
-title: 开发环境
-date: 2017-01-05
-categories: 
-- 基础
+title: 本地开发环境
+date: 2016-07-15 13:15:51
+categories: 基础
 ---
 
 基于VMware12 + CentOS 6.5 的解决方案，共享项目，宿主机办公、虚拟机提供服务。
 
-##一、系统
+## 一、系统
 
 1. 安装
 
@@ -551,4 +550,5 @@ dbg
 
 # git rm -r --cached app/test.php
 ```
+
 
