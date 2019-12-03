@@ -17,6 +17,7 @@ before_script:
   - mkdir -p ./source/_posts/ && mkdir -p ./source/images/
   - cp -r ../docs/* ./source/_posts/ && cp -r ../images/* ./source/images/
   - cp ../CNAME ./source/
+  - cp ../favicon.ico ./source/
   - echo $SHELL
 script:
   - hexo clean
