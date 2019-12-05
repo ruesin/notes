@@ -2,6 +2,12 @@
 title: Mac OX 编译安装 Nginx  + Mysql + PHP （失败记录）
 date: 2016-02-01 14:18:54
 categories: 本地
+tags: 
+- php
+- mac
+- mac ox
+- mac 终端
+- mac php
 ---
 
 先说一下，最后PHP编译的时候出了点状况，导致最后编译失败，使用的brew安装。

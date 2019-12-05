@@ -2,6 +2,11 @@
 title: smarty添加自定义插件功能
 date: 2014-09-28 14:32:07
 categories: PHP
+tags: 
+- php
+- php基础
+- smarty
+- smarty插件
 ---
 
 smarty插件是smarty模版引擎的核心，没有插件的smarty几乎什么都做不了。  

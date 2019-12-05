@@ -2,6 +2,10 @@
 title: wamp在win64位下PHP环境无法开启php_curl扩展组件
 date: 2014-07-11 12:53:03
 categories: 本地
+tags: 
+- wamp
+- curl
+- windows
 ---
 
 工作中用到了Curl，去Wamp设置里勾选开启Curl后，检测环境还是没有开启，php程序显示Call to undefined function curl\_init()错误。  

@@ -2,6 +2,12 @@
 title: Ecstore后台管理新加一种页面模版类型供前台渲染使用
 date: 2014-09-15 14:53:42
 categories: 三方产品
+tags: 
+- ecstore
+- ecstore二开
+- ecstore源码
+- ecstore模版
+- ecstore开发
 ---
 
 本文写的是在后台模版管理→页面管理→新增页面 时，左侧多加一种页面类型，前台渲染时可以使用相应模版。

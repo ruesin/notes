@@ -2,6 +2,12 @@
 title: Ubuntu删除文件过度，导致依赖丢失，系统崩溃
 date: 2015-12-31 23:39:14
 categories: 本地
+tags: 
+- ubuntu
+- ubuntu web环境
+- ubuntu 不能上网
+- ubuntu 系统设置
+- icu
 ---
 
 用久了Ubuntu，老毛病又犯了，看着dash中一大堆用不到的东西，就犯膈应，想清理清理系统。

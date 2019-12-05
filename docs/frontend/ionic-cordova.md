@@ -2,6 +2,10 @@
 title: Ionic + cordova 构建 webapp 项目
 date: 2016-07-07 14:17:56
 categories: 前端
+tags: 
+- ionic 项目
+- angularjs
+- cordova
 ---
 
 本文只是非常简单的记录了，ionic从新项目到打包的过程，并没有做任何的其他开发配置。具体内部的开发，请查阅ionic、angularjs文档等，打包配置等请查阅相关文档。

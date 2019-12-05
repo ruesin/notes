@@ -2,6 +2,10 @@
 title: Ubuntu 下编译Curl库及PHP的curl扩展
 date: 2015-12-31 23:42:18
 categories: 本地
+tags: 
+- curl
+- ubuntu
+- ubuntu web环境
 ---
 
 编译PHP的时候连常用的Curl扩展都忘记了，脑也是够残的。

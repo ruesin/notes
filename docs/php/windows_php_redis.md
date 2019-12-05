@@ -2,6 +2,11 @@
 title: Windows下php+redis安装
 date: 2015-04-15 09:42:59
 categories: PHP
+tags: 
+- php
+- windows redis
+- redis
+- yii2.0 属性
 ---
 
 有个项目需要在加载页面的时候执行大量的数据处理，按正常套路走的话速度会比较慢，而这时redis就是比较适合的选择了。

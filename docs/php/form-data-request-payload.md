@@ -2,6 +2,13 @@
 title: form data 与 request payload之间的区别，及PHP中接收
 date: 2015-10-31 07:54:57
 categories: PHP
+tags: 
+- php
+- php基础
+- request payload
+- ajax request payload
+- php request payload
+- php curl
 ---
 
 与前端交互一直都是POST、GET的，从来没有出现过以外。

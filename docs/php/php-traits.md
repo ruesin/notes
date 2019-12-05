@@ -2,6 +2,13 @@
 title: PHP的Traits特性实现多继承及代码复用
 date: 2015-06-23 11:28:28
 categories: PHP
+tags: 
+- php
+- php traits
+- php多继承
+- php代码复用
+- php 基础
+- ubuntu git
 ---
 
 有很多时候，我们会用到所谓的 PHP “多继承”，而在PHP中是不支持多重继承的，但是我们可以通过另类的方法来实现类似多继承的功能。

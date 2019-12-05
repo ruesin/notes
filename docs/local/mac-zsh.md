@@ -2,6 +2,11 @@
 title: 让你在终端飞起来 - Mac版
 date: 2016-01-26 10:08:32
 categories: 本地
+tags: 
+- mac ox
+- mac 终端
+- mac zsh
+- mac php 环境
 ---
 
 首先，要知道mac默认使用的shell是主流的bash，对于shell的理解版本等，网上资料一大堆，不做赘述。

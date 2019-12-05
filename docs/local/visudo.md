@@ -2,6 +2,9 @@
 title: ruesin 不在 sudoers 文件中。此事将被报告。
 date: 2014-12-27 17:02:15
 categories: 本地
+tags: 
+- centos
+- visudo
 ---
 
 要用普通用户执行sudo，可是提示 “ruesin 不在 sudoers 文件中。此事将被报告。”

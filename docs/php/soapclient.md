@@ -2,6 +2,9 @@
 title: 本地 SoapClient 响应时间过长
 date: 2015-07-29 11:03:37
 categories: PHP
+tags: 
+- SoapClient
+- php SoapClient
 ---
 
 本地搭建的环境开发一直没问题的，但是前两天做一个soap接口的时候，出现了匪夷所思的事情。

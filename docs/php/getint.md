@@ -2,6 +2,9 @@
 title: PHP取整，四舍五入取整、向上取整、向下取整、小数截取。
 date: 2014-08-11 15:47:50
 categories: PHP
+tags: 
+- php
+- php基础
 ---
 
 PHP取整数函数常用的四种方法：  

@@ -2,6 +2,13 @@
 title: Ubuntu下php+nginx+mysql的安装与配置
 date: 2015-06-10 14:27:56
 categories: 本地
+tags: 
+- php
+- mysql 5.7 ignore table
+- ubuntu
+- ubuntu web环境
+- nginx
+- php加密
 ---
 
 之前有说用家里老电脑玩CentOs，但毕竟是主做服务器的，用来玩桌面确实有点不爽，遂又在另一台电脑上整上了Ubuntu玩。话说、几年前就已接触Ubuntu，而且也装过几次，但每次都是浅尝辄止，没有往更深的玩。

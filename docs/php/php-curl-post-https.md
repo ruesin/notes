@@ -2,6 +2,14 @@
 title: php 使用 curl post 请求 https 
 date: 2015-11-02 08:49:22
 categories: PHP
+tags: 
+- php
+- php基础
+- curl
+- php curl post
+- php curl https
+- 微信支付
+- Ubuntu 修复
 ---
 
 今天做wap请求微信APP支付， PHP端要post请求API生成预支付订单，获取订单号。

@@ -2,6 +2,12 @@
 title: PHP遍历数组常用方法foreach,for,while的性能比较
 date: 2014-06-18 14:22:42
 categories: PHP
+tags: 
+- php
+- 数组
+- php性能
+- php数组
+- php效率
 ---
 
 工作中我们经常会用到数组遍历操作，常用的方法有foreach(),for(),while()，一般情况下我是习惯性使用foreach，没有考虑过执行效率，今天突发奇想对比一下这几个方法的性能。

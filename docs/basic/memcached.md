@@ -2,6 +2,12 @@
 title: 分布式缓存Memcached/memcached/memcache详解及区别
 date: 2014-11-12 16:54:45
 categories: 基础
+tags: 
+- memcache
+- memcached
+- 分布式缓存
+- 服务器缓存
+- 内存缓存
 ---
 
 先来解释下标题中的三种写法：首字母大写的Memcached，指的是Memcached服务器，就是独立运行Memcached的后台服务器，用于存储缓存数据的“容器”。memcached和memcache是Memcached的客户端，通过二者访问Memcached服务器，向容器存取数据。两者用途一致，但在用法上有稍微差异。

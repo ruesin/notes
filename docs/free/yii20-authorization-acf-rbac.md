@@ -2,6 +2,12 @@
 title: Yii 2.0 授权 Authorization
 date: 2015-07-28 13:57:17
 categories: 开源项目
+tags: 
+- Yii
+- Yii2.0
+- Yii2.0 安装
+- yii authorization
+- yii rbac
 ---
 
 在任何系统中，权限设计是最基础的东西，在 Yii2 中，使用授权的形式来检验一个用户有足够权限来做些事情。

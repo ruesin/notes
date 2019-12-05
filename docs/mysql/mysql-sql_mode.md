@@ -2,6 +2,9 @@
 title: mysql SQL_MODE 的配置。
 date: 2016-03-24 09:57:30
 categories: MySQL
+tags: 
+- mysql 5.7 ignore table
+- sql_mode
 ---
 
 最近接手一个正在运行中的项目，拉到本地运行的时候出了问题，在插入数据库的时候报错 Incorrect integer value: ” for column ‘id’ at row 1。

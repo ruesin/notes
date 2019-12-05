@@ -2,6 +2,10 @@
 title: 浅谈PHP格式化html函数htmlentities及与htmlspecialchars的区别
 date: 2014-03-22 10:39:50
 categories: PHP
+tags: 
+- php
+- php格式化函数
+- php函数
 ---
 
 昨天汉化了一个wordpress的广告插件，本以为完事大吉了，没想到使用的时候出现了问题——在后台添加了广告后，前台显示的是正常的，可是后台文本框编辑处的中文是乱码的。

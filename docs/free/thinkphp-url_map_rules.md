@@ -2,6 +2,13 @@
 title: Thinkphp 3.3 URL映射/解析、路由规则二开
 date: 2015-01-13 10:36:52
 categories: 开源项目
+tags: 
+- thinkphp
+- thinkphp二开
+- thinkphp学习
+- thinkphp路由
+- thinkphp URL
+- thinkphp映射
 ---
 
 上一次看 Thinkphp 好像两年前，也只是大概涉猎了下，以为不过算是把模版引擎做了下封装，更便捷使用而已。最近没事想再看看，发现已经3.3了，看了下开发文档，越看越觉得架构做得不错，特别是我比较在意的运行速度的优化上。当真是喜爱至极，于是决定做一两个简单操作熟悉一下机制。

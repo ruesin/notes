@@ -2,6 +2,11 @@
 title: Windows下分布式缓存Memcached环境的搭建安装配置
 date: 2014-11-12 17:02:36
 categories: 本地
+tags: 
+- memcache
+- memcached
+- Memcached安装
+- memcache php
 ---
 
 现在谈 Memcached 已经没有什么新意了，翻过来覆过去无非就那么点东西（基础），本文也仅仅是为了做个记录而已。在Windows下搭建 Memcached 的开发调试环境，网上随便一搜一大堆，说得也都千篇一律，也就不浪费大家的时间了，直接切入正题，写Memcached和memcache的安装过程，至于原理、理论什么的放在《[分布式缓存Memcached/memcached/memcache详解及区别](http://old.ruesin.com/system/server/memcached-184.html)》这篇文章里，避免了读者的阅读疲劳。

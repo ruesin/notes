@@ -2,6 +2,11 @@
 title: Ecstore 2.0 安装默认被隐藏掉的APP
 date: 2014-08-25 14:25:35
 categories: 三方产品
+tags: 
+- ecstore
+- ecstore二开
+- ecstore源码
+- ecstore APP
 ---
 
 翻看Ecstore 2.0 的APP文件夹，可以发现有几个常用的APP，可是在后台应用中心却看不到。比如：groupactivity（团购）、cps（网站联盟）、 timedbuy （限时抢购）等。但是有做过Ecstore1.2经验的朋友都知道，这些APP在Ecstore1.2中都是正常的，这是什么原因呢？

@@ -2,6 +2,14 @@
 title: Mac 下Brew 安装 Nginx+mysq+php
 date: 2016-02-02 11:25:30
 categories: 本地
+tags: 
+- mac
+- mac ox
+- mac 终端
+- mac brew php
+- mac brew nginx
+- mac brew mysql
+- mac mongodb
 ---
 
 自己编译安装环境失败后，就换成了brew安装，感觉跟Ubuntu中的apt-get差不多的样子，虽然不是自己喜欢的方式，但是目前为止也只能先这么安装了，当然、后续扩展什么的确实方便快捷。

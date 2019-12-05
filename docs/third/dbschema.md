@@ -2,6 +2,10 @@
 title: 详解Ecstore中的数据表结构定义文件dbschema
 date: 2014-04-10 11:25:59
 categories: 三方产品
+tags: 
+- ecstore
+- dbschema
+- sdfpath
 ---
 
 任何系统的操作无非都是对数据库的各种操作的结合,而对于ecstore的数据库操作可能与其他常见项目有些不太一样.  

@@ -2,6 +2,14 @@
 title: Ecstore 更改 dbschema 后执行 cmd update 不更新数据库
 date: 2015-01-05 14:47:29
 categories: 三方产品
+tags: 
+- ecstore
+- ecstore授权
+- ecstore二开
+- ecstore源码
+- ecstore模版
+- ecstore开发
+- ecstore shell
 ---
 
 不知道大家有没有碰到过，反正我刚接触Ecstore的时候，按照官方教程改了数据库文件，执行cmd update之后，数据库没有变化！

@@ -2,6 +2,9 @@
 title: ecmall数据库操作方法add，判断是否插入成功。
 date: 2014-07-08 17:22:26
 categories: 三方产品
+tags: 
+- ecmall
+- 商派产品
 ---
 
 使用ecmall的add时，可能会碰到这种情况，调用model类的add方法插入数据时，如果插入的数据的主键不是自增ID，就会返回空值，无法判断是否插入成功。  

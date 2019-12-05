@@ -2,6 +2,11 @@
 title: php+jquery 无刷新上传图片
 date: 2014-10-13 14:52:24
 categories: PHP
+tags: 
+- php
+- php基础
+- input file
+- 图片上传
 ---
 
 项目中我们经常会用到图片（文件）上传功能，简单粗暴的方法就是直接自带的input file，高端华丽点的就是swfupload。本文是为了优化了下用户体验前提下对自带组件进行简单的加工。粗制滥造只为给各位起到抛砖引玉的作用。  

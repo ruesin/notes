@@ -2,6 +2,13 @@
 title: Ubuntu 下编译安装 memcached 服务 及 PHP memcache扩展
 date: 2016-01-26 09:06:30
 categories: 本地
+tags: 
+- php
+- memcache
+- memcached
+- ubuntu
+- ubuntu web环境
+- ubuntu php
 ---
 
 对于memcache的介绍就不再做过多赘述，之前写过一个windows下的安装及介绍，有兴趣的朋友可以去翻一翻。

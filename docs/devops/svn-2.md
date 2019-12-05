@@ -2,6 +2,11 @@
 title: Centos 搭建多版本库svn服务器
 date: 2016-07-06 14:35:06
 categories: 运维
+tags: 
+- svn
+- svn多项目
+- svn钩子
+- ionic
 ---
 
 ```

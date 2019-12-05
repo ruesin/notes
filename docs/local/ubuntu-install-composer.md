@@ -2,6 +2,11 @@
 title: Ubuntu 下 安装 composer
 date: 2016-01-04 19:34:24
 categories: 本地
+tags: 
+- ubuntu
+- ubuntu web环境
+- composer
+- ubuntu memcache
 ---
 
 Composer提供了一个非常方便的安装程序，Ubuntu下可以很简单的在命令行下载。可以免费下载（https://getcomposer.org/installer），感兴趣的同学可以去Github上看下它的工作原理，是纯PHP的源。

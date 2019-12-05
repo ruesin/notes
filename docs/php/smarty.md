@@ -2,6 +2,9 @@
 title: 用Smarty模板引擎生成静态HTML文件
 date: 2013-12-31 00:00:20
 categories: PHP
+tags: 
+- php
+- smarty
 ---
 
 用php生成静态文件说白了无非就是打开、读取、写入、关闭而已，方法无外乎fopen()，fwrite()，fclose()。  

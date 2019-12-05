@@ -2,6 +2,14 @@
 title: Ubuntu 编译 Unicode ICU 库 及 PHP intl 扩展
 date: 2015-12-31 23:43:51
 categories: 本地
+tags: 
+- php图像识别
+- ubuntu
+- ubuntu web环境
+- intl
+- php intl
+- ubuntu icu
+- ubuntu composer
 ---
 
  PHP intl 是国际化扩展，是ICU 库的一个包装器。所以在安装PHP intl扩展前要先安装ICU库。

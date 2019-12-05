@@ -2,6 +2,11 @@
 title: Ecstore通过dbschema更改数据表。WARNING:512 @ ALTER IGNORE TABLE 
 date: 2015-04-20 08:47:59
 categories: 三方产品
+tags: 
+- ecstore
+- mysql 5.7 ignore table
+- ecstore 报错
+- ecstore dbschema
 ---
 
 最近做了个项目，二开了b2c\_members数据表，dbschema定义很规范，执行cmd update，本地测试一切正常，测试服务器上也没问题，后续的一系列的数据操作都是好的。自信满满的把文件交付给了客户，可是在客户服务器上更新时，却报错了！

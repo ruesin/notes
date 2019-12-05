@@ -2,6 +2,13 @@
 title: Windows下配置php扩展PHP_intl.dll
 date: 2015-03-19 08:34:37
 categories: PHP
+tags: 
+- php
+- php基础
+- php_intl
+- php_intl.dll
+- icu库
+- php图像识别
 ---
 
 之前也有说，在本地做开发，为了方便快捷起见一直是在用集成环境，这次项目开发需要用到intl扩展，由于没有开启php\_intl扩展，报错：You have to install PHP intl extension to use this feature.于是直接在集成环境工具上点选开启intl扩展，再次启动服务，竟然弹窗报错！

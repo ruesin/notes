@@ -2,6 +2,10 @@
 title: Centos7 + Windows7 双系统，通过修改grub2，重新添加 Win7 启动引导项
 date: 2014-12-23 16:15:55
 categories: 本地
+tags: 
+- centos
+- grub2
+- linux
 ---
 
 家里几个老电脑闲着实在是浪费，于是决定折腾centos玩，玩坏了也不心疼。  

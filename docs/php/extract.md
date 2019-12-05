@@ -2,6 +2,11 @@
 title: PHP函数extract()详细介绍
 date: 2014-06-11 16:35:20
 categories: PHP
+tags: 
+- php
+- php函数
+- php基础
+- extract
 ---
 
 前些日子接了个ecmall的项目，虽然跟ecstore比起来，代码差得不是一点半点，但也是有可圈可点的地方的。

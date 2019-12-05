@@ -2,6 +2,9 @@
 title: PHP一维数组/二维数组去重
 date: 2014-03-07 11:22:45
 categories: PHP
+tags: 
+- php
+- 数组
 ---
 
 PHP数组去除重复项,有个内置函数array\_unique ()。

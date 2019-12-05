@@ -2,6 +2,11 @@
 title: Ecstore读取普通商品购物车数据流程
 date: 2014-08-27 17:50:58
 categories: 三方产品
+tags: 
+- ecstore
+- ecstore购物车
+- ecstore二开
+- ecstore源码
 ---
 
 电商项目，主要就是围绕这个购物车、订单这个流程来的，之前我们讨论了Ecstore的加入购物车流程，既然商品加入购物车了，肯定是要读取出来以用来在页面中展示，写入订单信息等。

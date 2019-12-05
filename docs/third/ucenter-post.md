@@ -2,6 +2,13 @@
 title: Ucenter接口请求数据流程剖析
 date: 2014-12-05 10:21:33
 categories: 三方产品
+tags: 
+- ucenter
+- ucenter接口
+- ucenter请求
+- ucenter流程
+- ucenter ecmall
+- ucenter配置
 ---
 
 有用到Ucenter的朋友想来大部分都会搭建环境、配置应用，而一般也仅仅是停留在使用Ucenter，不涉及到接口的开发，所以除了需要开发时程序员会追程序的流程，应该很少有人会在意这些吧？

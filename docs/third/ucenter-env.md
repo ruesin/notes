@@ -2,6 +2,11 @@
 title: Ucenter中全局变量$_ENV的用法
 date: 2014-11-09 16:54:34
 categories: 三方产品
+tags: 
+- php
+- php基础
+- ucenter
+- 全局变量
 ---
 
 二开ucenter，翻看代码，追到 /client/control/user.php ，看到注册会员时的这段代码。

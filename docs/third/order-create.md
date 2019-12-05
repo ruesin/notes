@@ -2,6 +2,11 @@
 title: Ecstore 订单生成流程
 date: 2014-09-09 16:13:21
 categories: 三方产品
+tags: 
+- ecstore
+- ecstore购物车
+- ecstore源码
+- ecstore订单
 ---
 
 前面几篇文章已经介绍了Ecstore从加入购物车到读取购物车的流程，也做了购物车的各种校验，那么下面要做的就是生成订单了。
