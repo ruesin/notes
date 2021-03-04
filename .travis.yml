@@ -9,7 +9,7 @@ before_install:
   - export TZ='Asia/Shanghai'
   - npm install -g hexo-cli
 install:
-  - git clone https://${GIT_TOKEN}@github.com/ruesin/hexo.git .hexo
+  - git clone https://${GIT_TOKEN}@github.com/ruesin/hexo ./.hexo
   - cd .hexo
   - npm install
 before_script:
