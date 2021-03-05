@@ -74,7 +74,7 @@ $ adb push c8750f0d.0 /system_root/system/etc/security/cacerts
 ```
 如果无法`$ adb root`，可以先推送到临时目录，然后su之后cp到系统目录。有些小米手机操作system目录，可以进入re模式写命令拷贝。
 
-有些APP就算有证书也无法抓到HTTPS包（根本看不到请求），比如快手，是因为没有使用常规的http协议，可以结合VPN工具转发，比如`Drony`。
+有些APP就算有证书也无法抓到HTTPS包（根本看不到请求），比如快手，是因为没有使用常规的http协议，可以结合VPN工具转发，比如[Drony](./drony.md)。
 
 > 为了方便团队协作，建议使用统一的证书，将`~/.mitmproxy`及`c8750f0d.0`分发给团队成员，电脑和手机使用同一个证书。
 
@@ -139,4 +139,4 @@ addons = [
 ]
 ```
 
-可参考[easyMitmproxy](./) // TODD。
+可参考[easyMitmproxy](https://github.com/metmit/easyMitmproxy)。
