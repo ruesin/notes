@@ -1,0 +1,69 @@
+<!DOCTYPE HTML>
+<html>
+  <head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+    <title>Ubuntu删除文件过度，导致依赖丢失，系统崩溃-信口开河</title>
+    <meta name="keywords" content="Ruesin,信口开河">
+    <meta name="description" content="至于你信不信，反正我是信了。">
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+  <body>
+    
+<header class="header">
+    <nav class="navbar">
+        <ul>
+            
+            <li><a class="header-nav-link" href="/">首页</a></li>
+            
+            <li><a class="header-nav-link" href="/categories">分类</a></li>
+            
+            <li><a class="header-nav-link" href="/archives">归档</a></li>
+            
+            <li><a class="header-nav-link" href="/tags">标签</a></li>
+            
+            <li><a class="header-nav-link" href="https://github.com/ruesin/notes">Github</a></li>
+            
+            <li><a class="header-nav-link" href="https://ruesin.github.io/php-tree">PHP技能树</a></li>
+            
+            <li><a class="header-nav-link" href="https://www.xinkoukaihe.com">老博客</a></li>
+            
+        </ul>
+    </nav>
+</header>
+    <main class="main">
+      <!-- 内容页 -->
+<section class="section">
+    <div class="post-container">
+        <div class="post-header">
+                <h1>Ubuntu删除文件过度，导致依赖丢失，系统崩溃</h1>
+                <!-- <div class="post-meta">2015-12-31</div> -->
+        </div>
+        <article class="post-content">
+            <p>用久了Ubuntu，老毛病又犯了，看着dash中一大堆用不到的东西，就犯膈应，想清理清理系统。</p>
+<p>结果，各种删东西，导致依赖被删错了，直接导致的结果是，无法联网，没有系统设置，没有软件中心，编译软件时各种报错，总之，就是废废了。如果只是某些东西坏了，还能联网还好说，怎么都能给修复了。</p>
+<p>不能联网是个大事，尝试了很多办法，都没办法修复。</p>
+<p>最终，只能livecd引导修复了。</p>
+<p>由于电脑是双系统的，系统是通过windows硬盘安装的，所以修复也是走老路。</p>
+<p>打开easyBCD，添加条目→NeoGrub→安装→配置，配置文件添加，注意root索引要写对应的镜像放的磁盘位置，我的电脑只有一块硬盘，镜像放在了C盘中，所以写了(hd0,0)，第一块硬盘的第一个分区。</p>
+<p>将ISO镜像中casper下的vmlinuz.efi和initrd.lz也提取到C盘。</p>
+<p>title Install Ubuntu<br>root (hd0,0)<br>kernel (hd0,0)/vmlinuz.efi boot=casper iso-scan/filename=/ubuntu-15.10-desktop-amd64.iso ro quiet splash locale=zh_CN.UTF-8<br>initrd (hd0,0)/initrd.lz</p>
+<p>保存重启。</p>
+<p>选择 Install Ubuntu ，进入Ubuntu试用安装界面。</p>
+<p>注意，选择Install Ubuntu 报错，有可能就是配置文件没写好，可以根据报错，按‘e’编辑配置启动。</p>
+<p>配置联网，选择安装，弹窗是否卸载分区时，选择否，然后选择第一项，尽最大可能的保留用户数据安装。</p>
+<p>然后就稍等安装就好了。</p>
+<p>系统装好就能看到用户主目录文档啦、配置啦都还有保留的，先依次执行下更新、清理。</p>
+<p>sudo apt-get update<br>suso apt-get upgrade<br>sudo apt-get -f install<br>sudo apt-get autoclean<br>sudo apt-get autoremove</p>
+<p>之前编译的东西以及配置都还在，但是通过apt-get安装的组件需要重新安装一下。</p>
+
+        </article>
+    </div>
+</section>
+
+    </main>
+    <footer class="footer"> Copyright 2013 - 2019 Ruesin. All Rights Reserved </footer>
+  </body>
+</html>

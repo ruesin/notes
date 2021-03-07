@@ -1,0 +1,269 @@
+<!DOCTYPE HTML>
+<html>
+  <head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+    <title>PHP的Traits特性实现多继承及代码复用-信口开河</title>
+    <meta name="keywords" content="Ruesin,信口开河">
+    <meta name="description" content="至于你信不信，反正我是信了。">
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+  <body>
+    
+<header class="header">
+    <nav class="navbar">
+        <ul>
+            
+            <li><a class="header-nav-link" href="/">首页</a></li>
+            
+            <li><a class="header-nav-link" href="/categories">分类</a></li>
+            
+            <li><a class="header-nav-link" href="/archives">归档</a></li>
+            
+            <li><a class="header-nav-link" href="/tags">标签</a></li>
+            
+            <li><a class="header-nav-link" href="https://github.com/ruesin/notes">Github</a></li>
+            
+            <li><a class="header-nav-link" href="https://ruesin.github.io/php-tree">PHP技能树</a></li>
+            
+            <li><a class="header-nav-link" href="https://www.xinkoukaihe.com">老博客</a></li>
+            
+        </ul>
+    </nav>
+</header>
+    <main class="main">
+      <!-- 内容页 -->
+<section class="section">
+    <div class="post-container">
+        <div class="post-header">
+                <h1>PHP的Traits特性实现多继承及代码复用</h1>
+                <!-- <div class="post-meta">2015-06-23</div> -->
+        </div>
+        <article class="post-content">
+            <p>有很多时候，我们会用到所谓的 PHP “多继承”，而在PHP中是不支持多重继承的，但是我们可以通过另类的方法来实现类似多继承的功能。</p>
+<p>比如使用组合，在一个类中去将另外一个类设置成属性，使用魔术方法 __call 重定向方法的调用。</p>
+<p>比如使用接口，虽然PHP类只能继承一个父类（单继承），但是接口和类不同，接口可以实现多继承。</p>
+<p>而 5.4 中的 Traits 的出现，为我提供了另外一种可行的方法。</p>
+<p>Traits 是一种为类似 PHP 的单继承语言而准备的代码复用机制，它能让开发者在多个不同的class中实现代码重用。Trait 为了减少单继承语言的限制，使开发人员能够自由地在不同层次结构内独立的类中复用方法集。Traits 和类组合的语义是定义了一种方式来减少复杂性，避免传统多继承和混入类（Mixin）相关的典型问题。</p>
+<p>Trait 和一个类相似，但仅仅旨在用细粒度和一致的方式来组合功能。Trait 不能通过它自身来实例化，即不存在类似class的构造函数__construct()。它为传统继承增加了水平特性的组合；也就是说，应用类的成员不需要继承。</p>
+<p><strong>1、使用</strong></p>
+<p>在类中用关键字’use’ 来引用 Traits。多个Traits 用’,’隔开。</p>
+<pre><code>trait ezcReflectionReturnInfo {
+    function getReturnType() { /*1*/ }
+    function getReturnDescription() { /*2*/ }
+}
+
+class ezcReflectionMethod extends ReflectionMethod {
+    use ezcReflectionReturnInfo;
+    /* ... */
+}
+
+class ezcReflectionFunction extends ReflectionFunction {
+    use ezcReflectionReturnInfo;
+    /* ... */
+}</code></pre><p><strong>2、优先级</strong></p>
+<p>从基类继承的成员被 trait 插入的成员所覆盖，来自当前类的成员覆盖 trait 的方法。</p>
+<pre><code>class Base {
+    public function sayHello() {
+        echo &#39;Hello &#39;;
+    }
+}
+
+trait SayWorld {
+    public function sayHello() {
+        parent::sayHello();
+        echo &#39;World!&#39;;
+    }
+    public function sayHellos() {
+        echo &#39;Hello World!&#39;;
+    }
+}
+
+class MyHelloWorld extends Base {
+    use SayWorld;
+
+    public function sayHellos() {
+        echo &#39;Hello Universe!&#39;;
+    }
+}
+
+$o = new MyHelloWorld();
+$o-&gt;sayHello();  #Hello World!
+$o-&gt;sayHellos();  #Hello Universe!</code></pre><p><strong>3、多个 trait</strong></p>
+<p>通过逗号分隔，在 use 声明列出多个 trait，可以都插入到一个类中。</p>
+<pre><code>trait Hello {
+    public function sayHello() {
+        echo &#39;Hello &#39;;
+    }
+}
+
+trait World {
+    public function sayWorld() {
+        echo &#39;World&#39;;
+    }
+}
+
+class MyHelloWorld {
+    use Hello, World;
+}
+
+$o = new MyHelloWorld();
+$o-&gt;sayHello(); # Hello
+$o-&gt;sayWorld(); # World</code></pre><p><strong>4、多Traits冲突的解决</strong></p>
+<p>如果两个 trait 都插入了一个同名的方法，如果没有明确解决冲突将会产生一个致命错误。</p>
+<p>为了解决多个 trait 在同一个类中的命名冲突，需要使用 insteadof 操作符来明确指定使用冲突方法中的哪一个。</p>
+<p>以上方式仅允许排除掉其它方法，as 操作符可以将其中一个冲突的方法以另一个名称来引入。</p>
+<pre><code>trait A{
+    public function smallTalk(){
+        echo &#39;a&#39;;
+    }
+    public function bigTalk(){
+        echo &#39;A&#39;;
+    }
+}
+
+trait B{
+    public function smallTalk(){
+        echo &#39;b&#39;;
+    }
+    public function bigTalk(){
+        echo &#39;B&#39;;
+    }
+}
+
+class Talker{
+    use A,B{
+        B::smallTalk insteadof A;
+        A::bigTalk insteadof B;
+    }
+}
+
+class Talkers{
+    use A,B{
+        B::smallTalk insteadof A;
+        A::bigTalk insteadof B;
+        B::bigTalk as bTalk;
+    }
+}
+
+$o = new Talker();
+$o-&gt;smallTalk(); # b
+$o-&gt;bigTalk(); # A
+
+$os = new Talkers();
+$os-&gt;smallTalk(); # b
+$os-&gt;bigTalk(); #A
+$os-&gt;bTalk(); # B</code></pre><p><strong>5、修改方法的访问控制</strong></p>
+<p>还可以使用as语法来改变Traits中函数的访问权限属性。</p>
+<pre><code>trait HelloRuesin {
+    public function sayHello() {
+        echo &#39;Hello Ruesin&#39;;
+    }
+}
+
+class Hello {
+    use HelloRuesin {
+        sayHello as protected; ## 修改 sayHello 的访问控制
+    }
+}
+
+class Ruesin {
+    use HelloRuesin {
+        sayHello as private sayHellos; ## 给方法一个改变了访问控制的别名 而原版 sayHello 的访问控制则没有发生变化
+    }
+}
+
+$o  = new Hello();
+$os = new Ruesin();
+#$o-&gt;sayHello(); # 无法访问
+$os-&gt;sayHello(); # Hello Ruesin
+#$os-&gt;sayHellos(); # 无法访问</code></pre><p><strong>6、用Traits组成新Traits</strong></p>
+<p>正如类能够使用 trait 一样，其它 trait 也能够使用 trait。在 trait 定义时通过使用一个或多个 trait，它能够组合其它 trait 中的部分或全部成员。</p>
+<pre><code>trait Hello {
+    public function sayHello() {
+        echo &#39;Hello&#39;;
+    }
+}
+
+trait Ruesin {
+    public function sayRuesin() {
+        echo &#39;Ruesin&#39;;
+    }
+}
+
+trait HelloRuesin {
+    use Hello,Ruesin;
+}
+
+class SayHelloRuesin {
+    use HelloRuesin;
+}
+
+$o = new SayHelloRuesin();
+$o-&gt;sayHello();  #Hello
+$o-&gt;sayRuesin(); #Ruesin</code></pre><p><strong>7、Trait 的抽象成员</strong></p>
+<p>为了对使用的类施加强制要求，trait 支持抽象方法的使用。表示通过抽象方法来进行强制要求</p>
+<pre><code>trait Hello {
+    public function sayHelloRuesin() {
+        echo &#39;Hello &#39;.$this-&gt;getName();
+    }
+    abstract public function getName();
+}
+
+class HelloRuesin {
+    private $name;
+    use Hello;
+    public function __construct($name) {
+        $this-&gt;name = $name;
+    }
+    public function getName() {
+        return $this-&gt;name;
+    }
+}
+
+(new HelloRuesin(&#39;Ruesin&#39;))-&gt;sayHelloRuesin(); # Hello Ruesin</code></pre><p><strong>8、trait 的静态成员</strong></p>
+<p>静态变量可以被 trait 的方法引用，但不能被 trait 定义。Traits 能够为使用的类定义静态方法。</p>
+<pre><code>trait Counter {
+    public function inc() {
+        static $c = 0;
+        $c = $c + 1;
+        echo &quot;$c\n&quot;;
+    }
+
+    public static function HelloRuesin() {
+        #return &#39;Doing something&#39;;
+        echo &#39;Hello Ruesin&#39;;
+    }
+}
+
+class C {
+    use Counter;
+}
+
+$o = new C(); 
+$o-&gt;inc(); # 1
+$o-&gt;inc(); # 2
+C::HelloRuesin(); #Hello Ruesin&#39;</code></pre><p><strong>9、Trait 定义属性</strong></p>
+<p>如果 trait 定义了一个属性，那类将不能定义同样名称的属性，否则会产生一个错误。如果该属性在类中的定义与在 trait 中的定义兼容（同样的可见性和初始值）则错误的级别是 E_STRICT，否则是一个致命错误。</p>
+<pre><code>trait PropertiesTrait {
+    public $x = 1;
+}
+
+class PropertiesExample {
+    use PropertiesTrait;
+    #public $same = true; # Strict Standards
+    #public $different = true; # 致命错误
+}
+
+$example = new PropertiesExample;
+$example-&gt;x; # 1</code></pre>
+        </article>
+    </div>
+</section>
+
+    </main>
+    <footer class="footer"> Copyright 2013 - 2019 Ruesin. All Rights Reserved </footer>
+  </body>
+</html>

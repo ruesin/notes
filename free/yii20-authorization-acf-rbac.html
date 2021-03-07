@@ -1,0 +1,293 @@
+<!DOCTYPE HTML>
+<html>
+  <head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+    <title>Yii 2.0 授权 Authorization-信口开河</title>
+    <meta name="keywords" content="Ruesin,信口开河">
+    <meta name="description" content="至于你信不信，反正我是信了。">
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+  <body>
+    
+<header class="header">
+    <nav class="navbar">
+        <ul>
+            
+            <li><a class="header-nav-link" href="/">首页</a></li>
+            
+            <li><a class="header-nav-link" href="/categories">分类</a></li>
+            
+            <li><a class="header-nav-link" href="/archives">归档</a></li>
+            
+            <li><a class="header-nav-link" href="/tags">标签</a></li>
+            
+            <li><a class="header-nav-link" href="https://github.com/ruesin/notes">Github</a></li>
+            
+            <li><a class="header-nav-link" href="https://ruesin.github.io/php-tree">PHP技能树</a></li>
+            
+            <li><a class="header-nav-link" href="https://www.xinkoukaihe.com">老博客</a></li>
+            
+        </ul>
+    </nav>
+</header>
+    <main class="main">
+      <!-- 内容页 -->
+<section class="section">
+    <div class="post-container">
+        <div class="post-header">
+                <h1>Yii 2.0 授权 Authorization</h1>
+                <!-- <div class="post-meta">2015-07-28</div> -->
+        </div>
+        <article class="post-content">
+            <p>在任何系统中，权限设计是最基础的东西，在 Yii2 中，使用授权的形式来检验一个用户有足够权限来做些事情。</p>
+<p>Yii提供两种授权方法：访问控制过滤（ACF)和基于角色的访问控制（RBAC)。</p>
+<p><strong>一、Access Control Filter 访问控制过滤</strong></p>
+<p>访问控制过滤（ACF)是一个简单的授权方法，非常适合于在只需要一些简单访问控制的程序中使用。正如名字所标示的，访问控制过滤（ACF)是一个动作过滤，它可以作为一个扩展附加到一个控制器或是一个模块。</p>
+<pre><code>public function behaviors()
+{
+    return [
+        &#39;access&#39; =&gt; [
+            &#39;class&#39; =&gt; yii\filters\AccessControl::className(),
+            //&#39;only&#39; =&gt; [&#39;logout&#39;, &#39;signup&#39;],   //只对 logout signup 进行验证
+            &#39;rules&#39; =&gt; [  //[[yii\filters\AccessRule|accessrules]]
+                //所有访客都可以访问signup方法
+                [
+                    &#39;actions&#39; =&gt; [&#39;signup&#39;],   
+                    &#39;allow&#39; =&gt; true,
+                    &#39;roles&#39; =&gt; [&#39;?&#39;],// matches a guest user (not authenticated yet)
+                ],
+                //已授权的用户可以访问logout
+                [
+                    &#39;actions&#39; =&gt; [&#39;logout&#39;],
+                    &#39;allow&#39; =&gt; true,
+                    &#39;roles&#39; =&gt; [&#39;@&#39;],  //matches an authenticated user
+                ],
+                //匿名函数验证
+                [
+                    &#39;actions&#39; =&gt; [&#39;special-callback&#39;],
+                    &#39;allow&#39; =&gt; true,
+                    &#39;matchCallback&#39; =&gt; function ($rule, $action) {
+                        return date(&#39;d-m&#39;) === &#39;31-10&#39;;
+                    }
+                ],
+                //others deny
+            ],
+        ],
+    ];
+}</code></pre><p>当访问控制过滤（ACF)进行授权检查时，它会从上到下地一个接着一个地测试那些规则直至找到一个相符的。相符的允许值将立即用于判断用户是否被授权。如果没有一个规则符合，这就意味着这个用户“没有”被授权，访问控制过滤（ACF)将阻止它进一步的动作请求。</p>
+<p>默认情况下，当访问控制过滤（ACF)探测到一个用户没有被授权进入当前动作时，它只会作下面的工作：</p>
+<p>如果这个用户是个访客，ACF将会调用[[yii\web\User::loginRequired()]]，将浏览器重定向到配置的登录页面。</p>
+<p>如果用户已有授权，ACF会抛出一个[[yii\web\ForbiddenHttpException]]。</p>
+<p>你可以通过定义配置[[yii\filters\AccessControl::denyCallback]]的属性来对这个扩展进行自定义：</p>
+<pre><code>[
+    &#39;class&#39; =&gt; AccessControl::className(),
+    &#39;denyCallback&#39; =&gt; function ($rule, $action) {
+        throw new \Exception(&#39;You are not allowed to access this page 您没有被允许访问这个页面！&#39;);
+    }
+]</code></pre><p>[[yii\filters\AccessRule|Access rules]] 验证规则是很灵活的，支持许多选项，还可以有IP、请求类型、匿名函数等验证，具体的可以跟踪到 [[yii\filters\AccessRule]] 查看。</p>
+<p>[[yii\filters\AccessRule]]：指定是一个“允许”规则还是一个“禁止”规则。</p>
+<p>[[yii\filters\AccessRule::actions|actions]]：指定这个规则与哪些动作匹配。这应该是一个动作的ID的数组。比较是区分大小写的。如果这个选项是空的或是没有设置，这意味着这个规则适用于所有的动作。</p>
+<p>[[yii\filters\AccessRule::controllers|controllers]]：指定这个规则与哪些控制器匹配。这应该是一个控制器的ID的数组。比较是区分大小写的。如果这个选项是空的或是没有设置，这意味着这个规则适用于所有的控制器。</p>
+<p>[[yii\filters\AccessRule::roles|roles]]：指定这个规则与哪些用户角色匹配。两个特别的用户角色已经被确立，它们将通过[[yii\web\User::isGuest]]来检查。</p>
+<p>？：匹配访客（还没有被授权）</p>
+<p>@：匹配一个已授权用户</p>
+<p>使用其他角色名称的已授权用户，将会调用[[yii\web\User::can()]]，就走到基于角色的访问控制（RBAC)了。如果这个选项是空的或是没有设置，这意味着这个规则适用于所有的角色。</p>
+<p>[[yii\filters\AccessRule::ips|ips]]：指定这个规则匹配哪一个[[yii\web\Request::userIP|clientIP addresses]]。一个IP地址可以在末尾包含一个通配符，这样就可以匹配具有相同前缀的所有IP地址。比如，“192.168.”，匹配“192.168.”节中所有的IP地址。如果这个选项是空的或是没有设置，这意味着这个规则适用于所有的IP。</p>
+<p>[[yii\filters\AccessRule::verbs|verbs]]:指定这个规则匹配哪种请求方法（比如GET，POST)。比较是区分大小写的。</p>
+<p>[[yii\filters\AccessRule::matchCallback|matchCallback]]：指定一个PHP可调用，它将被调用来检查这个规则是否可以执行。</p>
+<p>[[yii\filters\AccessRule::denyCallback|denyCallback]]：指定一个PHP可调用，在这个规则拒绝访问时它将被调用。</p>
+<p><strong>二、基于角色的访问控制（RBAC）</strong></p>
+<p>基于角色的访问控制（RBAC）是用非常灵活的方式来控制访问，提供了简单而又功能强大的集中的访问控制。</p>
+<p>Yii提供了两种鉴权管理器：yii\rbac\PhpManager 和 yii\rbac\DbManager。</p>
+<p>前者使用一个PHP脚本文件管理鉴权数据，而后者是把数据存储在数据库里面。PhpManager主要适用于授权的数据不是太大，不需要经常变动的角色和权限管理的应用(例如,一个个人博客系统的授权数据)。DbManager 更适用于较复杂的授权数据。</p>
+<p><strong>2.1 基于文件的配置的RBAC</strong></p>
+<p>在定义鉴权数据并执行访问检查之前，必须先配置authManager组件。</p>
+<pre><code>&#39;authManager&#39; =&gt; [
+    &#39;class&#39; =&gt; &#39;yii\rbac\PhpManager&#39;,
+    &#39;defaultRoles&#39; =&gt; [&#39;guest&#39;],
+],</code></pre><p>默认的，yii\rbac\PhpManager 在三个文件里面存储RBAC数据：</p>
+<p>@app/rbac/items.php //定义角色和许可，在角色和许可间建立关系<br>@app/rbac/assignments.php’ //分配角色给用户<br>@app/rbac/rules.php’ //定义规则，把规则跟角色和许可关联起来 规则就是访问检查的时候执行的一段代码，它来决定相应的角色或者权限是否适用于当前用户。</p>
+<p>请确保这三个文件对服务器进程可写，有时你需要手动的去创建这些文件。</p>
+<pre><code>items.php
+
+return [
+    &#39;createPost&#39; =&gt; [
+        &#39;type&#39; =&gt; 2,
+        &#39;description&#39; =&gt; &#39;Create a post&#39;,
+    ],
+    &#39;updatePost&#39; =&gt; [
+        &#39;type&#39; =&gt; 2,
+        &#39;description&#39; =&gt; &#39;Update post&#39;,
+    ],
+    &#39;read&#39; =&gt; [
+        &#39;type&#39; =&gt; 2,
+        &#39;description&#39; =&gt; &#39;Read&#39;,
+    ],
+    &#39;author&#39; =&gt; [
+        &#39;type&#39; =&gt; 1,
+        &#39;children&#39; =&gt; [
+            &#39;createPost&#39;,
+            &#39;read&#39;,
+            &#39;updateOwnPost&#39;,
+        ],
+    ],
+    &#39;admin&#39; =&gt; [
+        &#39;type&#39; =&gt; 1,
+        &#39;children&#39; =&gt; [
+            &#39;updatePost&#39;,
+            &#39;author&#39;,
+        ],
+    ],
+    &#39;updateOwnPost&#39; =&gt; [
+        &#39;type&#39; =&gt; 2,
+        &#39;description&#39; =&gt; &#39;Update own post&#39;,
+        &#39;ruleName&#39; =&gt; &#39;isAuthor&#39;,
+        &#39;children&#39; =&gt; [
+            &#39;updatePost&#39;,
+        ],
+    ],
+];</code></pre><pre><code>assignments.php
+
+return [
+    2 =&gt; [
+        &#39;author&#39;,
+    ],
+    1 =&gt; [
+        &#39;admin&#39;,
+    ],
+];</code></pre><pre><code>rules.php
+
+return [
+    &#39;isAuthor&#39; =&gt; &#39;O:19:&quot;yii\\rbac\\AuthorRule&quot;:3:{s:4:&quot;name&quot;;s:8:&quot;isAuthor&quot;;s:9:&quot;createdAt&quot;;N;s:9:&quot;updatedAt&quot;;N;}&#39;,
+];</code></pre><p>如果刚开始不太清楚结构，可以通过authManager提供的API创建一个控制台命令来生成示例代码。</p>
+<pre><code>namespace console\controllers;
+
+use yii\console\Controller;
+
+class RbacController extends \yii\console\Controller 
+{
+    public function actionInit()
+    {
+        $auth = \Yii::$app-&gt;authManager;
+
+        // 添加”创建文章”许可
+        $createPost = $auth-&gt;createPermission(&#39;createPost&#39;);
+        $createPost-&gt;description = &#39;Create a post&#39;;
+        $auth-&gt;add($createPost);
+
+        // 添加”更新文章”许可
+        $updatePost = $auth-&gt;createPermission(&#39;updatePost&#39;);
+        $updatePost-&gt;description = &#39;Update post&#39;;
+        $auth-&gt;add($updatePost);
+
+        // 添加”查看文章”许可
+        $reader = $auth-&gt;createPermission(&#39;read&#39;);
+        $reader-&gt;description = &#39;Read&#39;;
+        $auth-&gt;add($reader);
+
+        // 添加“作者”角色，接着赋予这个角色“创建文章”的许可
+        $author = $auth-&gt;createRole(&#39;author&#39;);
+        $auth-&gt;add($author);
+
+        $auth-&gt;addChild($author, $createPost);
+        $auth-&gt;addChild($author, $reader);
+
+        // 添加“管理员”角色，接着赋予这个角色“更新文章”的许可
+        // 与“作者角色的一样
+        $admin = $auth-&gt;createRole(&#39;admin&#39;);
+        $auth-&gt;add($admin);
+        $auth-&gt;addChild($admin, $updatePost);
+        $auth-&gt;addChild($admin, $author);
+
+        //添加一条规则
+        $rule = new \yii\rbac\AuthorRule;
+        $auth-&gt;add($rule);
+
+        //添加“updateOwnPost”权限，并且和上面的规则关联起来
+        $updateOwnPost = $auth-&gt;createPermission(&#39;updateOwnPost&#39;);
+        $updateOwnPost-&gt;description = &#39;Update own post&#39;;
+        $updateOwnPost-&gt;ruleName = $rule-&gt;name;
+        $auth-&gt;add($updateOwnPost);
+
+        // &quot;updateOwnPost&quot; will be used from &quot;updatePost&quot;
+        $auth-&gt;addChild($updateOwnPost, $updatePost);
+
+        // allow &quot;author&quot; to update their own posts
+        $auth-&gt;addChild($author, $updateOwnPost);
+
+        // 分配角色给用户。1和2是用户ID，用IdentityInterface::getId()获取到的
+        // 经常出现在您的User模块中。
+        $auth-&gt;assign($author, 2);
+        $auth-&gt;assign($admin, 1);
+    }
+}</code></pre><p>当鉴权数据准备好之后，就可以进行访问检查了。可以通过配置ACF进行自动校验，也可以在某一个要操作的方法中进行校验。前者其实也是调用的后者的方法。</p>
+<pre><code>if (\Yii::$app-&gt;user-&gt;can(&#39;createPost&#39;)) {
+    // create post
+}</code></pre><p><strong>2.2 以DB为基础的存储RBAC</strong></p>
+<p>如果是数据经常变动并且后台需要灵活管理，用DB形式的是比较好的一个选择。</p>
+<p>Yii2 的RBAC一共是用到了五张表：四张auth表和一张user表。其中 auth 表位于 vendor/yiisoft/yii2/rbac/migration， 可使用命令生成 yii migrate –migrationPath=@yii/rbac/migrations/</p>
+<p>auth_item ：存储角色或权限的表。name为权限名，用 type 字段来标识是角色还是权限， 1 为角色 , 2 为权限 。</p>
+<p>auth_item_child：角色权限关联表。角色是一组权限的集合，和上面的auth_item相关联，用来保存角色和权限的关系，两个字段均对应 auth_item 表的 name 字段。<br>角色可以包含角色或权限，权限可以包含权限。<br>如果要得到一个角色的所有的权限，要做两方面的查找，一个是递归查找当前权限所有的子权限， 一个是查看所包含的角色的所有的权限以及子权限。所以在使用中不建议让权限继承，只让角色继承。而且继承深度也不宜太深。</p>
+<p>auth_assignment：权限（角色）和用户的关联表，这个表用来存储给用户分配的角色或者权限，一个用户的权限包含两部分，一部分是所指定的角色代表的权限，一部分就是直接所指定的权限。</p>
+<p>auth_rule：规则表 一个用户要执行一个操作除了要看他有没有这个权限外，还要看他的这个权限能不能执行。 auth_item 中还有一个字段： [rule_name] 。这个字段用来标明这个角色或者权限能不能成功执行。</p>
+<p>1、配置 Rbac，生成数据表。</p>
+<pre><code>&#39;authManager&#39; =&gt; [
+    &#39;class&#39; =&gt; &#39;yii\rbac\DbManager&#39;,
+    &#39;itemTable&#39; =&gt; &#39;auth_item&#39;,
+    &#39;assignmentTable&#39; =&gt; &#39;auth_assignment&#39;,
+    &#39;itemChildTable&#39; =&gt; &#39;auth_item_child&#39;,
+],</code></pre><p><code>yii migrate --migrationPath=@yii/rbac/migrations/</code>2、创建一个 许可 Permiassion</p>
+<pre><code>public function createPermission($item)
+{
+    $auth = Yii::$app-&gt;authManager;
+
+    $createPost = $auth-&gt;createPermission($item);
+    $createPost-&gt;description = &#39;创建了 &#39; . $item . &#39; 许可&#39;;
+    $auth-&gt;add($createPost);
+}</code></pre><p>3、创建一个 角色 roles</p>
+<pre><code>public function createRole($item)
+{
+    $auth = Yii::$app-&gt;authManager;
+    $role = $auth-&gt;createRole($item);
+    $role-&gt;description = &#39;创建了 &#39; . $item . &#39; 角色&#39;;
+    $auth-&gt;add($role);
+}</code></pre><p>4、给角色分配许可</p>
+<pre><code>static public function createEmpowerment($items)
+{
+    $auth = Yii::$app-&gt;authManager;
+    $parent = $auth-&gt;createRole($items[&#39;name&#39;]);
+    $child = $auth-&gt;createPermission($items[&#39;description&#39;]);
+
+    $auth-&gt;addChild($parent, $child);
+}</code></pre><p>5、给角色分配用户</p>
+<pre><code>static public function assign($item)
+{
+    $auth = Yii::$app-&gt;authManager;
+    $reader = $auth-&gt;createRole($item[&#39;name&#39;]);
+    $auth-&gt;assign($reader, $item[&#39;description&#39;]);
+}</code></pre><p>6、验证用户是否有权限</p>
+<pre><code>public function beforeAction($action)
+{
+    $action = Yii::$app-&gt;controller-&gt;action-&gt;id;
+    if(\Yii::$app-&gt;user-&gt;can($action)){
+        return true;
+    }else{
+        throw new \yii\web\UnauthorizedHttpException(&#39;对不起，您现在还没获此操作的权限&#39;);
+    }
+}</code></pre><p>实际操作与 PhpManager 异曲同工，都是创建权限、创建角色、分配权限、绑定用户。</p>
+<p>当然，yii只是为我们提供了基础的授权机制，你尽可以在此基础上大动手脚，比如用户表看不上，改user组件，权限表不符合自己的审美，改组件+数据表。。。</p>
+<p>附：<br>yii\rbac: Item 为角色或者权限的基类，其中用字段type来标识<br>yii\rbac: Role 为代表角色的类<br>yii\rbac: Permission 为代表权限的类<br>yii\rbac: Assignment 为代表用户角色或者权限的类<br>yii\rbac: Rule 为代表角色或权限能否执行的判定规则</p>
+<p>参考:</p>
+<p><a href="http://pan.baidu.com/s/1dDrWUbR" target="_blank" rel="noopener">http://pan.baidu.com/s/1dDrWUbR</a></p>
+
+        </article>
+    </div>
+</section>
+
+    </main>
+    <footer class="footer"> Copyright 2013 - 2019 Ruesin. All Rights Reserved </footer>
+  </body>
+</html>

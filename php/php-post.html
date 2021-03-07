@@ -1,0 +1,60 @@
+<!DOCTYPE HTML>
+<html>
+  <head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+    <title>有效解决PHP使用POST提交数据不完整,数据不全的问题-信口开河</title>
+    <meta name="keywords" content="Ruesin,信口开河">
+    <meta name="description" content="至于你信不信，反正我是信了。">
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+  <body>
+    
+<header class="header">
+    <nav class="navbar">
+        <ul>
+            
+            <li><a class="header-nav-link" href="/">首页</a></li>
+            
+            <li><a class="header-nav-link" href="/categories">分类</a></li>
+            
+            <li><a class="header-nav-link" href="/archives">归档</a></li>
+            
+            <li><a class="header-nav-link" href="/tags">标签</a></li>
+            
+            <li><a class="header-nav-link" href="https://github.com/ruesin/notes">Github</a></li>
+            
+            <li><a class="header-nav-link" href="https://ruesin.github.io/php-tree">PHP技能树</a></li>
+            
+            <li><a class="header-nav-link" href="https://www.xinkoukaihe.com">老博客</a></li>
+            
+        </ul>
+    </nav>
+</header>
+    <main class="main">
+      <!-- 内容页 -->
+<section class="section">
+    <div class="post-container">
+        <div class="post-header">
+                <h1>有效解决PHP使用POST提交数据不完整,数据不全的问题</h1>
+                <!-- <div class="post-meta">2014-07-15</div> -->
+        </div>
+        <article class="post-content">
+            <p>以前还真没注意过有这个问题，也是今天项目中遇到的问题，在后台form中，通过ajax请求返回了一个有很多input的form表单，提交数据后，要格式化数组时发现提交过来的数据不完整。</p>
+<p>刚开始以为是ajax返回的表单有问题，仔细翻了几遍发现一切正常，代码是没问题的，怀疑是环境配置的问题，于是就去网上搜了下post数据大小限制，大部分说的都是设置php.ini里的上传大小限制，设置post_max_size和upload_max_filesize，心想不应该啊，就算是上万条数据也不会超过上传大小2M的限制啊，再说上传数据大小限制跟整个应该没关系吧？</p>
+<p>死马当活马医吧，试了下果然不行…..</p>
+<p>查了N久终于找到办法了，原来PHP从5.3.9开始 php.ini 增加一个变量 max_input_vars 用来限制提交的表单数量。</p>
+<p>该值默认情况下是1000 ， 将此值改大一点就OK了！</p>
+<p><a href="/images/2014/07/php_post.jpg"><img src="/images/2014/07/php_post.jpg" alt="php_post"></a></p>
+<p>这里我说一下，我本地的环境是5.3.13的加了这个变量也变正常了，应该是一直都有这个变量而没有在php.ini中提现出来吧。</p>
+
+        </article>
+    </div>
+</section>
+
+    </main>
+    <footer class="footer"> Copyright 2013 - 2019 Ruesin. All Rights Reserved </footer>
+  </body>
+</html>

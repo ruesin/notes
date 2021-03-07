@@ -1,0 +1,74 @@
+<!DOCTYPE HTML>
+<html>
+  <head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+    <title>smarty添加自定义插件功能-信口开河</title>
+    <meta name="keywords" content="Ruesin,信口开河">
+    <meta name="description" content="至于你信不信，反正我是信了。">
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+  <body>
+    
+<header class="header">
+    <nav class="navbar">
+        <ul>
+            
+            <li><a class="header-nav-link" href="/">首页</a></li>
+            
+            <li><a class="header-nav-link" href="/categories">分类</a></li>
+            
+            <li><a class="header-nav-link" href="/archives">归档</a></li>
+            
+            <li><a class="header-nav-link" href="/tags">标签</a></li>
+            
+            <li><a class="header-nav-link" href="https://github.com/ruesin/notes">Github</a></li>
+            
+            <li><a class="header-nav-link" href="https://ruesin.github.io/php-tree">PHP技能树</a></li>
+            
+            <li><a class="header-nav-link" href="https://www.xinkoukaihe.com">老博客</a></li>
+            
+        </ul>
+    </nav>
+</header>
+    <main class="main">
+      <!-- 内容页 -->
+<section class="section">
+    <div class="post-container">
+        <div class="post-header">
+                <h1>smarty添加自定义插件功能</h1>
+                <!-- <div class="post-meta">2014-09-28</div> -->
+        </div>
+        <article class="post-content">
+            <p>smarty插件是smarty模版引擎的核心，没有插件的smarty几乎什么都做不了。<br>分析smarty的代码结构，主要有三部分：<br>./Smarty.class.php //smarty入口文件<br>./sysplugins //系统插件<br>./plugins //外部插件</p>
+<p>所以我们今天说的自定义插件就在./plugins下面，可以在他下面进行插件的开发。</p>
+<p>插件文件的命名规则是type.name.php, 插件文件中的的函数命名规则是smarty_type_name()。<br>type指的是类型,有下面几种可选; name: 自定义的插件名称。</p>
+<pre><code>    function
+    modifier
+    block
+    compiler
+    prefilter
+    postfilter
+    outputfilter
+    resource
+    insert</code></pre><p>我们常用的插件有文件名以modifier.开头的变量调节器，文件名以function.开头的自定义函数。本文也就只简单举两个这类型的例子，起到个抛砖引玉的作用。</p>
+<p>1.变量调节器插件。<br>modifier.trim.php</p>
+<pre><code>function smarty_modifier_trim($string){
+    return trim($string);
+}</code></pre><p>index.html</p>
+<p><code>{$str|trim}</code>2.自定义函数插件<br>function.print.php</p>
+<pre><code>function smarty_function_print.php($params){
+    print_r($params);
+}</code></pre><p>index.html</p>
+<p><code>{print arg=$arr}</code></p>
+
+        </article>
+    </div>
+</section>
+
+    </main>
+    <footer class="footer"> Copyright 2013 - 2019 Ruesin. All Rights Reserved </footer>
+  </body>
+</html>

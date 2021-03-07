@@ -1,0 +1,70 @@
+<!DOCTYPE HTML>
+<html>
+  <head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+    <title>Ecstore读取普通商品购物车数据流程-信口开河</title>
+    <meta name="keywords" content="Ruesin,信口开河">
+    <meta name="description" content="至于你信不信，反正我是信了。">
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+  <body>
+    
+<header class="header">
+    <nav class="navbar">
+        <ul>
+            
+            <li><a class="header-nav-link" href="/">首页</a></li>
+            
+            <li><a class="header-nav-link" href="/categories">分类</a></li>
+            
+            <li><a class="header-nav-link" href="/archives">归档</a></li>
+            
+            <li><a class="header-nav-link" href="/tags">标签</a></li>
+            
+            <li><a class="header-nav-link" href="https://github.com/ruesin/notes">Github</a></li>
+            
+            <li><a class="header-nav-link" href="https://ruesin.github.io/php-tree">PHP技能树</a></li>
+            
+            <li><a class="header-nav-link" href="https://www.xinkoukaihe.com">老博客</a></li>
+            
+        </ul>
+    </nav>
+</header>
+    <main class="main">
+      <!-- 内容页 -->
+<section class="section">
+    <div class="post-container">
+        <div class="post-header">
+                <h1>Ecstore读取普通商品购物车数据流程</h1>
+                <!-- <div class="post-meta">2014-08-27</div> -->
+        </div>
+        <article class="post-content">
+            <p>电商项目，主要就是围绕这个购物车、订单这个流程来的，之前我们讨论了Ecstore的加入购物车流程，既然商品加入购物车了，肯定是要读取出来以用来在页面中展示，写入订单信息等。</p>
+<p>其实在《<a href="http://old.ruesin.com/open/ecstore/ecstore_cart_add-125.html" title="Ecstore普通商品加入购物车流程" target="_blank" rel="noopener">Ecstore普通商品加入购物车流程</a>》中我们就已经涉及到了读取购物车数据，只是没有细讲而已。</p>
+<p>从加入购物车到提交订单，为了校验数据完整性、合法性，几乎每步都会有取出购物车数据的操作。</p>
+<p>Ecstore读取购物车数据的地方主要有：1.商品加入购物车成功时的弹窗提示；2.购物车页面；3.订单确认页；4.mini购物车等。</p>
+<p>虽然每个地方的入口不尽一样，但最后还都是从b2c_mdl_cart-&gt;get_objects()获取数据的。所以我们的流程图也是从get_objects()开始的。</p>
+<p>流程图：</p>
+<p><a href="/images/2014/08/cart_data.jpg"><img src="/images/2014/08/cart_data.jpg" alt="cart_data"></a></p>
+<p>1.b2c_mdl_cart-&gt;get_objects()<br>获取购物车数据的总的接口，会循环调取埋点S(b2c_cart_process_apps)的process()方法获取数据；然后会设置购物车商品数；抛出购物车项。。</p>
+<p>2.b2c_cart_process_get-&gt;process()<br>会有判断是购物车还是订单操作以调取不同的方法，我们暂时只考虑购物车的数据获取；$this-&gt;_cart_process()。<br>然后是对获取数据的信息统计操作。b2c_mdl_cart-&gt;count_objects()。</p>
+<p>3.b2c_cart_process_get-&gt;_cart_process()<br>获取埋点，按照购物车类型不同，循环调取数据。S(b2c_cart_object_apps)-&gt;getAll()。</p>
+<p>4.b2c_cart_object_goods-&gt;getAll()<br>会有几个数据校验什么的，最后是走$this-&gt;_get()。</p>
+<p>5.b2c_cart_object_goods-&gt;_get()<br>到了这里，基本上到了获取数据信息的底层。在此方法中会先调取$this-&gt;_get_basic()，获取购物车的基本信息；然后是$this-&gt;_get_products()，获取货品的详细信息。获取库存信息，商品数量信息等。<br>至于_get_basic、_get_products的内部操作就不做赘述了。</p>
+<p>6.b2c_mdl_cart-&gt;count_objects()<br>在第二步有说，获取信息之后，要对商品信息进行各种统计。通过此方法对购物车项的总数据进行统计。<br>调取埋点S(b2c_cart_object_apps)的count()方法。</p>
+<p>7.b2c_cart_object_goods-&gt;count()<br>统计购物车中商品项数据。这里只是走了普通商品的流程。通过埋点还会走其他的类，用以统计其他类别的数据。</p>
+<p>8.b2c_cart_object_goods-&gt;_count()<br>统计单件的数据信息，统计每一个商品的数据信息。</p>
+<p>9.b2c_cart_object_goods-&gt;_count_product()<br>统计货品的数据信息。</p>
+<p>总体流程就是获取信息，统计格式化信息。统一使用。</p>
+
+        </article>
+    </div>
+</section>
+
+    </main>
+    <footer class="footer"> Copyright 2013 - 2019 Ruesin. All Rights Reserved </footer>
+  </body>
+</html>

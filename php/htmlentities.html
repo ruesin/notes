@@ -1,0 +1,71 @@
+<!DOCTYPE HTML>
+<html>
+  <head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+    <title>浅谈PHP格式化html函数htmlentities及与htmlspecialchars的区别-信口开河</title>
+    <meta name="keywords" content="Ruesin,信口开河">
+    <meta name="description" content="至于你信不信，反正我是信了。">
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+  <body>
+    
+<header class="header">
+    <nav class="navbar">
+        <ul>
+            
+            <li><a class="header-nav-link" href="/">首页</a></li>
+            
+            <li><a class="header-nav-link" href="/categories">分类</a></li>
+            
+            <li><a class="header-nav-link" href="/archives">归档</a></li>
+            
+            <li><a class="header-nav-link" href="/tags">标签</a></li>
+            
+            <li><a class="header-nav-link" href="https://github.com/ruesin/notes">Github</a></li>
+            
+            <li><a class="header-nav-link" href="https://ruesin.github.io/php-tree">PHP技能树</a></li>
+            
+            <li><a class="header-nav-link" href="https://www.xinkoukaihe.com">老博客</a></li>
+            
+        </ul>
+    </nav>
+</header>
+    <main class="main">
+      <!-- 内容页 -->
+<section class="section">
+    <div class="post-container">
+        <div class="post-header">
+                <h1>浅谈PHP格式化html函数htmlentities及与htmlspecialchars的区别</h1>
+                <!-- <div class="post-meta">2014-03-22</div> -->
+        </div>
+        <article class="post-content">
+            <p>昨天汉化了一个wordpress的广告插件，本以为完事大吉了，没想到使用的时候出现了问题——在后台添加了广告后，前台显示的是正常的，可是后台文本框编辑处的中文是乱码的。</p>
+<p>发现乱码首先想到的是编码不一致，先去翻了数据库，发现也是正常的。然后想是不是后台php文件的编码错了，转了几次后确定了不是编码的问题。想想也是，如果是文件编码的问题，那应该是整个页面都乱码，而不仅仅是文本框乱码。</p>
+<p>那么只有一个问题了，就是数据输出的时候出错了，翻代码吧…发现数据输出前被php函数htmlentities格式化了。去掉格式化函数后，中文正常显示了…</p>
+<p>但是数据本身是包含html代码的，如果不格式化怕会出现意外的错误。当然，从常理上来说，我们也是要格式化一下的。</p>
+<p>我们平时一般都是用htmlspecialchars函数格式化html的，于是就查了下htmlentities函数。</p>
+<p>手册上是这样解释的:<br>htmlentities() 函数把字符转换为 HTML 实体。<br>htmlentities函数有三个参数:<br>htmlentities(string,quotestyle,character-set)</p>
+<p><a href="/images/2014/03/htmlentities.jpg"><img src="/images/2014/03/htmlentities.jpg" alt="htmlentities" title="htmlentities"></a></p>
+<p>注意:而无法被识别的字符集将被忽略，并由 ISO-8859-1 代替。</p>
+<p>很明显，是因为参数的问题导致了中文字符的编码被解析出错了。<br>把源代码改成</p>
+<pre><code>//$cod = htmlentities(get_option(&#39;AdsCode&#39;.$i));
+ $cod = htmlentities(get_option(&#39;AdsCode&#39;.$i),ENT_COMPAT,&#39;UTF-8&#39;);</code></pre><p>再看就正常了…</p>
+<p>PS:这不禁让我想起了前几天用的美橙互联的空间，phpmyadmin后台查看的数据，中文都是乱码的，而页面显示都是正常，现在想想应该是这个函数格式化html的时候编码出问题了…</p>
+<p>既然谈到了格式化html，并且也说到了htmlspecialchars函数，那我们就有必要对比一下这两个函数的区别。</p>
+<p>看到这里可能很多人都以为htmlentities跟htmlspecialchars的功能，用法是一样的。虽然从官方文档来看感觉这两个函数基本功能差不多，但还是有细微的差别的。</p>
+<p>仔细研究过官方文档后我们就会发现htmlentities 和 htmlspecialchars 的区别在于 htmlentities 会转化所有的html代码（包括它无法识别的中文字符），而htmlspecialchars 只会转化手册上列出的几个 html代码（也就是会影响 html 解析的那几个基本字符）。</p>
+<p>到这里可能就有人妄下结论:有中文的时候，最好用 htmlspecialchars ，否则可能乱码。</p>
+<p>其实通过博主亲身体验的例子就会发现，htmlentities只要加上正确的编码作为参数，根本就不会出现所谓的中文乱码问题。</p>
+<p>当然，一般来说，使用 htmlspecialchars 转化掉基本字符就已经足够了，没有必要使用 htmlentities。而实际情况中如果实在要使用 htmlentities 时，只需要注意为第三个参数传递正确的编码即可。</p>
+
+        </article>
+    </div>
+</section>
+
+    </main>
+    <footer class="footer"> Copyright 2013 - 2019 Ruesin. All Rights Reserved </footer>
+  </body>
+</html>

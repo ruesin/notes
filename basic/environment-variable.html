@@ -1,0 +1,190 @@
+<!DOCTYPE HTML>
+<html>
+  <head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+    <title>环境变量-信口开河</title>
+    <meta name="keywords" content="Ruesin,信口开河">
+    <meta name="description" content="至于你信不信，反正我是信了。">
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+  <body>
+    
+<header class="header">
+    <nav class="navbar">
+        <ul>
+            
+            <li><a class="header-nav-link" href="/">首页</a></li>
+            
+            <li><a class="header-nav-link" href="/categories">分类</a></li>
+            
+            <li><a class="header-nav-link" href="/archives">归档</a></li>
+            
+            <li><a class="header-nav-link" href="/tags">标签</a></li>
+            
+            <li><a class="header-nav-link" href="https://github.com/ruesin/notes">Github</a></li>
+            
+            <li><a class="header-nav-link" href="https://ruesin.github.io/php-tree">PHP技能树</a></li>
+            
+            <li><a class="header-nav-link" href="https://www.xinkoukaihe.com">老博客</a></li>
+            
+        </ul>
+    </nav>
+</header>
+    <main class="main">
+      <!-- 内容页 -->
+<section class="section">
+    <div class="post-container">
+        <div class="post-header">
+                <h1>环境变量</h1>
+                <!-- <div class="post-meta">2019-07-19</div> -->
+        </div>
+        <article class="post-content">
+            <p>当用户登陆<code>Linux</code>就启动了一个<code>Shell</code>，多数Linux默认为<code>bash</code>。取得一个<code>bash</code>之后，当前<code>bash</code>就是一个独立的进程。接下来在这个<code>bash</code>下执行的任何命令都是由这个<code>bash</code>衍生出来的，被执行的命令被称为子进程。</p>
+<p><code>Bash</code>执行脚本的时候，会创建一个新的<code>Shell</code>，这个<code>Shell</code>就是脚本的执行环境，<code>Bash</code>默认给定了这个环境的各种参数，<code>bash</code>使用一个叫环境变量的特性来存储有关<code>shell</code>会话和工作环境的信息。</p>
+<h2 id="进程"><a href="#进程" class="headerlink" title="进程"></a>进程</h2><p>进程是程序执行是的上下文集合（实例），这个集合包括程序代码、数据段、堆栈、环境变量、内核标识进程的数据结构等，进程能够分配给cpu和内存等资源。进程一般包括指令集和系统资源，其中指令集就是你的代码，系统资源就是指cpu、内存以及I/O等。</p>
+<p>一个进程可以生成另一个进程，生成的进程称为子进程，在unix系统中进程通过依次调用<code>fork()</code>和<code>exec()</code>系统调用来实现创建一个子进程。</p>
+<p><code>fork</code>就是在内存中将当前进程的所有内存镜像复制一份，所有东西都一样，包括进程运行到哪句代码，只修改新进程的进程号(PID)，所以新的进程会继续执行<code>fork()</code>后面的代码，父进程也会运行<code>fork()</code>后面的代码，从<code>fork()</code>开始父子进程就是两个独立的进程，独立的内存空间。</p>
+<p><code>exec</code>是一组函数的统称，用磁盘上的一个新的程序替换当前的进程的正文段、数据段、堆栈段。<code>exec</code>并不产生新的进程，而是替换当前进程。进程将从新代码的main开始执行，相当于另外运行了一个完全不同的程序，但保留了原来环境变量。</p>
+<p>在命令行中执行一个shell脚本时，shell进程会创建一个<code>sub-shell</code>子进程来执行这个<code>shell</code>脚本，并等待这个子进程执行结束。</p>
+<p>在命令行中执行一个命令时，shell这个进程会通过fork和exec为我们创建一个子进程，并等待(waitpid)这个子进程完成退出。</p>
+<p><img src="/images/basic/environment-variable-bash.gif" alt="bash"></p>
+<p>在原本的<code>bash</code>底下运行另一个<code>bash</code>，操作的环境接口会跑到第二个<code>bash</code>去(就是子进程)，原本的<code>bash</code>就会暂停。若要回到原本的<code>bash</code>去，需要将第二个<code>bash</code>结束掉 (exit 或 logout)。</p>
+<blockquote>
+<p>有一小部分命令执行时不会创建新的子进程，称为<code>build-in</code>命令，如<code>set</code>、<code>source</code>、<code>export</code>。</p>
+</blockquote>
+<blockquote>
+<p>线程是进程的一个执行流，线程不能分配系统资源，它是进程的一部分，比进程更小的独立运行的单位。</p>
+</blockquote>
+<h2 id="环境变量"><a href="#环境变量" class="headerlink" title="环境变量"></a>环境变量</h2><p>环境变量是一组特殊的字符型变量，由于具有继承性质，环境变量也经常用于父子进程传递参数用。</p>
+<p>通过<code>declare</code>命令以<code>变量名=值</code>设置自定义变量，父进程的自定义变量是无法被子进程继承，如果要在子进程使用，则需要用<code>export</code>将其提升为环境变量。</p>
+<p>进程可通过<code>setenv</code>或<code>putenv</code>更改自己的环境变量，环境变量的继承只能单向，即从父进程继承给fork出来的子进程。</p>
+<p>使用<code>printenv</code> 或 <code>env</code>命令可以查看环境变量，使用<code>printenv HOME</code> 或 <code>echo $HOME</code> 查看指定环境变量，使用<code>unset</code>删除变量。</p>
+<p>当把自定义变量提升为环境变量后，对于当前进程及所有子进程都是可用的，但无法在其他进程。如果想要在所有shell会话中使用，需要将环境变量“持久化”，将配置写入配置文件，比如<code>/etc/profile</code>或<code>/.bashrc</code>等，参考<a href="#文件加载">文件加载</a>。</p>
+<p>环境变量的数据可以被子进程引用是因为内存配置的关系：</p>
+<ol>
+<li>当启动一个<code>shell</code>，操作系统会分配一内存区块给<code>shell</code>使用，此内存内之变量可让子进程取用</li>
+<li>在父进程利用<code>export</code>功能，让自定义变量的内容写到上述的内存区块当中(环境变量)</li>
+<li>当加载另一个<code>shell</code>时 (启动子进程)，子进程复制父进程的内存区到当前进程</li>
+</ol>
+<h2 id="export"><a href="#export" class="headerlink" title="export"></a>export</h2><p><code>export</code>命令通过调用<code>putenv</code>将一个本地变量输出为当前<code>shell</code>的环境变量，从而被子进程自动继承，但是子进程<code>export</code>的变量无法改变父进程的环境变量。</p>
+<p>一般来说，配置交叉编译工具链的时候需要指定编译工具的路径，此时就需要设置环境变量。</p>
+<p>当不带任何参数时表示查看已经存在的环境变量。</p>
+<ul>
+<li>-f：代表变量名称中为函数名称；</li>
+<li>-n：删除指定的变量。变量实际上并未删除，只是不会输出到后续指令的执行环境中；</li>
+<li>-p：列出所有的shell赋予程序的环境变量。</li>
+</ul>
+<pre><code class="shell"># 设置变量
+$ name=ruesin
+# 提升为环境变量
+$ export name
+# 进入子进程
+$ bash
+# 输出环境变量
+$ echo $name</code></pre>
+<h2 id="set"><a href="#set" class="headerlink" title="set"></a>set</h2><p>set命令用来修改<code>shell</code>环境的运行参数，也就是可以定制环境，可以设置shell变量的新变量值，但不能够定义新的shell变量。</p>
+<p>set设置了当前shell进程的本地变量，本地变量只在当前shell的进程内有效，不会被子进程继承和传递。</p>
+<p>set设置变量的值时，如果未指定值，则该变量值将被设为NULL。</p>
+<p>使用set更改shell特性时，符号”+”和”-“的作用分别是打开和关闭指定的模式。</p>
+<p>set命令不带参数时，用来显示系统中已经存在的shell变量，包括全局变量、局部变量、用户自定义变量。</p>
+<ul>
+<li>-a：标示已修改的变量，以供输出至环境变量。</li>
+<li>-b：使被中止的后台程序立刻回报执行状态。</li>
+<li>-C：转向所产生的文件无法覆盖已存在的文件。</li>
+<li>-d：Shell预设会用杂凑表记忆使用过的指令，以加速指令的执行。使用- -d参数可取消。</li>
+<li>-e：若指令传回值不等于0，则立即退出shell。</li>
+<li>-f：取消使用通配符。</li>
+<li>-h：自动记录函数的所在位置。</li>
+<li>-H Shell：可利用”!”加&lt;指令编号&gt;的方式来执行history中记录的指令。</li>
+<li>-k：指令所给的参数都会被视为此指令的环境变量。</li>
+<li>-l：记录for循环的变量名称。</li>
+<li>-m：使用监视模式。</li>
+<li>-n：只读取指令，而不实际执行。</li>
+<li>-p：启动优先顺序模式。</li>
+<li>-P：启动-P参数后，执行指令时，会以实际的文件或目录来取代符号连接。</li>
+<li>-t：执行完随后的指令，即退出shell。</li>
+<li>-u：当执行时使用到未定义过的变量，则显示错误信息。</li>
+<li>-v：显示shell所读取的输入值。</li>
+<li>-x：执行指令后，会先显示该指令及所下的参数。</li>
+</ul>
+<pre><code class="shell"># 使用declare命令定义一个新的环境变量：
+declare name=&#39;ruesin&#39;
+# 使用set命令将变量输出为环境变量
+set -a name
+#显示环境变量值
+env | grep name</code></pre>
+<h2 id="source"><a href="#source" class="headerlink" title="source"></a>source</h2><p>source命令以一个脚本为参数，该脚本将作为当前shell的环境执行，即不会启动一个新的子进程，在当前<code>bash</code>环境下读取并执行<code>FileName</code>中的命令。</p>
+<p>source命令也称为“点命令”，也就是一个点符号（.），<code>source</code>命令（从 C shell而来）是bash shell的内置命令。点命令<code>.</code>，（从Bourne Shell而来）是source的另一名称。</p>
+<pre><code class="shell">source FileName
+. FileName</code></pre>
+<p>source命令通常用于重新执行刚修改的初始化文件，使之立即生效：</p>
+<p>假如在登录后对<code>.bash_profile</code>中的<code>TERM</code>变量做了修改，则能够用source命令重新执行<code>.bash_profile</code>中的命令而不用注销并重新登录。</p>
+<p>比如在一个脚本里<code>export $KKK=111</code>，假如用<code>./a.sh</code>执行该脚本，执行完毕后，运行<code>echo $KKK</code>，发现没有值，假如您用source来执行，然后再echo，就会发现KKK=111。因为调用<code>./a.sh</code>来执行shell是在一个子shell里运行的，所以执行后，结构并没有反应到父shell里，但是source不同他就是在本shell中执行的，所以能够看到结果。</p>
+<h2 id="env"><a href="#env" class="headerlink" title="env"></a>env</h2><p>env命令不带任何选项和参数时，用于显示系统中已存在的环境变量，以及在定义的环境中执行指令。该命令只使用”-“作为参数选项时，隐藏了选项”-i”的功能。</p>
+<pre><code class="shell">env [OPTION]... [-] [NAME=VALUE]... [COMMAND [ARG]...]</code></pre>
+<ul>
+<li>-i：开始一个新的空的环境；</li>
+<li>-u&lt;变量名&gt;：从当前环境中删除指定的变量。</li>
+</ul>
+<p>env仅为将要执行的子进程设置环境变量，临时启用指定的环境变量，执行子进程，而不影响之后的进程。</p>
+<pre><code class="shell">env GOTRACEBACK=crash ./test.sh</code></pre>
+<p>env不是shell的build-in命令，所以shell执行env的时候需要创建子进程。</p>
+<p>从本质上说，env相当于shell先fork，然后在子进程中运行env，子进程env调用execve运行test.sh时，多传了一个GOTRACEBACK=crash的环境变量，这样test.sh可以看到这个GOTRACEBACK环境变量，但由于没有调用putenv改变父shell的环境变量，所以后续启动的进程并不继承GOTRACEBACK。</p>
+<h2 id="exec"><a href="#exec" class="headerlink" title="exec"></a>exec</h2><p>exec命令用于在当前进程中调用并执行指令的命令。exec命令通常用在shell脚本程序中，可以调用其他的命令。如果在当前终端中使用命令，则当指定的命令执行完毕后会立即退出终端。</p>
+<p>exec运行脚本或命令的时候，不会启用一个新的shell进程，当前shell的代码执行到exec后，代码被替换成了exec要执行的程序。因为shell本身都被替换掉了，exec后续的脚本内容不会执行，即当前shell进程结束了。</p>
+<h2 id="文件加载"><a href="#文件加载" class="headerlink" title="文件加载"></a>文件加载</h2><p>系统有一些环境配置文件的存在，让<code>bash</code>在启动时直接读取这些配置文件，以规划好<code>bash</code>的操作环境。而这些配置文件又可以分为全体系统的配置文件以及用户个人偏好配置文件。</p>
+<h3 id="login-shell"><a href="#login-shell" class="headerlink" title="login shell"></a>login shell</h3><p>取得<code>bash</code>时需要完整的登陆流程的，就称为<code>login shell</code>。</p>
+<p>比如要由<code>tty1 ~ tty6</code>登陆，需要输入用户的账号与密码，此时取得的<code>bash</code>就称为<code>login shell</code>。</p>
+<p>一般来说，<code>login shell</code>其实只会读取这两个配置文件：</p>
+<ul>
+<li>/etc/profile：系统整体的配置，最好不要修改这个文件</li>
+<li>~/.bash_profile 或 ~/.bash_login 或 ~/.profile：属于使用者个人配置，可以在这里修改自己的数据</li>
+</ul>
+<h4 id="etc-profile"><a href="#etc-profile" class="headerlink" title="/etc/profile"></a>/etc/profile</h4><p>这个配置文件是整体环境配置文件，可以利用使用者的标识符 (UID) 来决定很多重要的变量数据，是每个用户登陆取得<code>bash</code>时一定会读取的配置文件。如果想要帮所有用户配置整体环境，可以修改这个文件。</p>
+<p><code>login shell</code>读取的整体环境配置文件其实只有<code>/etc/profile</code>，此文件会加载其他的配置文件：</p>
+<ul>
+<li>/etc/inputrc：如果用户没有自定义输入的按键功能，<code>/etc/profile</code>会配置<code>INPUTRC=/etc/inputrc</code>这个变量，此文件内容为bash的热键、[tab]要不要有声音等数据。</li>
+<li>/etc/profile.d/*.sh：加载<code>/etc/profile.d/</code>目录下扩展名为<code>.sh</code>的所有文件，使用者需要具有<code>r</code>的权限。</li>
+<li>/etc/sysconfig/i18n：由<code>/etc/profile.d/lang.sh</code>加载，是决定<code>bash</code>默认语言的配置文件，最重要的就是<code>LANG</code>这个变量。</li>
+</ul>
+<h4 id="bash-profile"><a href="#bash-profile" class="headerlink" title="~/.bash_profile"></a>~/.bash_profile</h4><p><code>bash</code>在读完了<code>/etc/profile</code>及其他配置文件后，接着读取使用者的个人配置文件。</p>
+<p>在<code>login shell</code>的<code>bash</code>环境中，读取的个人偏好配置文件主要有三个：</p>
+<ul>
+<li>~/.bash_profile</li>
+<li>~/.bash_login</li>
+<li>~/.profile</li>
+</ul>
+<p><code>bash</code>的<code>login shell</code>配置只会读取上面三个文件的其中一个，而读取的顺序则是依照上面的顺序。也就是说，如果<code>~/.bash_profile</code>存在，那么其他两个文件不论有无存在，都不会被读取。</p>
+<p><code>login shell</code>的读取流程：</p>
+<p><img src="/images/basic/environment-variable-login-shell.gif" alt="login-shell"></p>
+<p>实线的的方向是主线流程，虚线的方向则是被呼叫的配置文件。</p>
+<p>在<code>CentOS</code>的<code>login shell</code>环境下，最终被读取的配置文件是<code>~/.bashrc</code>，可以将自己的偏好配置写入该文件。</p>
+<blockquote>
+<p>由于<code>/etc/profile</code>与<code>~/.bash_profile</code>是在取得<code>login shell</code>时才会读取的配置文件，文件修改后，需要注销再登陆后配置才会生效。通常使用<code>source /etc/profile</code>命令执行文件使其立即生效。</p>
+</blockquote>
+<h3 id="non-login-shell"><a href="#non-login-shell" class="headerlink" title="non-login shell"></a>non-login shell</h3><p>不需要重复登陆取得<code>bash</code>的环境就称为<code>non-login shell</code>，比如：</p>
+<ul>
+<li>以<code>X window</code>登陆<code>Linux</code>后，再以<code>X</code>的图形化接口启动终端机，此时那个终端接口并没有需要再次的输入账号与密码</li>
+<li>在原本的<code>bash</code>环境下再次下达<code>bash</code>这个命令</li>
+</ul>
+<h4 id="bashrc"><a href="#bashrc" class="headerlink" title="~/.bashrc"></a>~/.bashrc</h4><p>取得<code>non-login shell</code>时，仅会读取<code>~/.bashrc</code>该配置文件，由于个人目录下，每个用户的<code>~/.bashrc</code>不一定相同。</p>
+<blockquote>
+<p>修改<code>~/.bashrc</code>后记得<code>source ~/.bashrc</code>，使配置文件生效。</p>
+</blockquote>
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><ul>
+<li><a href="http://man.linuxde.net/" target="_blank" rel="noopener">http://man.linuxde.net/</a></li>
+<li><a href="http://cn.linux.vbird.org/linux_basic/0320bash_1.php" target="_blank" rel="noopener">http://cn.linux.vbird.org/linux_basic/0320bash_1.php</a></li>
+<li><a href="https://segmentfault.com/a/1190000013356532" target="_blank" rel="noopener">https://segmentfault.com/a/1190000013356532</a></li>
+</ul>
+
+        </article>
+    </div>
+</section>
+
+    </main>
+    <footer class="footer"> Copyright 2013 - 2019 Ruesin. All Rights Reserved </footer>
+  </body>
+</html>

@@ -1,0 +1,71 @@
+<!DOCTYPE HTML>
+<html>
+  <head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+    <title>Ubuntu 下 安装 composer-信口开河</title>
+    <meta name="keywords" content="Ruesin,信口开河">
+    <meta name="description" content="至于你信不信，反正我是信了。">
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+  <body>
+    
+<header class="header">
+    <nav class="navbar">
+        <ul>
+            
+            <li><a class="header-nav-link" href="/">首页</a></li>
+            
+            <li><a class="header-nav-link" href="/categories">分类</a></li>
+            
+            <li><a class="header-nav-link" href="/archives">归档</a></li>
+            
+            <li><a class="header-nav-link" href="/tags">标签</a></li>
+            
+            <li><a class="header-nav-link" href="https://github.com/ruesin/notes">Github</a></li>
+            
+            <li><a class="header-nav-link" href="https://ruesin.github.io/php-tree">PHP技能树</a></li>
+            
+            <li><a class="header-nav-link" href="https://www.xinkoukaihe.com">老博客</a></li>
+            
+        </ul>
+    </nav>
+</header>
+    <main class="main">
+      <!-- 内容页 -->
+<section class="section">
+    <div class="post-container">
+        <div class="post-header">
+                <h1>Ubuntu 下 安装 composer</h1>
+                <!-- <div class="post-meta">2016-01-04</div> -->
+        </div>
+        <article class="post-content">
+            <p>Composer提供了一个非常方便的安装程序，Ubuntu下可以很简单的在命令行下载。可以免费下载（<a href="https://getcomposer.org/installer），感兴趣的同学可以去Github上看下它的工作原理，是纯PHP的源。" target="_blank" rel="noopener">https://getcomposer.org/installer），感兴趣的同学可以去Github上看下它的工作原理，是纯PHP的源。</a></p>
+<p>基本的两种方式</p>
+<p>curl -sS <a href="https://getcomposer.org/installer" target="_blank" rel="noopener">https://getcomposer.org/installer</a> | php</p>
+<p>php -r “readfile(‘<a href="https://getcomposer.org/installer’);”" target="_blank" rel="noopener">https://getcomposer.org/installer’);”</a> | php</p>
+<p>在工作目录下使用 php composer.phar 命令就可以运行Composer了。</p>
+<p>但是这样实在是不够方便，总不能每个项目目录下都拷贝一份吧。</p>
+<p>mv composer.phar /usr/local/bin/composer</p>
+<p>将可执行文件移动到任意一个全局变量目录下，就可以在系统中全局使用了。</p>
+<p>当然，也可以在下载安装的时候加一些参数，直接安装到命令目录下。</p>
+<p>curl -sS <a href="https://getcomposer.org/installer" target="_blank" rel="noopener">https://getcomposer.org/installer</a> | sudo php — –install-dir=/usr/local/bin –filename=composer</p>
+<p>–install-dir 定义安装的目录。<br>–filename 更改文件名称。</p>
+<p>然后就可以全局使用 composer 替代 php composer.phpar 了。</p>
+<p>至于，有时候会被墙的事儿，可以更改配置中国镜像，也可以修改hosts，或者直接上梯子了。</p>
+<p>更新composer，经常用到。<br>sudo composer self-update</p>
+<p>查看状态<br>composer -version</p>
+<p>文档：</p>
+<p><a href="https://getcomposer.org/doc/00-intro.md" target="_blank" rel="noopener">https://getcomposer.org/doc/00-intro.md</a></p>
+<p><a href="https://github.com/5-say/composer-doc-cn/blob/master/cn-introduction/04-schema.md#minimum-stability" target="_blank" rel="noopener">https://github.com/5-say/composer-doc-cn/blob/master/cn-introduction/04-schema.md#minimum-stability</a></p>
+
+        </article>
+    </div>
+</section>
+
+    </main>
+    <footer class="footer"> Copyright 2013 - 2019 Ruesin. All Rights Reserved </footer>
+  </body>
+</html>

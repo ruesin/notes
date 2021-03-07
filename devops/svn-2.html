@@ -1,0 +1,111 @@
+<!DOCTYPE HTML>
+<html>
+  <head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+    <title>Centos 搭建多版本库svn服务器-信口开河</title>
+    <meta name="keywords" content="Ruesin,信口开河">
+    <meta name="description" content="至于你信不信，反正我是信了。">
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+  <body>
+    
+<header class="header">
+    <nav class="navbar">
+        <ul>
+            
+            <li><a class="header-nav-link" href="/">首页</a></li>
+            
+            <li><a class="header-nav-link" href="/categories">分类</a></li>
+            
+            <li><a class="header-nav-link" href="/archives">归档</a></li>
+            
+            <li><a class="header-nav-link" href="/tags">标签</a></li>
+            
+            <li><a class="header-nav-link" href="https://github.com/ruesin/notes">Github</a></li>
+            
+            <li><a class="header-nav-link" href="https://ruesin.github.io/php-tree">PHP技能树</a></li>
+            
+            <li><a class="header-nav-link" href="https://www.xinkoukaihe.com">老博客</a></li>
+            
+        </ul>
+    </nav>
+</header>
+    <main class="main">
+      <!-- 内容页 -->
+<section class="section">
+    <div class="post-container">
+        <div class="post-header">
+                <h1>Centos 搭建多版本库svn服务器</h1>
+                <!-- <div class="post-meta">2016-07-06</div> -->
+        </div>
+        <article class="post-content">
+            <pre><code>创建版本库文件夹  
+# mkdir -p /data/svn/sinsvn  
+创建版本库  
+# svnadmin create /data/svn/sinsvn  
+# mkdir -p /data/www/sinsvn  
+导入所需管理的项目到版本库repository中  
+# svn import /data/www/sinsvn/ file:///data/svn/sinsvn -m &quot;svn first test&quot;  
+检查是否导入成功  
+# svn list –verbose file:///data/svn/sinsvn  
+修改版本库的配置文件  
+# vim /data/svn/sinsvn/conf/svnserve.conf</code></pre><pre><code>[general]  
+anon-access = none  
+auth-access = write  
+password-db = ../../passwd  
+authz-db = ../../authz  
+realm =sinsvn</code></pre><p><code>cp /data/svn/sinsvn/conf/passwd /data/svn</code><br><code>cp /data/svn/sinsvn/conf/authz /data/svn</code></p>
+<p>修改允许访问版本库的用户文件<br><code># vim /data/svn/passwd</code></p>
+<pre><code>[users]  
+harry = harryssecret  
+sin = sinssecret  
+surpersin = surpersin</code></pre><p><code># vim /data/svn/authz</code></p>
+<pre><code>[groups]  
+myteam = harry,sin
+
+[/]  
+surpersin = rw
+
+[sinsvn:/]  
+@myteam = rw
+
+[secsvn:/www]  
+@myteam =r  
+sin= rw
+
+[sincms:/]  
+sin= rw  
+harry=  </code></pre><p>启动 svn 服务<br><code># svnserve -d -r /data/svn/</code></p>
+<p>至此，版本库 sinsvn 就可以使用了。<br>多项目的话，有几种解决方案：<br>1.启动多个svn服务，每个SVN监听不同的IP或端口。<br><code># svnserve -d –listen-port 3690 -r /data/svn1</code><br><code># svnserve -d –listen-port 3691 -r /data/svn2</code></p>
+<p>2.在一个版本库下，按项目分不同目录，在authz控制各项目目录的权限。  </p>
+<pre><code>[sinsvn:/pro1]  
+sin= rw  
+[sinsvn:/pro2]  
+@myteam =rw</code></pre><p>3.SVN服务监听版本库的根目录 /data/svn，然后在/data/svn下创建多个版本库，在各版本库下的配置文件中，指定用户及权限文件到根目录下的文件，就可以集中管理了，上面的例子已经是按照这么做的了。<br><code># svnserve -d -r /data/svn/</code></p>
+<p>svn 自动更新钩子：  </p>
+<pre><code># cd /data/svn/sinsvn/hooks  
+# cp post-commit.tmpl post-commit  
+# vim post-commit</code></pre><pre><code>export LANG=zh_CN.utf-8  
+REPOS=&quot;1&quot;
+REV=&quot;2&quot;
+SVN=/usr/bin/svn  
+WEB=/data/website/shebao/  
+LOG=/data/svn/logs/shebao.log  
+$SVN update $WEB –username ruesin –password ruesin  
+if [ $? == 0 ]  
+then  
+echo &quot;$REPOS&quot; &quot;$REV&quot; &gt;&gt; $LOG  
+echo `date` &gt;&gt; $LOG  
+echo &quot;####################&quot; &gt;&gt; $LOG  
+fi</code></pre>
+        </article>
+    </div>
+</section>
+
+    </main>
+    <footer class="footer"> Copyright 2013 - 2019 Ruesin. All Rights Reserved </footer>
+  </body>
+</html>

@@ -1,0 +1,119 @@
+<!DOCTYPE HTML>
+<html>
+  <head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+    <title>PHP获取客户端的网卡mac物理地址-信口开河</title>
+    <meta name="keywords" content="Ruesin,信口开河">
+    <meta name="description" content="至于你信不信，反正我是信了。">
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+  <body>
+    
+<header class="header">
+    <nav class="navbar">
+        <ul>
+            
+            <li><a class="header-nav-link" href="/">首页</a></li>
+            
+            <li><a class="header-nav-link" href="/categories">分类</a></li>
+            
+            <li><a class="header-nav-link" href="/archives">归档</a></li>
+            
+            <li><a class="header-nav-link" href="/tags">标签</a></li>
+            
+            <li><a class="header-nav-link" href="https://github.com/ruesin/notes">Github</a></li>
+            
+            <li><a class="header-nav-link" href="https://ruesin.github.io/php-tree">PHP技能树</a></li>
+            
+            <li><a class="header-nav-link" href="https://www.xinkoukaihe.com">老博客</a></li>
+            
+        </ul>
+    </nav>
+</header>
+    <main class="main">
+      <!-- 内容页 -->
+<section class="section">
+    <div class="post-container">
+        <div class="post-header">
+                <h1>PHP获取客户端的网卡mac物理地址</h1>
+                <!-- <div class="post-meta">2014-09-29</div> -->
+        </div>
+        <article class="post-content">
+            <p>获取客户端的mac地址是非常有用的一个功能，因为它是客户端的不可变的唯一标识，更换IP或者清除本地记录都是没用的。</p>
+<p>所以获取mac地址经常会用到购买软件时的一机一激活码，网站注册每台机器只能注册一次等等。</p>
+<p>在电商系统开发中，常见的一个功能就是：用户在没有登录的状态下将商品加入购物车，登录后自动将购物车数据同步上来。对此的解决办法我们一般都是使用COOKIE或者SESSION解决即可。其实也可以用获取客户端的mac地址作为唯一标识存入到数据库中，登录成功后再进行匹配。</p>
+<p>大数据时代的云很多时候都有用到此类方法。</p>
+<p>网上查询整理的代码如下：</p>
+<pre><code>class GetMac{
+    var $result   = array(); 
+    var $macAddrs = array(); //所有mac地址
+    var $macAddr;            //第一个mac地址
+
+    function __construct($OS){
+        $this-&gt;GetMac($OS);
+    }
+
+    function GetMac($OS){
+        switch ( strtolower($OS) ){
+            case &quot;unix&quot;: break;
+            case &quot;solaris&quot;: break;
+            case &quot;aix&quot;: break;
+            case &quot;linux&quot;:
+                $this-&gt;getLinux();
+                break;
+            default: 
+                $this-&gt;getWindows();
+                break;
+        }
+        $tem = array();
+        foreach($this-&gt;result as $val){
+            if(preg_match(&quot;/[0-9a-f][0-9a-f][:-]&quot;.&quot;[0-9a-f][0-9a-f][:-]&quot;.&quot;[0-9a-f][0-9a-f][:-]&quot;.&quot;[0-9a-f][0-9a-f][:-]&quot;.&quot;[0-9a-f][0-9a-f][:-]&quot;.&quot;[0-9a-f][0-9a-f]/i&quot;,$val,$tem) ){
+                $this-&gt;macAddr = $tem[0];//多个网卡时，会返回第一个网卡的mac地址，一般够用。
+                break;
+                //$this-&gt;macAddrs[] = $temp_array[0];//返回所有的mac地址
+            }
+        }
+        unset($temp_array);
+        return $this-&gt;macAddr;
+    }
+    //Linux系统
+    function getLinux(){
+        @exec(&quot;ifconfig -a&quot;, $this-&gt;result);
+        return $this-&gt;result;
+    }
+    //Windows系统
+    function getWindows(){
+        @exec(&quot;ipconfig /all&quot;, $this-&gt;result);
+        if ( $this-&gt;result ) {
+            return $this-&gt;result;
+        } else {
+            $ipconfig = $_SERVER[&quot;WINDIR&quot;].&quot;\system32\ipconfig.exe&quot;;
+            if(is_file($ipconfig)) {
+                @exec($ipconfig.&quot; /all&quot;, $this-&gt;result);
+            } else {
+                @exec($_SERVER[&quot;WINDIR&quot;].&quot;\system\ipconfig.exe /all&quot;, $this-&gt;result);
+                return $this-&gt;result;
+            }
+        }
+    }
+}
+
+$obj = new GetMac(PHP_OS);
+print_r($obj-&gt;result);
+echo $obj-&gt;macAddr;
+//获取客户端
+//$result=`arp -a $REMOTE_ADDR`;
+//$result=`nbtstat -a $REMOTE_ADDR`;
+//print_r($result);
+exit;</code></pre>
+        </article>
+    </div>
+</section>
+
+    </main>
+    <footer class="footer"> Copyright 2013 - 2019 Ruesin. All Rights Reserved </footer>
+  </body>
+</html>

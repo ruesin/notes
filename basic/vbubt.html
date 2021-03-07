@@ -1,0 +1,359 @@
+<!DOCTYPE HTML>
+<html>
+  <head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+    <title>VirtualBox + Ubuntu 16.04 编译 PHP 开发环境-信口开河</title>
+    <meta name="keywords" content="Ruesin,信口开河">
+    <meta name="description" content="至于你信不信，反正我是信了。">
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+  <body>
+    
+<header class="header">
+    <nav class="navbar">
+        <ul>
+            
+            <li><a class="header-nav-link" href="/">首页</a></li>
+            
+            <li><a class="header-nav-link" href="/categories">分类</a></li>
+            
+            <li><a class="header-nav-link" href="/archives">归档</a></li>
+            
+            <li><a class="header-nav-link" href="/tags">标签</a></li>
+            
+            <li><a class="header-nav-link" href="https://github.com/ruesin/notes">Github</a></li>
+            
+            <li><a class="header-nav-link" href="https://ruesin.github.io/php-tree">PHP技能树</a></li>
+            
+            <li><a class="header-nav-link" href="https://www.xinkoukaihe.com">老博客</a></li>
+            
+        </ul>
+    </nav>
+</header>
+    <main class="main">
+      <!-- 内容页 -->
+<section class="section">
+    <div class="post-container">
+        <div class="post-header">
+                <h1>VirtualBox + Ubuntu 16.04 编译 PHP 开发环境</h1>
+                <!-- <div class="post-meta">2018-12-12</div> -->
+        </div>
+        <article class="post-content">
+            <h2 id="一、准备"><a href="#一、准备" class="headerlink" title="一、准备"></a>一、准备</h2><h3 id="1-1-网络设置，有两种方案可用："><a href="#1-1-网络设置，有两种方案可用：" class="headerlink" title="1.1 网络设置，有两种方案可用："></a>1.1 网络设置，有两种方案可用：</h3><ol>
+<li>设置网卡1的端口转发，将主机的22、80、3306等端口映射到虚拟机的相应端口，访问127.0.0.1:22即转发至虚拟机。</li>
+<li>设置网卡2，选择<code>host-only</code>模式，本文是采用此方法。  </li>
+</ol>
+<p>设置root密码<br><code>$ sudo passwd root</code></p>
+<p>修改网络配置  </p>
+<pre><code>$ sudo vim /etc/network/interfaces
+
+
+...
+# This file describes the network interfaces available on your system
+# and how to activate them. For more information, see interfaces(5).
+
+source /etc/network/interfaces.d/*
+
+# The loopback network interface
+auto lo
+iface lo inet loopback 
+
+# The primary network interface
+auto enp0s3
+iface enp0s3 inet dhcp
+
+## custom net 1
+# 增加的Host-only静态IP设置 (enp0s8 是根据拓扑关系映射的网卡名称（旧规则是eth0,eth1）)
+# 可以通过 ```ls /sys/class/net```查看，是否为enp0s8
+
+auto enp0s8
+iface enp0s8 inet static
+address 192.168.56.101
+netmask 255.255.255.0
+
+#auto eth1
+#iface eth1 inet static
+#address 192.168.56.11
+#netmask 255.255.255.0
+...
+</code></pre><p>修改SSH配置，使root可远程登录  </p>
+<pre><code>$ sudo vim /etc/ssh/sshd_config
+...
+#PermitRootLogin prohibit-password
+PermitRootLogin yes
+...
+$ sudo service ssh restart</code></pre><h3 id="1-2-替换源"><a href="#1-2-替换源" class="headerlink" title="1.2 替换源"></a>1.2 替换源</h3><pre><code># sed -i &quot;s#cn.archive.ubuntu.com#mirrors.aliyun.com#g&quot; /etc/apt/sources.list
+# sed -i &quot;s#security.ubuntu.com#mirrors.aliyun.com#g&quot; /etc/apt/sources.list
+# apt update
+# apt upgrade</code></pre><h3 id="1-3-安装必要依赖"><a href="#1-3-安装必要依赖" class="headerlink" title="1.3 安装必要依赖"></a>1.3 安装必要依赖</h3><p><code># apt install gcc binutils make linux-source autoconf g++</code></p>
+<h3 id="1-4-文件共享"><a href="#1-4-文件共享" class="headerlink" title="1.4 文件共享"></a>1.4 文件共享</h3><p>先去管理窗口菜单 “设备” -&gt; “安装增强功能” (Devices-&gt;Insert Guest Additions CD image) </p>
+<pre><code># mkdir -p /mnt/cdrom
+# mount /dev/cdrom /mnt/cdrom/
+# cd /mnt/cdrom/
+# ./VBoxLinuxAdditions.run
+# mkdir -p /data/projects
+# mount -t vboxsf projects /data/projects
+# echo &#39;test&#39; &gt; a.txt
+
+## 开机自动挂载
+# echo &#39;share /data/share vboxsf defaults 0 0&#39; &gt;&gt; /etc/fstab
+# echo &#39;projects /data/projects vboxsf defaults 0 0&#39; &gt;&gt; /etc/fstab
+
+# echo &#39;vboxsf&#39; &gt;&gt; /etc/modules</code></pre><h3 id="1-5-配置git信息"><a href="#1-5-配置git信息" class="headerlink" title="1.5 配置git信息"></a>1.5 配置git信息</h3><pre><code># git config --global user.name &quot;Ruesin&quot;
+# git config --global user.email &quot;ruesin@gmail.com&quot;
+# ssh-keygen -t rsa -C &quot;ruesin@gmail.com&quot;</code></pre><h3 id="1-6-下载软件包"><a href="#1-6-下载软件包" class="headerlink" title="1.6 下载软件包"></a>1.6 下载软件包</h3><pre><code># wget http://nginx.org/download/nginx-1.14.0.tar.gz
+# wget ftp://ftp.csx.cam.ac.uk/pub/software/programming/pcre/pcre-8.42.tar.gz
+# wget http://zlib.net/zlib-1.2.11.tar.gz
+# wget https://www.openssl.org/source/openssl-1.0.1u.tar.gz
+# wget http://hk1.php.net/distributions/php-7.2.7.tar.gz
+# wget http://cdn.mysql.com/archives/mysql-5.6/mysql-5.6.12-linux-glibc2.5-x86_64.tar.gz</code></pre><h2 id="二、Nginx"><a href="#二、Nginx" class="headerlink" title="二、Nginx"></a>二、Nginx</h2><h3 id="2-1-安装"><a href="#2-1-安装" class="headerlink" title="2.1 安装"></a>2.1 安装</h3><pre><code># groupadd www
+# useradd -g www www -s /bin/false
+
+# tar zvxf openssl-1.0.1u.tar.gz
+# tar zvxf zlib-1.2.11.tar.gz
+# tar zvxf pcre-8.42.tar.gz
+# tar zvxf nginx-1.14.0.tar.gz
+# cd nginx-1.14.0/
+# ./configure --user=www --group=www --prefix=/usr/local/nginx --with-http_stub_status_module --with-http_ssl_module --with-http_realip_module --with-pcre=/root/src/pcre-8.42 --with-zlib=/root/src/zlib-1.2.11 --with-openssl=/root/src/openssl-1.0.1u
+# make
+# make install</code></pre><h3 id="2-2-配置"><a href="#2-2-配置" class="headerlink" title="2.2 配置"></a>2.2 配置</h3><pre><code>## 开机启动
+# sed -i &#39;$i\/usr/local/nginx/sbin/nginx&#39; /etc/rc.local
+
+# cd /usr/local/nginx/conf/
+# mkdir vhost
+# vim nginx.conf
+... 
+user  www;
+include  vhost/*.conf;
+...
+
+## 添加环境变量
+# vim /etc/profile
+...
+export PATH=$PATH:/usr/local/nginx/sbin
+...
+# source /etc/profile</code></pre><h2 id="三、Mysql"><a href="#三、Mysql" class="headerlink" title="三、Mysql"></a>三、Mysql</h2><pre><code># tar -zvxf mysql-5.6.12-linux-glibc2.5-x86_64.tar.gz
+# groupadd mysql
+# useradd -g mysql mysql -s /bin/false
+# mv mysql-5.6.12-linux-glibc2.5-x86_64 /usr/local/mysql
+# cd /usr/local/mysql/
+# chown -R mysql.mysql .
+
+# apt install -y libaio1
+
+## 执行安装
+# ./scripts/mysql_install_db --user=mysql
+
+## 添加service
+# cp ./support-files/mysql.server /etc/init.d/mysqld
+# chmod 755 /etc/init.d/mysqld
+# systemctl enable mysqld.service
+# service mysqld start
+
+## 初始化密码
+# ./bin/mysql_secure_installation
+
+## 添加环境变量
+# vim /etc/profile
+...
+export PATH=$PATH:/usr/local/mysql/bin:/usr/local/nginx/sbin
+...
+# source /etc/profile
+
+## 设置root访问权限
+# mysql -u root -p
+mysql&gt; use mysql;
+mysql&gt; UPDATE user SET `host`=&#39;%&#39; WHERE `user`=&#39;root&#39; AND `host`=&#39;localhost&#39;;
+mysql&gt; exit;
+
+# service mysqld restart</code></pre><h2 id="四、PHP"><a href="#四、PHP" class="headerlink" title="四、PHP"></a>四、PHP</h2><h3 id="4-1-安装"><a href="#4-1-安装" class="headerlink" title="4.1 安装"></a>4.1 安装</h3><pre><code>## 安装依赖
+# apt install -y libxml2 libxml2-dev
+# apt install -y libcurl4-openssl-dev pkg-config libssl-dev
+# apt install -y build-essential libexpat1-dev libgeoip-dev libpng-dev libpcre3-dev rcs zlib1g-dev mcrypt libmcrypt-dev libmhash-dev libcurl4-openssl-dev libjpeg-dev libpng-dev libwebp-dev libfreetype6 libfreetype6-dev
+# apt install -y libxslt1.1 libxslt1-dev
+
+# tar zvxf php-7.2.7.tar.gz
+# ./configure --prefix=/usr/local/php --with-config-file-path=/usr/local/php \
+--enable-fpm --with-fpm-user=www --with-fpm-group=www \
+--enable-mysqlnd --with-mysqli=mysqlnd --with-pdo-mysql=mysqlnd \
+--with-iconv --with-iconv-dir --enable-pcntl --enable-shmop \
+--enable-simplexml --with-libxml-dir --enable-ftp --enable-zip --enable-soap --with-curl \
+--with-openssl --enable-mbstring  --with-zlib --enable-xml \
+--enable-sockets --enable-inline-optimization \
+--with-png-dir --with-freetype-dir --with-gd --with-jpeg-dir \
+--enable-bcmath \
+--disable-rpath --enable-sysvsem \
+--enable-mbregex --enable-intl   \
+--with-mhash  --with-xmlrpc \
+--with-gettext --disable-fileinfo --enable-opcache --with-xsl
+# make
+# make install</code></pre><h3 id="4-2-配置"><a href="#4-2-配置" class="headerlink" title="4.2 配置"></a>4.2 配置</h3><p>开机启动<br><code># sed -i &#39;$i\/usr/local/php/sbin/php-fpm&#39; /etc/rc.local</code></p>
+<p>环境变量</p>
+<pre><code># vim /etc/profile
+...
+export PATH=$PATH:/usr/local/php/bin:/usr/local/php/sbin:/usr/local/mysql/bin:/usr/local/nginx/sbin
+...
+# source /etc/profile</code></pre><p>修改配置文件</p>
+<pre><code># cp php.ini-development /usr/local/php/php.ini
+# cp /usr/local/php/etc/php-fpm.conf.default /usr/local/php/etc/php-fpm.conf
+# cp /usr/local/php/etc/php-fpm.d/www.conf.default /usr/local/php/etc/php-fpm.d/www.conf
+
+# vim /usr/local/php/php.ini
+...
+error_log = /php_errors.log
+cgi.fix_pathinfo=0
+date.timezone = PRC
+...</code></pre><p>配置service</p>
+<pre><code># cp /root/src/php-7.2.7/sapi/fpm/init.d.php-fpm /etc/init.d/php-fpm
+# chmod +x /etc/init.d/php-fpm
+# service enable php-fpm.service
+# service php-fpm restart</code></pre><h2 id="五、其他软件"><a href="#五、其他软件" class="headerlink" title="五、其他软件"></a>五、其他软件</h2><h3 id="5-1-Redis"><a href="#5-1-Redis" class="headerlink" title="5.1 Redis"></a>5.1 Redis</h3><p>安装</p>
+<pre><code># wget http://download.redis.io/releases/redis-3.2.5.tar.gz
+# tar zvxf redis-3.2.5.tar.gz
+# cd redis-3.2.5
+# make
+# make install
+# redis-server --version</code></pre><p>修改配置</p>
+<pre><code># mkdir -p /usr/local/redis
+# cp /root/src/redis-3.2.5/redis.conf /usr/local/redis
+# vim /usr/local/redis/redis.conf
+...
+bind 0.0.0.0
+daemonize yes
+dir /usr/local/redis
+...</code></pre><p>启动<br><code># redis-server /usr/local/redis/redis.conf</code></p>
+<p>开机启动</p>
+<pre><code>vim /etc/rc.local
+...
+/usr/local/bin/redis-server /usr/local/redis/redis.conf
+...</code></pre><h3 id="5-2-MongoDB"><a href="#5-2-MongoDB" class="headerlink" title="5.2 MongoDB"></a>5.2 MongoDB</h3><p>安装</p>
+<pre><code># apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 0C49F3730359A14518585931BC711F9BA15703C6 
+##官方
+echo &quot;deb [ arch=amd64,arm64 ] http://repo.mongodb.org/apt/ubuntu xenial/mongodb-org/3.4 multiverse&quot; | sudo tee /etc/apt/sources.list.d/mongodb-org-3.4.list
+##阿里云
+$ echo &quot;deb [ arch=amd64,arm64 ]https://mirrors.aliyun.com/mongodb/apt/ubuntuxenial/mongodb-org/3.4 multiverse&quot; | sudo tee /etc/apt/sources.list.d/mongodb-org-3.4.list
+$ apt update
+$ apt install -y mongodb-org
+$ systemctl enable mongod.service</code></pre><p>启动Mongo并设置root密码</p>
+<pre><code># service mongod start
+mongo
+&gt; use admin
+&gt; db.createUser({user:&#39;root&#39;,pwd:&#39;root&#39;,roles:[&#39;root&#39;]})</code></pre><p>修改配置</p>
+<pre><code># vim /etc/mongod.conf
+...
+net:
+  port: 27017
+  bindIp: 0.0.0.0
+
+security:
+  authorization: enabled
+  transitionToAuth: false
+...</code></pre><p>重启服务：<code>#service mongod restart</code></p>
+<p>参考：<a href="https://docs.mongodb.com/master/tutorial/install-mongodb-on-ubuntu/" target="_blank" rel="noopener">https://docs.mongodb.com/master/tutorial/install-mongodb-on-ubuntu/</a></p>
+<h2 id="六、扩展"><a href="#六、扩展" class="headerlink" title="六、扩展"></a>六、扩展</h2><h3 id="6-1-Redis"><a href="#6-1-Redis" class="headerlink" title="6.1 Redis"></a>6.1 Redis</h3><pre><code># wget http://pecl.php.net/get/redis-3.1.1.tgz
+# tar zvxf redis-3.1.1.tgz
+# cd redis-3.1.1
+# phpize
+# ./configure --with-php-config=/usr/local/php/bin/php-config
+# make
+# make test
+# make install
+# echo &#39;extension=redis.so&#39; &gt;&gt; /usr/local/php/php.ini</code></pre><h3 id="6-2-MongoDB"><a href="#6-2-MongoDB" class="headerlink" title="6.2 MongoDB"></a>6.2 MongoDB</h3><pre><code># wget http://pecl.php.net/get/mongodb-1.3.0.tgz
+# tar zvxf mongodb-1.3.0.tgz
+# cd mongodb-1.3.0
+# phpize
+# ./configure --with-php-config=/usr/local/php/bin/php-config
+# make
+# make install
+# echo &#39;extension=mongodb.so&#39; &gt;&gt; /usr/local/php/php.ini</code></pre><h3 id="6-3-Swoole"><a href="#6-3-Swoole" class="headerlink" title="6.3 Swoole"></a>6.3 Swoole</h3><pre><code># wget http://pecl.php.net/get/swoole-1.9.16.tgz
+# phpize
+# ./configure
+# make
+# make install
+# echo &#39;extension=swoole.so&#39; &gt;&gt; /usr/local/php/php.ini</code></pre><h3 id="6-4-xhprof"><a href="#6-4-xhprof" class="headerlink" title="6.4 xhprof"></a>6.4 xhprof</h3><pre><code># git clone https://github.com/longxinH/xhprof
+# cd xhprof/extension
+# phpize
+# ./configure --with-php-config=/usr/local/php/bin/php-config
+# make
+# make install
+# echo &#39;&#39; &gt;&gt; /usr/local/php/php.ini
+# echo &#39;[xhprof]&#39; &gt;&gt; /usr/local/php/php.ini
+# echo &#39;extension=xhprof.so;&#39; &gt;&gt; /usr/local/php/php.ini
+# echo &#39;xhprof.output_dir=/tmp/xhprof&#39; &gt;&gt; /usr/local/php/php.ini
+# echo &#39;&#39; &gt;&gt; /usr/local/php/php.ini</code></pre><p>拷贝目录下文件到项目中<br><code># cp -r xhprof_* /data/projects/xhprof/7/</code></p>
+<p>要使用xhprof的示例代码：</p>
+<pre><code>xhprof_enable();
+
+//CODE
+
+$xhprof_data = xhprof_disable();
+include_once &#39;/data/projects/xhprof/7/xhprof_lib/utils/xhprof_lib.php&#39;;
+include_once &#39;/data/projects/xhprof/7/xhprof_lib/utils/xhprof_runs.php&#39;;
+$xhprof_runs = new XHProfRuns_Default();
+$run_id = $xhprof_runs-&gt;save_run($xhprof_data, &quot;xhprof_test&quot;);
+echo &#39;http://local.xhprof.com/index.php?run=&#39; . $run_id . &#39;&amp;source=xhprof_test&#39;;</code></pre><p>查看图表时报错：failed to execute cmd: “ dot -Tpng”. stderr: sh: 1: dot: not found ‘<br><code>apt install -y graphviz graphviz-dev</code></p>
+<h3 id="6-5-Composer"><a href="#6-5-Composer" class="headerlink" title="6.5 Composer"></a>6.5 Composer</h3><pre><code># php -r &quot;copy(&#39;https://install.phpcomposer.com/installer&#39;, &#39;composer-setup.php&#39;);&quot;
+# php composer-setup.php
+# php -r &quot;unlink(&#39;composer-setup.php&#39;);&quot;
+# mv composer.phar /usr/bin/composer
+# chmod +x /usr/bin/composer
+# composer config -g repo.packagist composer https://packagist.phpcomposer.com</code></pre><h2 id="七、Docker"><a href="#七、Docker" class="headerlink" title="七、Docker"></a>七、Docker</h2><pre><code># apt-get update
+# apt-get install apt-transport-https ca-certificates
+
+## 增加新的GPG 密钥
+# apt-key adv --keyserver hkp://p80.pool.sks-keyservers.net:80 --recv-keys 58118E89F3A912897C070ADBF76221572C52609D
+# echo &#39;deb http://apt.dockerproject.org/repo ubuntu-xenial main&#39; &gt; /etc/apt/sources.list.d/docker.list
+
+## 重新执行更新操作，并删除老的repo
+# apt update
+# apt purge lxc-docker
+
+## 查看是否有正确的可用版本
+# apt-cache policy docker-engine
+# apt upgrade
+
+## 从14.04版本以上开始docker推荐安装linux-image-extra
+# apt-get install linux-image-extra-$(uname -r)
+
+# apt install docker-engine
+# service docker start</code></pre><p>配置 docker 加速器，镜像地址可自行网上获取，我这里是从阿里云镜像服务获取的。</p>
+<pre><code># vim /etc/docker/daemon.json
+...
+{
+  &quot;registry-mirrors&quot;: [&quot;https://xxxxxx.mirror.aliyuncs.com&quot;]
+}</code></pre><p>安装 docker-compose</p>
+<pre><code># apt install python-pip
+# mkdir -p /root/.pip/
+# vim /root/.pip/pip.conf
+...
+[global]
+index-url = http://mirrors.aliyun.com/pypi/simple/
+trusted-host = mirrors.aliyun.com
+...
+
+# pip install --upgrade pip
+# pip install docker-compose</code></pre><p>本地登录镜像服务，比如阿里云<br><code>docker login --username=ruesin@xxxxxx.com registry.cn-beijing.aliyuncs.com</code></p>
+<h2 id="八、其他"><a href="#八、其他" class="headerlink" title="八、其他"></a>八、其他</h2><h2 id="8-1-修改命令行样式"><a href="#8-1-修改命令行样式" class="headerlink" title="8.1 修改命令行样式"></a>8.1 修改命令行样式</h2><pre><code>vim  ~/.bashrc
+...
+function git-branch-name {
+  #git symbolic-ref HEAD 2&gt;/dev/null | cut -d&quot;/&quot; -f 3
+  git symbolic-ref HEAD 2&gt;/dev/null | sed &#39;s#refs/heads/##g&#39;
+}
+function git-branch-prompt {
+  local branch=`git-branch-name`
+  if [ $branch ]; then printf &quot; [%s]&quot; $branch; fi
+}
+PS1=&quot;\[\e[31m\]\$ \[\e[m\]\[\033[01;34m\]\w\[\033[00m\]\[\033[0;32m\]\$(git-branch-prompt)\[\033[0m\]\n\[\e[31m\]\$ \[\e[m\]&quot;
+...
+source ~/.bashrc</code></pre>
+        </article>
+    </div>
+</section>
+
+    </main>
+    <footer class="footer"> Copyright 2013 - 2019 Ruesin. All Rights Reserved </footer>
+  </body>
+</html>

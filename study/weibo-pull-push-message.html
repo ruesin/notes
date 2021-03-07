@@ -1,0 +1,86 @@
+<!DOCTYPE HTML>
+<html>
+  <head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+    <title>微博推、拉结合按时间分区消息提醒模式的学习-信口开河</title>
+    <meta name="keywords" content="Ruesin,信口开河">
+    <meta name="description" content="至于你信不信，反正我是信了。">
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+  <body>
+    
+<header class="header">
+    <nav class="navbar">
+        <ul>
+            
+            <li><a class="header-nav-link" href="/">首页</a></li>
+            
+            <li><a class="header-nav-link" href="/categories">分类</a></li>
+            
+            <li><a class="header-nav-link" href="/archives">归档</a></li>
+            
+            <li><a class="header-nav-link" href="/tags">标签</a></li>
+            
+            <li><a class="header-nav-link" href="https://github.com/ruesin/notes">Github</a></li>
+            
+            <li><a class="header-nav-link" href="https://ruesin.github.io/php-tree">PHP技能树</a></li>
+            
+            <li><a class="header-nav-link" href="https://www.xinkoukaihe.com">老博客</a></li>
+            
+        </ul>
+    </nav>
+</header>
+    <main class="main">
+      <!-- 内容页 -->
+<section class="section">
+    <div class="post-container">
+        <div class="post-header">
+                <h1>微博推、拉结合按时间分区消息提醒模式的学习</h1>
+                <!-- <div class="post-meta">2015-04-29</div> -->
+        </div>
+        <article class="post-content">
+            <p>网站的消息提醒一般都是采用的是刷新页面，查询消息表，看是否有新信息。或者使用ajax轮询、长轮询等。再就是近年兴起的Html5中的websocket。</p>
+<p>我们本文只是肤浅的猜测学习一下新浪微博发送和新微博大概模式。至于架构和服务器的负载等，持续学习中。</p>
+<p>本文只是大概学习了下，文章最后的参考文档讲的更详尽细致，一味的复制过来，显得啰嗦又反感，倒不如留给有心人士继续研究。</p>
+<p>前段时间看微博的新微博提醒，firebug中看不到请求，未读微博就过来了。然后用网络抓包看了下，其实页面打开之后有定时请求 <a href="http://rm.api.weibo.com/remind/unread\_count.json" target="_blank" rel="noopener">http://rm.api.weibo.com/remind/unread\_count.json</a> 这个地址。</p>
+<p><a href="http://rm.api.weibo.com/2/remind/push\_count.json?trim\_null=1&amp;with\_settings=1&amp;exclude\_attitude=1&amp;with\_common\_cmt=1&amp;with\_comment\_attitude=1&amp;with\_common\_attitude=1&amp;with\_moments=1&amp;with\_dm\_unread=1&amp;msgbox=true&amp;with\_page\_group=1&amp;with\_chat\_group=1&amp;with\_chat\_group\_notice=1&amp;\_pid=1&amp;count=3&amp;source=3818214747&amp;status\_type=0&amp;callback=STK\_143020455030438" target="_blank" rel="noopener">http://rm.api.weibo.com/2/remind/push\_count.json?trim\_null=1&amp;with\_settings=1&amp;exclude\_attitude=1&amp;with\_common\_cmt=1&amp;with\_comment\_attitude=1&amp;with\_common\_attitude=1&amp;with\_moments=1&amp;with\_dm\_unread=1&amp;msgbox=true&amp;with\_page\_group=1&amp;with\_chat\_group=1&amp;with\_chat\_group\_notice=1&amp;\_pid=1&amp;count=3&amp;source=3818214747&amp;status\_type=0&amp;callback=STK\_143020455030438</a></p>
+<p>查到的大部分文章说的理论都是：推和拉（按时间分区）的结合。</p>
+<p><strong>推的模式</strong>：</p>
+<p>一条微博在我们系统发布之后，我们把它放在一个消息队列里面，然后会有一个消息队列的处理程序把它拿过来，处理以后放到db里面，然后程序会将数据传送到后台引擎里，引擎会把用户的关系拿过来，然后按照用户关系马上推送给他相应的粉丝。</p>
+<p>假设一个用户A，有100W粉丝，A发表一条微博，这就触发了一个事件，服务将这条微博消息的时间点攒成100W份多播分发下去，放入缓存。</p>
+<p><strong>拉的模式</strong>：</p>
+<p>某粉丝B登录微博首页后，会将所有关注好友的微博拉出来。定时请求缓存，按时间偏移查出未读微博数量。</p>
+<p>简单看这个例子应该很容易理解，可能也觉得恍然大悟，我们继续看文档，会发现这些仅仅算是最初版本的设计，后续各版本的更新都做了很大的优化，而我们本文只对着发送和接受微博学习，其他的稍后研究。</p>
+<p>以下仅仅是我将原文中的自己理解的点转化成自己的话来复述了一遍。</p>
+<p><strong>一、投递模式的优化</strong></p>
+<p>推模式的优化，主要做的就是把粉丝分为的有效用户和无效用户。及时推送的只是给有效用户，另外不在线或者近期不活跃的用户，就不做推送，而是等他们登录或活跃后采取拉的模式拉去信息。</p>
+<p><strong>二、数据的拆分</strong></p>
+<p>微博用户及数据量那么大，你很难想像将数据集中在一起会产生怎样的结果。我们平时做产品，数据拆分大部分都是按照主键ID进行拆的。而微博新鲜事等都是按照时间来分的，所以微博的数据也是按照时间进行拆分的。比如说一个月发一张表，这样就解决了我们不同时间的惟度可以有不同的拆分方式。</p>
+<p>然后我们惯用的招数也就是将内容和索引拆表。拆分之后的内容就简单的变成了一种key-value的方式，key-value是最容易扩展的一种数据。</p>
+<p>最后在原来索引的基础上，做了二次索引，数据还是按照时间拆分，但是会把每个月记录的偏移记下来，也就是每月发表了多少条微博。这样可以为前端分页很快的定位那一页发表的是哪些内容。</p>
+<p><strong>三、异步处理</strong></p>
+<p>微博发表是一个非常繁重的操作，它要入库、统计索引、进入后台，如果我们要把所有的索引都做完用户需要前端等待很长的时间，如果有一个环节失败的话，用户得到的提示是发表失败，但是入库已经成功。所以我们做了一个异步操作，就是发表成功我们就提示成功， 后台任务继续进行投递，消息队列里慢慢完成。</p>
+<p><strong>四、未读微博计数器的改进</strong></p>
+<p>新版我们改成了基于偏移的思路，就是一个用户他原来读的一个ID比如说是10000，系统最系的ID是10002的话，我们和清楚他有两条未读。原来的版本是采用绝对技术的，这个用户有几条未读都是用一个存储结构的话，就容易产生一致性的问题，采用这种偏 移的技术基本上不会出错。</p>
+<p>用户的关注关系，我们改成一个多惟度的索引结构， 性能极大的提高。</p>
+<p>微博第一版解决发布规模问题，第二版是解决数据规模的问题，第三版是解决服务化的问题。</p>
+<p>参考文档：</p>
+<p><a href="http://www.cnblogs.com/sunli/archive/2010/08/24/twitter_feeds_push_pull.html" target="_blank" rel="noopener">微博feed系统的push和pull模式和时间分区拉模式架构探</a></p>
+<p><a href="http://tech.sina.com.cn/i/2010-11-16/14434871585.shtml" target="_blank" rel="noopener">新浪微博技术架构分析</a></p>
+<h1 id="对于一个具有几百万粉丝的用户，数据如何实时投递到所有用户"><a href="#对于一个具有几百万粉丝的用户，数据如何实时投递到所有用户" class="headerlink" title="对于一个具有几百万粉丝的用户，数据如何实时投递到所有用户?  "></a><a href="#">对于一个具有几百万粉丝的用户，数据如何实时投递到所有用户?</a>  </h1><p>对于一个具有几百万粉丝的用户，数据如何实时投递到所有用户?</p>
+<p>使用TCP/IP中的多播协议吧，这样一个具有几百万粉丝的用户只用向路由器发送一份数据，路由器自动向几百万粉丝转发(路由器发送给与之相连的路由器和主机)。不用发送几百万份数据，大大提供系统性能和网络吞吐率。<br>背景：<br>1.IP多播技术被广泛应用在网络视音频广播、网络视频会议、远程实时教育等方面。<br>2.多播不同于广播，广播协议向每个用户发送数据报，而多播指向加入多播组的用户发送报文。降低了网络流量，使得不想接收数据的用户不用处理。<br>3. 各个路由器使用IGMP(Internet群组管理)协议得知被连入主机是否加入多播组，从而对发送源的数据进行转发。各个路由器之间的组播通知也相同。 由于IGMP也有对流量的优化算法，比如路由器只用关心与之相连的主机或路由器是否还有一个在多播组里。这样路由器发送IGMP查询后，只要一台与之相连 的主机发送应答后，其它的主机不用再发送，大大减小了网络流量。<br>4.对于路由器，我们也无需担心其是否承受得起几百万粉丝的流量，因为路由器只担当转发的工作。且有大量的科学家在研究路由算法，基于多播的路由算法也层出不穷，比如DVMRP、MOSPF、PIM-DM、CBT、PIM-SM等。<br>使用：<br>1.发送者和接收者都必须加入一个相同的多播组(且端口号相同)，多播组地址 为：224.0.0.0到239.255.255.255。其中224.0.0.0到224.0.0.255属于局域网中使用的组播地址。 224.0.1.0到238.255.255.255属于全球范围使用的组播地址。239.0.0.0到239.255.255.255是组织内部申请的 组播地址。而多播地址又分为永久地址和临时地址。永久地址是为特殊用途而保留的。比如，244.0.0.0根本没有使用（也不能使用），244.0.0.1代表子网内的所有系统（主机），而244.0.0.2代表子网内的所有路由器。<br>2.通过设置socket套接字中的选项加入多播组。具体参考一个完整的多播实现代码：<a href="http://www.zxbc.cn/a/vcnet/20100520155129.html" target="_blank" rel="noopener">http://www.zxbc.cn/a/vcnet/20100520155129.html</a> 看完这个，你会加强对组播的印象。</p>
+<p>新浪微博的feed系统是采用push和pull模式和时间分区拉模式，对于活跃的用户采用push，不活跃的用户采用pull，数据的存储、缓存是冷热分离，推荐可以看一下这篇文章：微博feed系统的push和pull模式和时间分区拉模式架构探</p>
+<p>分布式 push pull 结合<br>在实际开发过程中, 实时性能保证在10秒内完成即可接受<br>后台维护脚本, 不间断的获取用户动作, 采用分布式处理方案</p>
+<p>如此大规模的应用，如果真正对所有用户实时推送显得难度很大，看到其他人的回答，发现的确有很多我没接触的方法，特别是多播组的概念。<br>硬件的话肯定要采用分布式的，不然无论是磁盘i/o还是网络i/o都是跟不上的，至于实时，我感觉对于很多用户来说，几十秒都算的上实时了。<br>我 看到的最好的模型也是push&amp;pull，这个设计上和ucenter有些相似，ucenter会主动下发一部分比较要紧的通知给客户端网站，但 是有些不太重要的请求可以等待客户端来查询。唯一不同的是，大型应用可以慢慢地push数据，直到完成，ucenter有时候会等待客户端发起请求才开始 处理。<br>对于这么大用户的项目，表示非常好奇，大部分程序员是无缘接触到的，更别说整体设计了</p>
+
+        </article>
+    </div>
+</section>
+
+    </main>
+    <footer class="footer"> Copyright 2013 - 2019 Ruesin. All Rights Reserved </footer>
+  </body>
+</html>

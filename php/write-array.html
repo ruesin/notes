@@ -1,0 +1,63 @@
+<!DOCTYPE HTML>
+<html>
+  <head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+    <title>PHP把数组写入文件-信口开河</title>
+    <meta name="keywords" content="Ruesin,信口开河">
+    <meta name="description" content="至于你信不信，反正我是信了。">
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+  <body>
+    
+<header class="header">
+    <nav class="navbar">
+        <ul>
+            
+            <li><a class="header-nav-link" href="/">首页</a></li>
+            
+            <li><a class="header-nav-link" href="/categories">分类</a></li>
+            
+            <li><a class="header-nav-link" href="/archives">归档</a></li>
+            
+            <li><a class="header-nav-link" href="/tags">标签</a></li>
+            
+            <li><a class="header-nav-link" href="https://github.com/ruesin/notes">Github</a></li>
+            
+            <li><a class="header-nav-link" href="https://ruesin.github.io/php-tree">PHP技能树</a></li>
+            
+            <li><a class="header-nav-link" href="https://www.xinkoukaihe.com">老博客</a></li>
+            
+        </ul>
+    </nav>
+</header>
+    <main class="main">
+      <!-- 内容页 -->
+<section class="section">
+    <div class="post-container">
+        <div class="post-header">
+                <h1>PHP把数组写入文件</h1>
+                <!-- <div class="post-meta">2014-08-08</div> -->
+        </div>
+        <article class="post-content">
+            <p>项目测试人员反映，线上数据编辑不修改，保存之后数据丢失？！翻查代码后，没有找到问题所在，决定把编辑加载时的数据写入到一个文件中，保存时把提交的数据写入到一个新的文件中，然后进行对比。可能有人会问为什么不直接对比数据库呢？因为测试人员反映的是有时报错。。。我只能把所有的都点一遍进行测试了。好吧，废话不多说，进入正题。</p>
+<p>把数据写入txt文件自然是用file_put_contents()了，我刚开始是直接取数组$data，然后写入文件，可是写入后才发现，txt里是一堆的ArrayArrayArrayArrayArray。。。</p>
+<p>好吧，既然不能直接的把数组作为第二个参数使用，那我就写入字符串得了。<br>而写入字符串我想到了两个办法</p>
+<p>1、序列化数组<br>想到数组转字符串首先想到的肯定是序列化存储，反序列化读取呀。</p>
+<pre><code>$write = serialize($write);
+file_put_contents($_SERVER[&#39;DOCUMENT_ROOT&#39;].&quot;/test/{$id}_old.txt&quot;, $write);</code></pre><p>2.使用var_export()将数组转成字符串再保存</p>
+<p>var_export() — 输出或返回一个变量的字符串表示</p>
+<pre><code>$write = var_export($write, true);
+file_put_contents($_SERVER[&#39;DOCUMENT_ROOT&#39;].&quot;/test/{$id}_old.txt&quot;, $write);</code></pre><p>因为我要直接明了的肉眼对比保存前后的数据差异，所以选择了第二种方式。</p>
+<p>另外，看手册上说file_put_contents()是可以保存数组的啊，但是为什么我保存数据不对？实在查不到原因。。。</p>
+
+        </article>
+    </div>
+</section>
+
+    </main>
+    <footer class="footer"> Copyright 2013 - 2019 Ruesin. All Rights Reserved </footer>
+  </body>
+</html>

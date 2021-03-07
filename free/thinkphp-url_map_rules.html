@@ -1,0 +1,131 @@
+<!DOCTYPE HTML>
+<html>
+  <head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+    <title>Thinkphp 3.3 URL映射/解析、路由规则二开-信口开河</title>
+    <meta name="keywords" content="Ruesin,信口开河">
+    <meta name="description" content="至于你信不信，反正我是信了。">
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+  <body>
+    
+<header class="header">
+    <nav class="navbar">
+        <ul>
+            
+            <li><a class="header-nav-link" href="/">首页</a></li>
+            
+            <li><a class="header-nav-link" href="/categories">分类</a></li>
+            
+            <li><a class="header-nav-link" href="/archives">归档</a></li>
+            
+            <li><a class="header-nav-link" href="/tags">标签</a></li>
+            
+            <li><a class="header-nav-link" href="https://github.com/ruesin/notes">Github</a></li>
+            
+            <li><a class="header-nav-link" href="https://ruesin.github.io/php-tree">PHP技能树</a></li>
+            
+            <li><a class="header-nav-link" href="https://www.xinkoukaihe.com">老博客</a></li>
+            
+        </ul>
+    </nav>
+</header>
+    <main class="main">
+      <!-- 内容页 -->
+<section class="section">
+    <div class="post-container">
+        <div class="post-header">
+                <h1>Thinkphp 3.3 URL映射/解析、路由规则二开</h1>
+                <!-- <div class="post-meta">2015-01-13</div> -->
+        </div>
+        <article class="post-content">
+            <p>上一次看 Thinkphp 好像两年前，也只是大概涉猎了下，以为不过算是把模版引擎做了下封装，更便捷使用而已。最近没事想再看看，发现已经3.3了，看了下开发文档，越看越觉得架构做得不错，特别是我比较在意的运行速度的优化上。当真是喜爱至极，于是决定做一两个简单操作熟悉一下机制。</p>
+<p>首先，我也就这两天大概看了下，还未深入研究，也许我所谓的二开的东西属于画蛇添足，或者本来就有而我没发现，如有误导，还望见谅。</p>
+<p>另外，我二开的这些东西只是用作我自己当下的需求使用，或许不太适合做产品或者广泛使用，请谨而慎之。</p>
+<p>就我个人而言，是很排斥将代码结构暴漏出来的，而 Thinkphp 偏偏是这样做的，从模块到控制器到方法，一层层的显示出来了。</p>
+<p>虽然自带的有 路由规则、URL映射、模块映射、控制器映射、方法映射，但是在我看来，还是不能够满足我的需求，而我偏偏又爱上了它，不舍得抛弃它。那就把它变成我自己的“西施”吧。</p>
+<p>需求：</p>
+<p>1、访问自定义的url可以默认映射出指定的方法。</p>
+<p>Want： 访问 local.ruesin.com/article/3.html 实际上访问的是 local.ruesin.com/home/index/article/id/3.html</p>
+<p>可以通过URL映射实现，但是这只适合普通的方法映射，好像写上参数的话就不能用了，使用路由规则和URL映射是无法实现我的需求的。</p>
+<p>2、模版页中使用 U 方法输出链接地址，是自定义的URL。</p>
+<p>Want： &lt;{:U(‘article’,”,false)}&gt; 输出的是 article 而不是映射的 home/index/article 。</p>
+<p>后来考虑这个问题，或许不用二开，直接写URL也是可以的。本来想的是不做二开，硬写URL得了，可是又手痒顺手改了下。。。</p>
+<p>做所有二开之前，要先了解配置文件的各种路由和映射，下面便是我的配置文件。</p>
+<pre><code>// 默认路由规则 针对模块//路由跳转的,输入前面的自动跳后面
+&#39;URL_ROUTE_RULES&#39;       =&gt;  array(
+        //&#39;cs/:id&#39;=&gt;&#39;/home/index/cs/:1&#39;,
+), 
+// URL映射定义规则//访问前面地址,映射后面的内容
+&#39;URL_MAP_RULES&#39;         =&gt;  array(
+        &#39;article&#39; =&gt; &#39;hm/in/article&#39;,
+        &#39;index&#39; =&gt; &#39;hm/in/index&#39;
+),
+&#39;URL_MODULE_MAP&#39; =&gt; array(
+        &#39;hm&#39;  =&gt; &#39;home&#39;,
+),
+&#39;URL_CONTROLLER_MAP&#39; =&gt; array(
+        &#39;in&#39; =&gt; &#39;index&#39;,
+),
+&#39;URL_ACTION_MAP&#39;=&gt;array(
+        &#39;index&#39;    =&gt;  array(
+                &#39;ts&#39;  =&gt; &#39;test&#39;,
+        ),
+),</code></pre><p>我是不想让我访问页面的URL中出现参数的键名的，那样的话参数一多URL层级就显得很深，那么在模版解析的时候就也不应该出现，但是正常的解析是必须写键名的，我便去改了下 function.php 下的 U 方法。</p>
+<p><code>&lt;{:U(&#39;article&#39;,&#39;www/wamp/curl-130&#39;,true,true)}&gt;</code>解析参数：先把参数改成斜杠分割形式的，这样就能区别正常的参数还是二开的参数，再加个必须是在PATHINFO模式下才会生效，把各个参数写入数组，伪参数。</p>
+<pre><code>if(is_string($vars)) { // aaa=1&amp;bbb=2 转换成数组
+    parse_str($vars,$vars);
+    //== Ruesin -Bgn
+    if(C(&#39;URL_MODEL&#39;) != 0 &amp;&amp; count($vars) == 1 &amp;&amp; reset($vars) == null ){
+        $key = key($vars);
+        if(false !== strpos($key,&#39;/&#39;)){
+            $vars = explode(&#39;/&#39;,$key);
+        }else{
+            $vars[1] = $key;
+        }
+        $cstUrl = 1; //标识二开过
+    }
+    //== Ruesin -End
+}elseif(!is_array($vars)){
+    $vars = array();
+}</code></pre><p>PATHINFO模式下封URL：去查URL映射，看是否有映射，有的话就直接显示映射的地址，而不是完整地址。</p>
+<pre><code>//== Ruesin -Bgn
+$maps = C(&#39;URL_MAP_RULES&#39;);
+if( $maps &amp;&amp; array_search(strtolower($url),$maps)) {
+    $url = array_search(strtolower($url),$maps);
+}
+$url =  __APP__.&#39;/&#39;.$url;
+//== Ruesin -End</code></pre><p>封参数：判断URL是否被二开，有的话就不封键名进URL</p>
+<pre><code>//== Ruesin -Bgn
+if($cstUrl){
+    if(&#39;&#39; !== trim($val))   $url .=  $depr . urlencode($val);
+}else{
+    if(&#39;&#39; !== trim($val))   $url .= $depr . $var . $depr . urlencode($val);
+}
+//== Ruesin -End</code></pre><p>最后页面输出的URL为： <a href="http://local.ruesin.com/article/www/wamp/curl-130.html" target="_blank" rel="noopener">http://local.ruesin.com/article/www/wamp/curl-130.html</a></p>
+<p>看着URL输出改完了，之前测试的直接访问 <a href="http://local.ruesin.com/article" target="_blank" rel="noopener">http://local.ruesin.com/article</a> 输出的也是 <a href="http://local.ruesin.com/hm/in/article" target="_blank" rel="noopener">http://local.ruesin.com/hm/in/article</a> 的数据。</p>
+<p>那是不是就万事大吉了呢？赶紧点击链接进入看一下，FUCK！ :(</p>
+<p><a href="/images/2015/01/no_module.jpg"><img src="/images/2015/01/no_module.jpg" alt="no_module"></a></p>
+<p>原来是URL解析的时候，还是按照完整路径走的，要先匹配模块，然后控制器方法，程序把article当成模块了，当然会出错。</p>
+<p>那咋弄呢？难道必须要完整路径吗？既然我们能把URL地址改掉，那么我们在他解析内容之前，再给他改回去不就行了吗？不带参数能解析就能说明这块。</p>
+<p>打开 /ThinkPHP/Library/Think/Dispatcher.class.php 在 dispatch() 方法的所有操作之前加上</p>
+<pre><code>//== Ruesin -Bgn
+$maps = C(&#39;URL_MAP_RULES&#39;);
+$mods = explode(&#39;/&#39;, $_SERVER[&#39;PATH_INFO&#39;]);
+if( $maps &amp;&amp; $maps[strtolower($mods[1])] ) {
+    $mods[1] = $maps[strtolower($mods[1])];
+    $_SERVER[&#39;PATH_INFO&#39;] = implode(&#39;/&#39;, $mods);
+}
+//== Ruesin -End</code></pre><p>再次尝试访问，可以了吧。。。。</p>
+
+        </article>
+    </div>
+</section>
+
+    </main>
+    <footer class="footer"> Copyright 2013 - 2019 Ruesin. All Rights Reserved </footer>
+  </body>
+</html>

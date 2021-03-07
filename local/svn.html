@@ -1,0 +1,61 @@
+<!DOCTYPE HTML>
+<html>
+  <head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+    <title>没有SVN服务器怎样实现版本控制呢？-信口开河</title>
+    <meta name="keywords" content="Ruesin,信口开河">
+    <meta name="description" content="至于你信不信，反正我是信了。">
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+  <body>
+    
+<header class="header">
+    <nav class="navbar">
+        <ul>
+            
+            <li><a class="header-nav-link" href="/">首页</a></li>
+            
+            <li><a class="header-nav-link" href="/categories">分类</a></li>
+            
+            <li><a class="header-nav-link" href="/archives">归档</a></li>
+            
+            <li><a class="header-nav-link" href="/tags">标签</a></li>
+            
+            <li><a class="header-nav-link" href="https://github.com/ruesin/notes">Github</a></li>
+            
+            <li><a class="header-nav-link" href="https://ruesin.github.io/php-tree">PHP技能树</a></li>
+            
+            <li><a class="header-nav-link" href="https://www.xinkoukaihe.com">老博客</a></li>
+            
+        </ul>
+    </nav>
+</header>
+    <main class="main">
+      <!-- 内容页 -->
+<section class="section">
+    <div class="post-container">
+        <div class="post-header">
+                <h1>没有SVN服务器怎样实现版本控制呢？</h1>
+                <!-- <div class="post-meta">2014-11-08</div> -->
+        </div>
+        <article class="post-content">
+            <p>对于几个人写的小项目，又或者是自己想随便写点代码，想随时随地的工作并且进行版本控制，如果没有SVN服务器，我们要怎么做呢？总不能拿优盘copy吧？</p>
+<p>一般我们首先想到的就是知名的Github，但是虽然github提供了免费的托管，但是使用者必须开源，这对于我们来说，特别是一些没有完成亦或是不想开源的项目来说的确是不太容易接受。</p>
+<p>那么，到底有没有其他办法呢？可不可以用国内的阿里云、百度云等等各种云呢？当然是可以的，而且不仅可以做到代码不开源，而且还可以不让外人访问项目，这个不是本文的重点。</p>
+<p>除了上面两种，还有另外一种办法，既能保证闭源，又有比较高的安全性和保密性。那就是借用云盘的服务，实现的版本控制。前面也说到了，是比较高的安全性和保密性，各位自行斟酌。</p>
+<p>1.先装一款云盘客户端软件，比如360云盘、百度云盘，然后设置同步目录、自动同步什么的。没有什么特别交代的。</p>
+<p>2.在云盘本地同步目录创建svn项目文件夹，并设置svn reporsitory。然后就会在“svn”目录中生成有关的SVN仓库的管理文件，此时SVN服务已经可以使用<br><a href="/images/2014/11/svn1.jpg"><img src="/images/2014/11/svn1.jpg" alt="svn1"></a><br>3.创建项目文件夹，然后在此文件夹中进行checkout，svn地址对应之前创建的svn管理文件夹，即可将项目文件夹与svn服务绑定，然后我们就可以在此项目中尽情的编码，提交更改等等操作。<br><a href="/images/2014/11/svn2.jpg"><img src="/images/2014/11/svn2.jpg" alt="svn2"></a><br>4.在其他电脑中进行svn同步也很简单，下载网盘，登录，同步svn repository文件夹，checkout。</p>
+<p>原理其实很简单，就是本地创建SVN仓库管理文件，上传到云盘，注意这些管理文件的数量名称等是不会改变的，只会随着上传文件的增加而变大，所以，云盘每次同步都会把改变的文件覆盖掉，然后我们本地项目提交到SVN的时候，只是改变了管理文件的大小。</p>
+<p>流程是：本地项目→管理文件→云盘。</p>
+
+        </article>
+    </div>
+</section>
+
+    </main>
+    <footer class="footer"> Copyright 2013 - 2019 Ruesin. All Rights Reserved </footer>
+  </body>
+</html>

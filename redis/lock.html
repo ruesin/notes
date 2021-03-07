@@ -1,0 +1,155 @@
+<!DOCTYPE HTML>
+<html>
+  <head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+    <title>Redis 锁-信口开河</title>
+    <meta name="keywords" content="Ruesin,信口开河">
+    <meta name="description" content="至于你信不信，反正我是信了。">
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+  <body>
+    
+<header class="header">
+    <nav class="navbar">
+        <ul>
+            
+            <li><a class="header-nav-link" href="/">首页</a></li>
+            
+            <li><a class="header-nav-link" href="/categories">分类</a></li>
+            
+            <li><a class="header-nav-link" href="/archives">归档</a></li>
+            
+            <li><a class="header-nav-link" href="/tags">标签</a></li>
+            
+            <li><a class="header-nav-link" href="https://github.com/ruesin/notes">Github</a></li>
+            
+            <li><a class="header-nav-link" href="https://ruesin.github.io/php-tree">PHP技能树</a></li>
+            
+            <li><a class="header-nav-link" href="https://www.xinkoukaihe.com">老博客</a></li>
+            
+        </ul>
+    </nav>
+</header>
+    <main class="main">
+      <!-- 内容页 -->
+<section class="section">
+    <div class="post-container">
+        <div class="post-header">
+                <h1>Redis 锁</h1>
+                <!-- <div class="post-meta">2019-07-26</div> -->
+        </div>
+        <article class="post-content">
+            <p>系统中经常需要有加锁的场景，单进程可以在各语言内加锁，单节点可以有文件锁等。业内有很多可以实现锁的方案，Redis也有很多实现。</p>
+<h3 id="INCR"><a href="#INCR" class="headerlink" title="INCR"></a>INCR</h3><p><code>Incr</code>命令将<code>key</code>中储存的数字值增一，返回执行 INCR 命令之后 key 的值。</p>
+<p>如果<code>key</code>不存在，那么<code>key</code>的值会先被初始化为<code>0</code>，然后再执行<code>INCR</code>操作。</p>
+<p>如果值包含错误的类型，或字符串类型的值不能表示为数字，那么返回一个错误。</p>
+<p>如果返回值等于1，表示抢锁成功；如果返回的数大于1，表示抢锁失败。</p>
+<pre><code>127.0.0.1:6379&gt; INCR sin
+(integer) 1
+127.0.0.1:6379&gt; INCR sin
+(integer) 2
+127.0.0.1:6379&gt; get sin
+&quot;2&quot;
+127.0.0.1:6379&gt; EXPIRE sin 1
+(integer) 1
+127.0.0.1:6379&gt; get sin
+(nil)</code></pre><h3 id="SETNX"><a href="#SETNX" class="headerlink" title="SETNX"></a>SETNX</h3><p><code>Setnx</code>（SET if Not eXists）命令在指定的<code>key</code>不存在时，为<code>key</code>设置指定的值。</p>
+<p>设置成功，返回<code>1</code>，表示抢锁成功。 设置失败，返回<code>0</code>，表示抢锁失败。</p>
+<pre><code>127.0.0.1:6379&gt; SETNX sin 1
+(integer) 1
+127.0.0.1:6379&gt; SETNX sin 1
+(integer) 0
+127.0.0.1:6379&gt; GET sin
+&quot;1&quot;
+127.0.0.1:6379&gt; EXPIRE sin 1
+(integer) 1
+127.0.0.1:6379&gt; GET sin
+(nil)</code></pre><p>上面两种方法都需要设置<code>key</code>过期，以期望达到锁过期时自动释放，也可以在业务处理完成后主动<code>DEL</code>释放。但是如果业务逻辑意外退出了，导致创建了锁但没有删除，那么这个锁将一直存在，造成死锁。</p>
+<p>但是借助<code>Expire</code>来设置就不是原子性操作了，也可以通过事务来确保原子性，但是还是有些问题，比如<code>Redis</code>事务中前一个命令执行失败了，并不会退出当前事务，而是继续执行。</p>
+<h3 id="SET"><a href="#SET" class="headerlink" title="SET"></a>SET</h3><p><code>SET</code>命令用于设置给定<code>key</code>的值。如果<code>key</code>已经存储其他值，<code>SET</code>就覆写旧值，且无视类型。</p>
+<p>从Redis 2.6.12开始<code>SET key value [EX seconds] [PX milliseconds] [NX|XX]</code>支持一组修改其行为的选项：</p>
+<ul>
+<li>EX：设置指定的过期时间，以秒为单位</li>
+<li>PX：设置指定的过期时间，以毫秒为单位</li>
+<li>NX：仅设置key（如果key尚不存在）</li>
+<li>XX：仅设置key（如果key已存在）</li>
+</ul>
+<blockquote>
+<p>由于SET命令选项可以替换<code>SETNX</code>、<code>SETEX</code>、<code>PSETEX</code>，因此在将来的Redis版本中，这三个命令可能会被弃用并最终被删除。</p>
+</blockquote>
+<p>在 Redis 2.6.12 以前版本，SET命令总是返回<code>OK</code>。</p>
+<p>从 Redis 2.6.12 版本开始，SET在设置操作成功完成时，才返回<code>OK</code>。如果指定了<code>NX</code>或<code>XX</code>选项但未满足条件，则返回<code>Nil</code>。</p>
+<p>注意：不鼓励使用以下模式来支持Redlock算法，该算法实现起来稍微复杂一些，但提供了更好的保证并且具有容错能力。</p>
+<p>命令<code>SET resource-name anystring NX EX max-lock-time</code>是一种使用Redis实现锁的简单方法。</p>
+<p>如果上面的命令返回OK，则客户端可以获取锁（如果命令返回Nil，则在一段时间后重试）。</p>
+<p>可以使用<code>DEL</code>删除锁，或者等到过期时间后，自动释放锁。</p>
+<p>但是假设我么设置的过期时间为10秒，而由于意外原因导致业务逻辑10秒内未处理完毕，这时锁已经自动释放了；如果此时其他进程又重新设置了此锁，此时调用了<code>DEL</code>命令删除锁；那么就可能会存在第三个进程又抢到锁，导致两个进程同时处理一个逻辑。</p>
+<p>为了使系统更加健壮，可以修改解锁模式，<code>value</code>不要设置为固定字符串，而是设置一个不可猜测的大型随机字符串。</p>
+<p>主动释放锁时不直接使用<code>DEL</code>释放锁，而是发送一个脚本，该脚本仅在值匹配时才删除密钥。</p>
+<p>即增加对<code>value</code>的检查，只解除自己加的锁。类似于<code>CAS</code>，不过是<code>compare-and-delete</code>。</p>
+<p><code>SET resource-name token-value NX PX 10000</code></p>
+<pre><code class="lua">if redis.call(&quot;get&quot;,KEYS[1]) == ARGV[1]
+then
+    return redis.call(&quot;del&quot;,KEYS[1])
+else
+    return 0
+end</code></pre>
+<p>应使用<code>EVAL &quot;...script...&quot; 1 resource-name token-value</code>调用该<code>lua</code>脚本。</p>
+<p>PHP示例：</p>
+<pre><code class="php">$key = &#39;ruesin_lock&#39;;
+$value = &#39;ruesin_&#39; . mt_rand(100000, 999999);
+$isLock = Redis::set($key, $value, &#39;ex&#39;, 10, &#39;nx&#39;);
+if ($isLock) {
+    if (Redis::get($key) == $value) {  //防止提前过期，误删其它请求创建的锁
+        // code...
+        Redis::del($key);
+    }
+}</code></pre>
+<h3 id="RedLock"><a href="#RedLock" class="headerlink" title="RedLock"></a>RedLock</h3><p><code>Redis</code>官方提出了一种权威的基于<code>Redis</code>实现分布式锁的方式名<a href="https://redis.io/topics/distlock" target="_blank" rel="noopener">Redlock</a>，此种方式比原先的单节点的方法更安全。</p>
+<p>它可以保证以下特性：</p>
+<ul>
+<li>安全特性：互斥访问，即永远只有一个<code>client</code>能拿到锁</li>
+<li>避免死锁：最终<code>client</code>都可能拿到锁，不会出现死锁的情况，即使原本锁住某资源的<code>client crash</code>了或者出现了网络分区</li>
+<li>容错性：只要大部分<code>Redis</code>节点存活就可以正常提供服务</li>
+</ul>
+<p>大概实现原理和<code>SET</code>相似，可以直接使用官方提供写好的代码：</p>
+<pre><code class="php"># 创建一个锁管理器
+$servers = [
+    [&#39;127.0.0.1&#39;, 6379, 0.01],
+    [&#39;127.0.0.1&#39;, 6389, 0.01],
+    [&#39;127.0.0.1&#39;, 6399, 0.01],
+];
+
+$redLock = new RedLock($servers);
+
+//获取锁 
+// my_resource_name 是尝试锁定的唯一标识符，1000是有效时间的毫秒数
+$lock = $redLock-&gt;lock(&#39;my_resource_name&#39;, 1000);
+//Array
+//(
+//    [validity] =&gt; 9897.3020019531
+//    [resource] =&gt; my_resource_name
+//    [token] =&gt; 53771bfa1e775
+//)
+
+// 释放锁
+$redLock-&gt;unlock($lock)</code></pre>
+<p>如果未获取锁定，则返回值为false，否则返回表示锁定的数组：</p>
+<ul>
+<li>validity：一个整数，表示锁有效的毫秒数</li>
+<li>resource：用户指定的锁定资源的名称</li>
+<li>token：一个随机令牌值，用于安全地回收锁</li>
+</ul>
+<p>可以设置重试次数（默认为3）和用于获取锁定的重试延迟（默认为200毫秒），实际上，是在<code>$retryDelay / 2</code>毫秒和指定的<code>$retryDelay</code>值之间随机选择重试延迟。</p>
+
+        </article>
+    </div>
+</section>
+
+    </main>
+    <footer class="footer"> Copyright 2013 - 2019 Ruesin. All Rights Reserved </footer>
+  </body>
+</html>

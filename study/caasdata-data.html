@@ -1,0 +1,90 @@
+<!DOCTYPE HTML>
+<html>
+  <head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+    <title>【卡思数据】数据架构迭代-信口开河</title>
+    <meta name="keywords" content="Ruesin,信口开河">
+    <meta name="description" content="至于你信不信，反正我是信了。">
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+  <body>
+    
+<header class="header">
+    <nav class="navbar">
+        <ul>
+            
+            <li><a class="header-nav-link" href="/">首页</a></li>
+            
+            <li><a class="header-nav-link" href="/categories">分类</a></li>
+            
+            <li><a class="header-nav-link" href="/archives">归档</a></li>
+            
+            <li><a class="header-nav-link" href="/tags">标签</a></li>
+            
+            <li><a class="header-nav-link" href="https://github.com/ruesin/notes">Github</a></li>
+            
+            <li><a class="header-nav-link" href="https://ruesin.github.io/php-tree">PHP技能树</a></li>
+            
+            <li><a class="header-nav-link" href="https://www.xinkoukaihe.com">老博客</a></li>
+            
+        </ul>
+    </nav>
+</header>
+    <main class="main">
+      <!-- 内容页 -->
+<section class="section">
+    <div class="post-container">
+        <div class="post-header">
+                <h1>【卡思数据】数据架构迭代</h1>
+                <!-- <div class="post-meta">2019-01-04</div> -->
+        </div>
+        <article class="post-content">
+            <p>扩展：<a href="https://mp.weixin.qq.com/s/pLrf34k1nTehLoDxZ2Vvfw" target="_blank" rel="noopener">PingCAP案例</a></p>
+<h2 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h2><p>卡思数据所有产品都是基于大数据分析计算的，分布式的服务架构业务场景下，各服务节点的压力是可控的，压力集中在了数据库处。</p>
+<p>除了日常业务产生的数据外，每天会有5到6小时的时间用来处理基础数据，数据量大且时间短。</p>
+<p>两年多时间，卡思数据的数据架构经过了多次调整，目前稳定使用的 MySQL + TiDB。</p>
+<h2 id="1-MySQL-MongoDB"><a href="#1-MySQL-MongoDB" class="headerlink" title="1. MySQL + MongoDB"></a>1. MySQL + MongoDB</h2><p>MySQL存储业务相关数据，因为直接面向用户，对事务的要求很高，但在海量数据存储方面偏弱，单表数据超过1000万或10G性能就会急剧下降。</p>
+<p>MongoDB存储最小单元的基础数据，MongoDB有更好的写入性能，保证了每天数据爬取存储速度；对海量数据存储上，MongoDB内建的分片特性，可以很好的适应大数据量的需求。</p>
+<p><img src="/images/20190104/0f88383a7f55cabf0bb94af236c9ed7a.png" alt="mysql-mongodb.png"></p>
+<p>但是随着业务发展，暴露出一些问题：</p>
+<ul>
+<li>MySQL 在海量数据下，查询性能难以满足要求，并且扩展能力偏弱，如果采用分库分表方式，需要对业务代码进行全面改造，成本非常高。</li>
+<li>MongoDB 对复杂事务的不支持，前台业务需要用到数据元及连表查询，当前架构支持的不太友好。</li>
+</ul>
+<h2 id="2-HybirdDB-for-MySQL"><a href="#2-HybirdDB-for-MySQL" class="headerlink" title="2. HybirdDB for MySQL"></a>2. HybirdDB for MySQL</h2><p>阿里云数据库（PetaData）是同时支持海量数据在线事务（OLTP）和在线分析（OLAP）的HTAP关系型数据库，实际上是基于 MySQL Sharding 的数据架构。</p>
+<p>因为在不少业务场景存在需要即时计算的情况，所以直接将原有的MySQL与MongoDB进行了合并，使用了阿里云的PetaData，以下为PetaData的架构图：</p>
+<p><img src="/images/20190104/ee8697f98c0d9e0fe3a6e4215da13443.png" alt="petadata.png"></p>
+<ul>
+<li>链路引擎：用户的SQL经过链路引擎解析、优化之后，生成相应的执行计划：对于简单查询场景，直接将计算推至存储节点执行，若查询较复杂则直接由计算引擎生成相关计划树并执行。</li>
+<li>计算引擎：在存储引擎执行之前，生成SQL执行计划，下推至存储引擎；聚合从各存储节点查询返回数据。</li>
+<li>存储引擎：存储实际数据库的数据，分布式节点、分区存储，通过hash key进行分区。</li>
+</ul>
+<p>存储引擎的架构如下：</p>
+<p><img src="/images/20190104/8c56f2e450c4e8afc36a21cdcd88f095.png" alt="petadata-storage.png"></p>
+<p>试用一段时间后，出现以下问题：</p>
+<ul>
+<li>复杂语句导致计算引擎拥堵，阻塞所有业务；</li>
+<li>连表查询性能低下，网络IO出现瓶颈；</li>
+<li>DDL较慢，下发至节点后易出现死锁。</li>
+</ul>
+<h2 id="3-MySQL-TiDB"><a href="#3-MySQL-TiDB" class="headerlink" title="3. MySQL + TiDB"></a>3. MySQL + TiDB</h2><p>在经历了痛苦的传统解决方案的折磨后，在做了大量调研及对比后，卡思数据最终选择了TiDB作为数据仓库及业务数据库。</p>
+<p>TiDB结合了传统的 RDBMS 和 NoSQL 的最佳特性，高度兼容MySQL，支持无限的水平扩展，具备强一致性和高可用性，100% 支持标准的 ACID 事务。</p>
+<p>卡思数据目前配置了两个32C64G的TiDB、三个4C16G的PD、4个32C128G的TiKV。数据量大约 60亿条、4TB左右，每天新增数据量大约5000万，单节点QPS峰值为3000左右。</p>
+<p>由于数据迁移不能影响线上业务，卡思数据在保持继续使用原数据架构的前提下，使用mydumper、loader进行数据迁移，并在首轮数据迁移完成后使用 syncer 进行增量同步。</p>
+<p>卡思数据部署了数据库监控系统 (Prometheus/Grafana)来实时监控服务状态，可以非常清晰的查看服务器问题。</p>
+<p>由于TiDB对MySQL的高度兼容性，在数据迁移完成后，几乎没有对代码做任何修改，平滑实现了无侵入升级。</p>
+<p>目前卡思数据的架构如下：</p>
+<p><img src="/images/20190104/94e426f2700c3c42183e8f8244415a9b.png" alt="tidb.png"></p>
+<h2 id="未来"><a href="#未来" class="headerlink" title="未来"></a>未来</h2><p>目前的卡思数据已全部迁移至TiDB，但对TiDB的使用还局限在数据存储上，可以说只实现了OLTP。卡思数据准备深入了解OLAP，将目前一些需要实时返回的复杂查询、数据分析下推至TiDB。既减少计算服务的复杂性，又可增加数据的准确性。</p>
+
+        </article>
+    </div>
+</section>
+
+    </main>
+    <footer class="footer"> Copyright 2013 - 2019 Ruesin. All Rights Reserved </footer>
+  </body>
+</html>

@@ -1,0 +1,89 @@
+<!DOCTYPE HTML>
+<html>
+  <head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+    <title>ecmall数据库操作方法add，判断是否插入成功。-信口开河</title>
+    <meta name="keywords" content="Ruesin,信口开河">
+    <meta name="description" content="至于你信不信，反正我是信了。">
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+  <body>
+    
+<header class="header">
+    <nav class="navbar">
+        <ul>
+            
+            <li><a class="header-nav-link" href="/">首页</a></li>
+            
+            <li><a class="header-nav-link" href="/categories">分类</a></li>
+            
+            <li><a class="header-nav-link" href="/archives">归档</a></li>
+            
+            <li><a class="header-nav-link" href="/tags">标签</a></li>
+            
+            <li><a class="header-nav-link" href="https://github.com/ruesin/notes">Github</a></li>
+            
+            <li><a class="header-nav-link" href="https://ruesin.github.io/php-tree">PHP技能树</a></li>
+            
+            <li><a class="header-nav-link" href="https://www.xinkoukaihe.com">老博客</a></li>
+            
+        </ul>
+    </nav>
+</header>
+    <main class="main">
+      <!-- 内容页 -->
+<section class="section">
+    <div class="post-container">
+        <div class="post-header">
+                <h1>ecmall数据库操作方法add，判断是否插入成功。</h1>
+                <!-- <div class="post-meta">2014-07-08</div> -->
+        </div>
+        <article class="post-content">
+            <p>使用ecmall的add时，可能会碰到这种情况，调用model类的add方法插入数据时，如果插入的数据的主键不是自增ID，就会返回空值，无法判断是否插入成功。<br>刚开始时没注意，还以为是因为我的sql语句写错了呢，后来翻了下base.model类下的add方法，才发现是本身的BUG，不得不再说一遍，ecmall代码写的实在是太…..</p>
+<pre><code>function add($data, $compatible = false){
+    if (empty($data) || !$this-&gt;dataEnough($data))    {
+        return false;
+    }
+    $data = $this-&gt;_valid($data);
+    if (!$data){
+        $this-&gt;_error(&#39;no_valid_data&#39;);
+        return false;
+    }
+    $insert_info = $this-&gt;_getInsertInfo($data);
+    $mode = $compatible ? &#39;REPLACE&#39; : &#39;INSERT&#39;;
+    $this-&gt;db-&gt;query(&quot;{$mode} INTO {$this-&gt;table}{$insert_info[&#39;fields&#39;]} VALUES{$insert_info[&#39;values&#39;]}&quot;);
+    $insert_id = $this-&gt;db-&gt;insert_id();
+    if ($insert_id){
+        if ($insert_info[&#39;length&#39;] &gt; 1){
+            for ($i = $insert_id; $i </code></pre><p>这里用的是php内置函数mysql_insert_id()返回了上一步 INSERT 操作产生的 ID。如果上一查询没有产生 AUTO_INCREMENT 的 ID，则 mysql_insert_id() 返回 0。<br>而我们很多时候会需要用到判断插入是否成功，所以我把原方法改了下，先判断是否有插入ID，如果没有，就判断是否执行成功，成功就返回true。</p>
+<pre><code>function add($data, $compatible = false){
+    if (empty($data) || !$this-&gt;dataEnough($data)){
+        return false;
+    }
+    $data = $this-&gt;_valid($data);
+    if (!$data){
+        $this-&gt;_error(&#39;no_valid_data&#39;);
+        return false;
+    }
+    $insert_info = $this-&gt;_getInsertInfo($data);
+    $mode = $compatible ? &#39;REPLACE&#39; : &#39;INSERT&#39;;
+
+    $query=$this-&gt;db-&gt;query(&quot;{$mode} INTO {$this-&gt;table}{$insert_info[&#39;fields&#39;]} VALUES{$insert_info[&#39;values&#39;]}&quot;);
+
+    $insert_id = $this-&gt;db-&gt;insert_id();
+
+    if ($insert_id){
+        if ($insert_info[&#39;length&#39;] &gt; 1){
+            for ($i = $insert_id; $i </code></pre><p>以上仅仅是为了满足本项目中开发而更改的，算是为各位看官起一个抛砖引玉的作用吧。</p>
+
+        </article>
+    </div>
+</section>
+
+    </main>
+    <footer class="footer"> Copyright 2013 - 2019 Ruesin. All Rights Reserved </footer>
+  </body>
+</html>

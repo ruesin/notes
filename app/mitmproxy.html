@@ -1,0 +1,136 @@
+<!DOCTYPE HTML>
+<html>
+  <head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+    <title>mitmproxy使用记录-信口开河</title>
+    <meta name="keywords" content="Ruesin,信口开河">
+    <meta name="description" content="至于你信不信，反正我是信了。">
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+  <body>
+    
+<header class="header">
+    <nav class="navbar">
+        <ul>
+            
+            <li><a class="header-nav-link" href="/">首页</a></li>
+            
+            <li><a class="header-nav-link" href="/categories">分类</a></li>
+            
+            <li><a class="header-nav-link" href="/archives">归档</a></li>
+            
+            <li><a class="header-nav-link" href="/tags">标签</a></li>
+            
+            <li><a class="header-nav-link" href="https://github.com/ruesin/notes">Github</a></li>
+            
+            <li><a class="header-nav-link" href="https://ruesin.github.io/php-tree">PHP技能树</a></li>
+            
+            <li><a class="header-nav-link" href="https://www.xinkoukaihe.com">老博客</a></li>
+            
+        </ul>
+    </nav>
+</header>
+    <main class="main">
+      <!-- 内容页 -->
+<section class="section">
+    <div class="post-container">
+        <div class="post-header">
+                <h1>mitmproxy使用记录</h1>
+                <!-- <div class="post-meta">2021-03-04</div> -->
+        </div>
+        <article class="post-content">
+            <h2 id="介绍"><a href="#介绍" class="headerlink" title="介绍"></a>介绍</h2><p>中间人代理（man-in-the-middle proxy）是一个免费开源的交互式HTTP/HTTPS代理，可以用来拦截、修改、保存HTTP/HTTPS请求，类似Fiddler、Charles。</p>
+<p>可以根据提供的Python API进行编程，通过Python代码来控制请求和响应、篡改转发返回以及请求体。</p>
+<p>比如仿真爬虫，利用手机模拟器、无头浏览器来抓取数据，mitmpproxy 作为代理可以拦截、存储爬虫获取到的数据、修改数据调整爬虫的行为。</p>
+<p><a href="https://www.mitmproxy.org/" target="_blank" rel="noopener">https://www.mitmproxy.org/</a></p>
+<p><a href="https://github.com/mitmproxy/mitmproxy" target="_blank" rel="noopener">https://github.com/mitmproxy/mitmproxy</a></p>
+<blockquote>
+<p>也可了解基于Nodejs开发的anyproxy，功能与mitmproxy基本一致，使用js定制脚本。</p>
+</blockquote>
+<h2 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h2><pre><code>$ sudo pip3 install mitmproxy</code></pre><p><a href="https://docs.mitmproxy.org/stable/overview-installation/" target="_blank" rel="noopener">https://docs.mitmproxy.org/stable/overview-installation/</a></p>
+<h2 id="启动"><a href="#启动" class="headerlink" title="启动"></a>启动</h2><p>安装完成后，将拥有三个命令：mitmproxy、mitmdump、mitmweb，三个命令的功能一致，只是交互界面、应用场景不同。</p>
+<ul>
+<li>mitmproxy：命令行界面，可以看到实时请求，通过命令过滤、查看、导出、编辑请求，<code>mitmproxy -p 18888</code>。</li>
+<li>mitmweb：浏览器界面，<code>mitmweb -p 18888</code>。</li>
+<li>mitmdump：加载自定义脚本，通过脚本控制、拦截、修改请求和响应，<code>mitmdump -s test.py -p 18888 -w request.log -q</code>。</li>
+</ul>
+<h2 id="证书"><a href="#证书" class="headerlink" title="证书"></a>证书</h2><p>生成证书，并信任该证书。</p>
+<pre><code>$ mitmdump
+$ ls ~/.mitmproxy</code></pre><p><strong>IOS</strong>或<strong>安卓7以下</strong>的手机：</p>
+<p>手机设置代理为当前IP &amp; Port，浏览器访问<code>mitm.it</code>下载对应系统的证书，安装证书并信任，即可拦截HTTPS请求。</p>
+<p><strong>安卓7以上</strong>的手机：</p>
+<p>1、查看证书的hash值，第一行的8个16进制即是，比如：c8750f0d</p>
+<pre><code>$ openssl x509 -inform PEM -subject_hash_old -in  ~/.mitmproxy/mitmproxy-ca-cert.pem</code></pre><p>2、将证书拷贝为<code>c8750f0d.0</code>（后缀是数字0）</p>
+<pre><code>$ cp ~/.mitmproxy/mitmproxy-ca-cert.pem c8750f0d.0</code></pre><p>3、将证书文件写入到Android的系统证书列表，由于是访问了system目录，需要root并挂载</p>
+<pre><code>$ adb root 
+$ adb remount
+$ adb shell rm -f /system/etc/security/cacerts/c8750f0d.0
+$ adb push c8750f0d.0 /system/etc/security/cacerts/c8750f0d.0
+$ pause</code></pre><p>或者</p>
+<pre><code>$ adb push c8750f0d.0 /system_root/system/etc/security/cacerts</code></pre><p>如果无法<code>$ adb root</code>，可以先推送到临时目录，然后su之后cp到系统目录。有些小米手机操作system目录，可以进入re模式写命令拷贝。</p>
+<p>有些APP就算有证书也无法抓到HTTPS包（根本看不到请求），比如快手，是因为没有使用常规的http协议，可以结合VPN工具转发，比如<a href="./drony.md">Drony</a>。</p>
+<blockquote>
+<p>为了方便团队协作，建议使用统一的证书，将<code>~/.mitmproxy</code>及<code>c8750f0d.0</code>分发给团队成员，电脑和手机使用同一个证书。</p>
+</blockquote>
+<h2 id="快捷键"><a href="#快捷键" class="headerlink" title="快捷键"></a>快捷键</h2><p>通常使用mitmproxy模式分析请求，下面是一些常用快捷键，也可以使用<code>?</code>查看更多帮助。</p>
+<ul>
+<li>?：查看帮助</li>
+<li>q：退出当前界面：从详情页退出到列表页、从列表页退出程序。</li>
+<li>z：清屏，清理掉列表页所有请求。</li>
+<li>d：删除当前选中的请求。</li>
+<li>f：过滤列表中的请求，比如<code>f</code>之后，输入<code>user_info</code>，就只能看到URL包含<code>user_info</code>的请求了。</li>
+<li>e：在列表中，导出当前选中的请求，通常导出curl以分析请求信息。</li>
+<li>r：重新发送请求。</li>
+<li>w：将当前列表中的所有请求，保存到一个文件中。比如，抓完一个APP（如抖音）的从安装到初始化完成的生命周期后，清理掉无用的请求，将列表保存下来，在需要的时候使用<code>L</code>加载。</li>
+<li>L：加载之前报错是请求列表。</li>
+<li>enter：进入当前选中请求的详情。</li>
+<li>tab：切到下一个tab。</li>
+<li>b：在详情页可以保存响应结果（response.body）、请求信息（request.body）等</li>
+</ul>
+<h2 id="脚本"><a href="#脚本" class="headerlink" title="脚本"></a>脚本</h2><p>本地调试完成后，通过脚本实现自动化处理是更常用的场景。</p>
+<pre><code>$ mitmdump -s test.py -p 18888 -w request.log -q</code></pre><ul>
+<li>-s：指定脚本文件</li>
+<li>-p：指定监听端口</li>
+<li>-w：将输出存储到指定文件</li>
+<li>-q：网络请求不再默认输出，可以自行输出</li>
+</ul>
+<p>在脚本中按规则写回调函数，即可在对应场景自动执行。但不太建议生产环境中如此使用，不够灵活。</p>
+<pre><code class="python">import mitmproxy.http
+from mitmproxy import ctx
+
+def request(flow: mitmproxy.http.HTTPFlow):
+    ctx.log.info(&quot;请求地址是：&quot; + flow.request.url)</code></pre>
+<p>更常用的是通过<code>addons</code>数组加载多个类实例，类的方法实现了<code>mitmproxy</code>的事件，会在事件发生时调用对应的方法。</p>
+<pre><code class="python">import mitmproxy.http
+
+class Aweme:
+    def __init__(self):
+        pass
+
+    def request(self, flow: mitmproxy.http.HTTPFlow):
+        print(&quot;抖音地址：&quot; + flow.request.url)
+
+class GifMaker:
+    def __init__(self):
+        pass
+
+    def request(self, flow: mitmproxy.http.HTTPFlow):
+        print(&quot;快手地址：&quot; + flow.request.url)
+
+addons = [
+    Aweme(),
+    GifMaker()
+]</code></pre>
+<p>可参考<a href="https://github.com/metmit/easyMitmproxy" target="_blank" rel="noopener">easyMitmproxy</a>。</p>
+
+        </article>
+    </div>
+</section>
+
+    </main>
+    <footer class="footer"> Copyright 2013 - 2019 Ruesin. All Rights Reserved </footer>
+  </body>
+</html>

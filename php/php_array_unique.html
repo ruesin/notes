@@ -1,0 +1,137 @@
+<!DOCTYPE HTML>
+<html>
+  <head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+    <title>PHP一维数组/二维数组去重-信口开河</title>
+    <meta name="keywords" content="Ruesin,信口开河">
+    <meta name="description" content="至于你信不信，反正我是信了。">
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+  <body>
+    
+<header class="header">
+    <nav class="navbar">
+        <ul>
+            
+            <li><a class="header-nav-link" href="/">首页</a></li>
+            
+            <li><a class="header-nav-link" href="/categories">分类</a></li>
+            
+            <li><a class="header-nav-link" href="/archives">归档</a></li>
+            
+            <li><a class="header-nav-link" href="/tags">标签</a></li>
+            
+            <li><a class="header-nav-link" href="https://github.com/ruesin/notes">Github</a></li>
+            
+            <li><a class="header-nav-link" href="https://ruesin.github.io/php-tree">PHP技能树</a></li>
+            
+            <li><a class="header-nav-link" href="https://www.xinkoukaihe.com">老博客</a></li>
+            
+        </ul>
+    </nav>
+</header>
+    <main class="main">
+      <!-- 内容页 -->
+<section class="section">
+    <div class="post-container">
+        <div class="post-header">
+                <h1>PHP一维数组/二维数组去重</h1>
+                <!-- <div class="post-meta">2014-03-07</div> -->
+        </div>
+        <article class="post-content">
+            <p>PHP数组去除重复项,有个内置函数array_unique ()。</p>
+<p>array_unique() 函数移除数组中的重复的值，并返回结果数组。array_unique()先将值作为字符串排序，然后对每个值只保留第一个遇到的键名，接着忽略所有后面的键名。也就是说，当几个数组元素的值相等时，只保留第一个元素，其他的元素被删除。被返回的数组将保持第一个数组元素的键类型。即，返回的数组中键名不变。</p>
+<p>一维数组去除重复项：</p>
+<pre><code>$arr=array(&quot;Ruesin&quot;,&quot;PHP&quot;,&quot;nginx&quot;,&quot;Mysql&quot;,&quot;apache&quot;,&quot;Ruesin&quot;);
+$row=array_unique($arr);
+print_r($row);</code></pre><p>二维数组去除重复项：</p>
+<p>但是php的 array_unique函数只适用于一维数组，对多维数组并不适用，所以需要我们自己写自定义函数。</p>
+<p>本来对二维数组去重，考虑的不过是二维数组中的一维数组不能重复，后来在网上看到了另外一种需求：一维数组中某一键名的值不能重复。</p>
+<p>1.因为某一键名的值不能重复</p>
+<pre><code>function sin_unique($arr, $key){
+    $tmp_arr = array();
+    foreach($arr as $k =&gt; $v){
+        if(in_array($v[$key], $tmp_arr)){
+            unset($arr[$k]);
+        }else{
+            $tmp_arr[] = $v[$key];
+        }
+    }
+    return $arr;
+}
+
+$arr = array(
+    &#39;one&#39;=&gt;array(&#39;id&#39; =&gt; 111, &#39;name&#39; =&gt; &#39;张三&#39;),
+    &#39;tow&#39;=&gt;array(&#39;id&#39; =&gt; 111, &#39;name&#39; =&gt; &#39;李四&#39;),
+    &#39;three&#39;=&gt;array(&#39;id&#39; =&gt; 222, &#39;name&#39; =&gt; &#39;王五&#39;),
+    &#39;four&#39;=&gt;array(&#39;id&#39; =&gt; 111, &#39;name&#39; =&gt; &#39;李四&#39;),
+    &#39;five&#39;=&gt;array(&#39;id&#39; =&gt; 333, &#39;name&#39; =&gt; &#39;赵六&#39;)
+);
+$row=sin_unique($arr, &#39;id&#39;);
+print_r($row);</code></pre><p>2.二维数组中的一维数组不能重复</p>
+<pre><code>function unique_arr($array2D){
+    foreach ($array2D as $v){
+        $v = implode(&quot;,&quot;,$v); //降维
+        $temp[] = $v;
+    }
+    $temp = array_unique($temp); //去重
+    foreach ($temp as $k =&gt; $v){
+        $temp[$k] = explode(&quot;,&quot;,$v); //重组
+    }
+    return $temp;
+}
+
+$arr = array(
+    &#39;one&#39;=&gt;array(&#39;id&#39; =&gt; 111, &#39;name&#39; =&gt; &#39;张三&#39;),
+    &#39;tow&#39;=&gt;array(&#39;id&#39; =&gt; 111, &#39;name&#39; =&gt; &#39;李四&#39;),
+    &#39;three&#39;=&gt;array(&#39;id&#39; =&gt; 222, &#39;name&#39; =&gt; &#39;王五&#39;),
+    &#39;four&#39;=&gt;array(&#39;id&#39; =&gt; 111, &#39;name&#39; =&gt; &#39;李四&#39;),
+    &#39;five&#39;=&gt;array(&#39;id&#39; =&gt; 333, &#39;name&#39; =&gt; &#39;赵六&#39;)
+);
+$row=unique_arr($arr);
+print_r($row);</code></pre><p>完善一下</p>
+<pre><code>function unique_arr($array2D,$stkeep=false,$ndformat=true){
+    // 判断是否保留一级数组键 (一级数组键可以为非数字)
+    if($stkeep) $stArr = array_keys($array2D);
+    // 判断是否保留二级数组键 (所有二级数组键必须相同)
+    if($ndformat) $ndArr = array_keys(end($array2D));
+    foreach ($array2D as $v){//降维
+        $v = implode(&quot;,&quot;,$v);
+        $temp[] = $v;
+    }
+    $temp = array_unique($temp);//去重
+    foreach ($temp as $k =&gt; $v){//重组
+        if($stkeep){
+            $k = $stArr[$k];
+        }
+        if($ndformat){
+            $tempArr = explode(&quot;,&quot;,$v);
+            foreach($tempArr as $ndkey =&gt; $ndval){
+                $output[$k][$ndArr[$ndkey]] = $ndval;
+            }
+        }else{
+            $output[$k] = explode(&quot;,&quot;,$v);
+        }
+    }
+    return $output;
+}
+
+$array2D = array(
+    &#39;one&#39;=&gt;array(&#39;id&#39;=&gt;&#39;1111&#39;,&#39;date&#39;=&gt;&#39;2222&#39;),
+    &#39;tow&#39;=&gt;array(&#39;id&#39;=&gt;&#39;1111&#39;,&#39;date&#39;=&gt;&#39;2222&#39;),
+    &#39;three&#39;=&gt;array(&#39;id&#39;=&gt;&#39;2222&#39;,&#39;date&#39;=&gt;&#39;3333&#39;)
+);
+
+print_r($array2D);
+print_r(unique_arr($array2D,true));</code></pre>
+        </article>
+    </div>
+</section>
+
+    </main>
+    <footer class="footer"> Copyright 2013 - 2019 Ruesin. All Rights Reserved </footer>
+  </body>
+</html>

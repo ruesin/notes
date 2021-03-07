@@ -1,0 +1,102 @@
+<!DOCTYPE HTML>
+<html>
+  <head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+    <title>用Smarty模板引擎生成静态HTML文件-信口开河</title>
+    <meta name="keywords" content="Ruesin,信口开河">
+    <meta name="description" content="至于你信不信，反正我是信了。">
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+  <body>
+    
+<header class="header">
+    <nav class="navbar">
+        <ul>
+            
+            <li><a class="header-nav-link" href="/">首页</a></li>
+            
+            <li><a class="header-nav-link" href="/categories">分类</a></li>
+            
+            <li><a class="header-nav-link" href="/archives">归档</a></li>
+            
+            <li><a class="header-nav-link" href="/tags">标签</a></li>
+            
+            <li><a class="header-nav-link" href="https://github.com/ruesin/notes">Github</a></li>
+            
+            <li><a class="header-nav-link" href="https://ruesin.github.io/php-tree">PHP技能树</a></li>
+            
+            <li><a class="header-nav-link" href="https://www.xinkoukaihe.com">老博客</a></li>
+            
+        </ul>
+    </nav>
+</header>
+    <main class="main">
+      <!-- 内容页 -->
+<section class="section">
+    <div class="post-container">
+        <div class="post-header">
+                <h1>用Smarty模板引擎生成静态HTML文件</h1>
+                <!-- <div class="post-meta">2013-12-31</div> -->
+        </div>
+        <article class="post-content">
+            <p>用php生成静态文件说白了无非就是打开、读取、写入、关闭而已，方法无外乎fopen()，fwrite()，fclose()。<br>说来简单、但用在smarty上着实费了我一番功夫、最后还是看手册和网上查才弄好。最后有附smarty手册中对fetch介绍。</p>
+<p>用smarty生成静态html文件的关键就是用缓存技术，开启缓冲，用display或者fetch向前台传输数据的时候其实不会显示在view上，打开文件，读取文件，写入文件。<br>前者是在display()的同时，增加了ob_start()、ob_get_contents()和fwrite() 函数。<br>后者则是利用smarty模板引擎的fetch函数，由smarty解析的文件保存到一个变量，然后再读写文件。</p>
+<pre><code>/*
+* Created on 2013-3-20
+* Author: Ruesin
+* Link: http://old.ruesin.com
+*/
+
+include(&quot;./smarty/Smarty.class.php&quot;);
+//include(&quot;./configs/config.php&quot;);
+$smarty=new Smarty();
+$smarty-&gt;template_dir=&#39;./templates/&#39;;
+$smarty-&gt;compile_dir=&#39;./templates_c/&#39;;
+$smarty-&gt;config_dir=&#39;./configs/&#39;;
+$smarty-&gt;cache_dir=&#39;./cache/&#39;;
+$smarty-&gt;caching = false;
+$smarty-&gt;left_delimiter=&#39;&lt;{&#39;;
+$smarty-&gt;right_delimiter=&#39;}&gt;&#39;;
+
+//用for循环测试批量生成文件
+for($i=1;$i&lt;3;$i++){
+$smarty-&gt;assign(&#39;recont&#39;,&#39;小信吃了&#39;.$i.&#39;个苹果&#39;);
+//$smarty-&gt;display(&#39;index.html&#39;);    //我们的目的不是显示、而是获取他的内容
+//第一种方法
+$content=$smarty-&gt;fetch(&quot;index.htm&quot;);//获得smarty替换后的模板文件内容、也就是display之后的index.php的内容
+$fopen=fopen(&quot;lgx_&quot;.$i.&quot;.html&quot;,&quot;w&quot;);
+fwrite($fopen,$content);
+fclose($fopen);
+//第二种方法
+/*
+ob_start();//开启缓冲区
+$smarty-&gt;display(&#39;index.htm&#39;);
+$content=ob_get_contents();//获得缓冲区内容
+$fopen=fopen(&quot;lgx_&quot;.$i.&quot;.html&quot;,&quot;w&quot;);
+fwrite($fopen,$content);
+fclose($fopen);
+ob_end_claen();//关闭缓冲区
+*/
+}
+/*
+//创建html文件的函数
+function mkhtml($file,$content){
+$fopen = fopen($file,&#39;w&#39;);
+fwrite($fopen,$content);
+fclose($fopen);
+}
+*/</code></pre><p>上面两种方式是常用的：<br>第一种用display方法，用$content = ob_get_contents();得到向前台输出的内容。<br>第二种用fetch直接获取向前台输出的内容（两种都不会真正地展示出来中）。</p>
+<p>附：smarty手册中对fetch的介绍</p>
+<p><a href="/images/2014/04/smarty_fetch.png"><img src="/images/2014/04/smarty_fetch.png" alt="smarty_fetch"></a></p>
+
+        </article>
+    </div>
+</section>
+
+    </main>
+    <footer class="footer"> Copyright 2013 - 2019 Ruesin. All Rights Reserved </footer>
+  </body>
+</html>

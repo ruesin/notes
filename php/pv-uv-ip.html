@@ -1,0 +1,72 @@
+<!DOCTYPE HTML>
+<html>
+  <head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+    <title>用PHP做网站的PV、UV、IP访客统计-信口开河</title>
+    <meta name="keywords" content="Ruesin,信口开河">
+    <meta name="description" content="至于你信不信，反正我是信了。">
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+  <body>
+    
+<header class="header">
+    <nav class="navbar">
+        <ul>
+            
+            <li><a class="header-nav-link" href="/">首页</a></li>
+            
+            <li><a class="header-nav-link" href="/categories">分类</a></li>
+            
+            <li><a class="header-nav-link" href="/archives">归档</a></li>
+            
+            <li><a class="header-nav-link" href="/tags">标签</a></li>
+            
+            <li><a class="header-nav-link" href="https://github.com/ruesin/notes">Github</a></li>
+            
+            <li><a class="header-nav-link" href="https://ruesin.github.io/php-tree">PHP技能树</a></li>
+            
+            <li><a class="header-nav-link" href="https://www.xinkoukaihe.com">老博客</a></li>
+            
+        </ul>
+    </nav>
+</header>
+    <main class="main">
+      <!-- 内容页 -->
+<section class="section">
+    <div class="post-container">
+        <div class="post-header">
+                <h1>用PHP做网站的PV、UV、IP访客统计</h1>
+                <!-- <div class="post-meta">2015-01-25</div> -->
+        </div>
+        <article class="post-content">
+            <p>用PHP做网站访客统计，听起来好像有点多此一举，想想有那么多好用的统计工具不用，偏偏想自己写？不过，有时还是按项目需求走吧。</p>
+<p>就当我是在废话吧，还是想唠叨一下PV、UV、IP三者的定义与区别。</p>
+<p><strong>1.PV(page view)</strong></p>
+<p>页面访问量，即此页面(站点)被打开过多少次，比如打开本博首页然后有电击进入了本文，此时便为本博贡献了2PV，本文1PV，如果您现在手滑按了下F5，那么就为本博贡献了3PV（首页1+本文2）。</p>
+<p><strong>2.UV(Unqie Vistor)</strong></p>
+<p>独立访客数，指的是不同的、通过互联网访问、浏览一个网页的自然人。一般情况下，是使用COOKIE进行区分。比如，您现在访问了本文，会给本博UV加1，随后您关闭了浏览器，接着您的朋友又用您的电脑访问了本博，此时，UV是不会变的，因为浏览器的COOKIE没变。再比如，您使用新浪微博登录访问的本博，随后退出帐号，又用腾许微博登录访问本博，那么先后就会给本博UV加2，因为浏览器记录到了两个用户。</p>
+<p><strong>3.IP(internet protocol)</strong></p>
+<p>独立IP数目，记录访问本博的真实IP数量，可以使用程序记录，也可以通过分析服务器日志统计。</p>
+<p>前面也有说到IP和UV这里有些绕。可以拿下面几种情况理解。</p>
+<p>您家里有多台电脑，都连了家里的一个路由器，这是通过不同的PC访问本博，只会记录一个IP数，因为对外IP是一样的。但是会记录多个UV，因为记录到了多个不同的COOKIE，甚至在同一电脑上使用不同的浏览器都有可能会加两个UV。在登录的情况下，就算同一PC、同一浏览器，只要是多个用户访问，都会加多个UV的。此时不巧您忽然断网了，过了一会重新拨号上网，IP变了，这时候本博的IP数会再加1，但是如果还是使用刚才的PC，刚才的浏览器访问本博的话，UV是不会变的，因为您的的COOKIE没变。</p>
+<p>这样大概就可以理解了吧？当然，或许您会说，UV存在客户端的COOCKIE中，这不就意味着可以伪造了吗？这个安心啦，首先不说谁会没事儿搞这个，其次是我记得《大数据时代》中，作者好像反复强调数据的非准确性。</p>
+<p>当然，UV只是网站流量的其中一个指标而已，具体指标还是要综合这三者进行分析的，一般情况下IP数量的统计是比较容易实现，具有较高的真实性（相对来说）。</p>
+<p>另外需要说明的是，IP和UV惯例一般都是以24小时为一个周期的。</p>
+<p>好啦，唠了一大堆理论，该说一下程序了。</p>
+<p>我接到的需求是统计指定页面的各项指标，而非整站，所以就要在各个页面做统计了。</p>
+<p>PV、IP的统计都比较容易了，PV是每次加载页面都加1，IP就是获取客户端的真实IP，然后看今日是否有记录，没有就加1。</p>
+<p>UV，写入COOKIE，同样要进行今日是否有记录进行判断，本来如果是统计全站的话，直接记录一个COOKIE，然后在访问的时候，查询是否存在COOKIE即可，但是此次需求是要求统计指定的页，而我又不想记录太大的数据量（比如每次访问都记录IP、COOKIE、URL，最后入库时再做算法统计），所以就在COOKIE这做了个小手脚。</p>
+<p>页面每次加载，取出指定日期记录文件中的PV数，加1。同时，打开IP记录文件，追加一条数据。也可以类似服务器日志那样，每次加载页面，就把此次访问的所有数据写入记录文件中，然后写计划任务，每日午夜执行，更新数据库。（一定不要每次都操作数据库啊，负担太大！）</p>
+<p>啊哈，说道最后还是没有列出代码，只因此次代码太过特殊，写代码还不如唠一下理论，授人以鱼不如授人以渔不是吗？ <img src="http://old.ruesin.com/wp-content/themes/Ruesin/img/smilies/icon_smile.gif" alt=":)"></p>
+
+        </article>
+    </div>
+</section>
+
+    </main>
+    <footer class="footer"> Copyright 2013 - 2019 Ruesin. All Rights Reserved </footer>
+  </body>
+</html>

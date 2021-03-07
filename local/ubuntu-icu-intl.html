@@ -1,0 +1,62 @@
+<!DOCTYPE HTML>
+<html>
+  <head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+    <title>Ubuntu 编译 Unicode ICU 库 及 PHP intl 扩展-信口开河</title>
+    <meta name="keywords" content="Ruesin,信口开河">
+    <meta name="description" content="至于你信不信，反正我是信了。">
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+  <body>
+    
+<header class="header">
+    <nav class="navbar">
+        <ul>
+            
+            <li><a class="header-nav-link" href="/">首页</a></li>
+            
+            <li><a class="header-nav-link" href="/categories">分类</a></li>
+            
+            <li><a class="header-nav-link" href="/archives">归档</a></li>
+            
+            <li><a class="header-nav-link" href="/tags">标签</a></li>
+            
+            <li><a class="header-nav-link" href="https://github.com/ruesin/notes">Github</a></li>
+            
+            <li><a class="header-nav-link" href="https://ruesin.github.io/php-tree">PHP技能树</a></li>
+            
+            <li><a class="header-nav-link" href="https://www.xinkoukaihe.com">老博客</a></li>
+            
+        </ul>
+    </nav>
+</header>
+    <main class="main">
+      <!-- 内容页 -->
+<section class="section">
+    <div class="post-container">
+        <div class="post-header">
+                <h1>Ubuntu 编译 Unicode ICU 库 及 PHP intl 扩展</h1>
+                <!-- <div class="post-meta">2015-12-31</div> -->
+        </div>
+        <article class="post-content">
+            <p> PHP intl 是国际化扩展，是ICU 库的一个包装器。所以在安装PHP intl扩展前要先安装ICU库。</p>
+<p>先从官网下载源文件，这里是选择的ICU4C。<a href="http://site.icu-project.org/download" target="_blank" rel="noopener">http://site.icu-project.org/download</a></p>
+<p>$ wget <a href="http://download.icu-project.org/files/icu4c/56.1/icu4c-56\_1-src.tgz" target="_blank" rel="noopener">http://download.icu-project.org/files/icu4c/56.1/icu4c-56\_1-src.tgz</a><br>$ tar zvxf icu4c-56_1-src.tgz<br>$ cd icu/source<br>$ sudo ./configure –prefix=/usr/local/icu<br>$ sudo make<br>$ sudo make install</p>
+<p>然后从PHP扩展包中搜索intl下载。<a href="https://pecl.php.net/package/intl" target="_blank" rel="noopener">https://pecl.php.net/package/intl</a></p>
+<p>$ wget <a href="https://pecl.php.net/get/intl-3.0.0.tgz" target="_blank" rel="noopener">https://pecl.php.net/get/intl-3.0.0.tgz</a><br>$ tar zvxf intl-3.0.0.tgz<br>$ cd intl-3.0.0/<br>$ sudo /usr/local/php/bin/phpize<br>$ sudo ./configure –enable-intl –with-icu-dir=/usr/local/icu/ –with-php-config=/usr/local/php/bin/php-config<br>$ sudo make<br>$ sudo make install<br>$ sudo vi /usr/local/php/php.ini</p>
+<p>编辑配置文件，添加开启intl扩展，重启服务。</p>
+<p>当然，官方也提供了pecl的安装方式，有兴趣的朋友可以去看下官方文档。</p>
+<p>$ sudo /usr/local/php/bin/pecl install intl-3.0.0<br>指定ICU库的位置，然后修改配置，开启扩展，重启服务即可。</p>
+<p>可以用 $php -m | grep intl 或 phpinfo() 查看intl扩展是否安装成功</p>
+
+        </article>
+    </div>
+</section>
+
+    </main>
+    <footer class="footer"> Copyright 2013 - 2019 Ruesin. All Rights Reserved </footer>
+  </body>
+</html>

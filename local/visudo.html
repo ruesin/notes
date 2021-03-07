@@ -1,0 +1,66 @@
+<!DOCTYPE HTML>
+<html>
+  <head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+    <title>ruesin 不在 sudoers 文件中。此事将被报告。-信口开河</title>
+    <meta name="keywords" content="Ruesin,信口开河">
+    <meta name="description" content="至于你信不信，反正我是信了。">
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+  <body>
+    
+<header class="header">
+    <nav class="navbar">
+        <ul>
+            
+            <li><a class="header-nav-link" href="/">首页</a></li>
+            
+            <li><a class="header-nav-link" href="/categories">分类</a></li>
+            
+            <li><a class="header-nav-link" href="/archives">归档</a></li>
+            
+            <li><a class="header-nav-link" href="/tags">标签</a></li>
+            
+            <li><a class="header-nav-link" href="https://github.com/ruesin/notes">Github</a></li>
+            
+            <li><a class="header-nav-link" href="https://ruesin.github.io/php-tree">PHP技能树</a></li>
+            
+            <li><a class="header-nav-link" href="https://www.xinkoukaihe.com">老博客</a></li>
+            
+        </ul>
+    </nav>
+</header>
+    <main class="main">
+      <!-- 内容页 -->
+<section class="section">
+    <div class="post-container">
+        <div class="post-header">
+                <h1>ruesin 不在 sudoers 文件中。此事将被报告。</h1>
+                <!-- <div class="post-meta">2014-12-27</div> -->
+        </div>
+        <article class="post-content">
+            <p>要用普通用户执行sudo，可是提示 “ruesin 不在 sudoers 文件中。此事将被报告。”</p>
+<pre><code>[sudo] password for ruesin:
+ruesin 不在 sudoers 文件中。此事将被报告。</code></pre><p>网上有人说切换到root，把sudoers文件改为读写，然后修改sudoers文件，把ruesin用户添加上。</p>
+<pre><code>$ su root
+密码：
+#chmod 740 /etc/sudoers
+#vi /etc/sudoers</code></pre><p>但是一般情况下，是不建议直接修改/etc/sudoers这个文件的，Linux提供有专用的命令：visudo</p>
+<pre><code>$ su root
+密码：
+# visudo</code></pre><p>在 root ALL=(ALL) ALL 后面加上 ruesin ALL=(ALL) ALL</p>
+<pre><code>root    ALL=(ALL)       ALL
+ruesin ALL=(ALL) ALL</code></pre><p>说明：格式为（用户名 网络中的主机=（执行命令的目标用户） 执行的命令范围）<br>保存后切换会普通用户测试权限提升成功。</p>
+<p><code># su ruesin</code></p>
+
+        </article>
+    </div>
+</section>
+
+    </main>
+    <footer class="footer"> Copyright 2013 - 2019 Ruesin. All Rights Reserved </footer>
+  </body>
+</html>

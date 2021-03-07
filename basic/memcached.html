@@ -1,0 +1,70 @@
+<!DOCTYPE HTML>
+<html>
+  <head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+    <title>分布式缓存Memcached/memcached/memcache详解及区别-信口开河</title>
+    <meta name="keywords" content="Ruesin,信口开河">
+    <meta name="description" content="至于你信不信，反正我是信了。">
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+  <body>
+    
+<header class="header">
+    <nav class="navbar">
+        <ul>
+            
+            <li><a class="header-nav-link" href="/">首页</a></li>
+            
+            <li><a class="header-nav-link" href="/categories">分类</a></li>
+            
+            <li><a class="header-nav-link" href="/archives">归档</a></li>
+            
+            <li><a class="header-nav-link" href="/tags">标签</a></li>
+            
+            <li><a class="header-nav-link" href="https://github.com/ruesin/notes">Github</a></li>
+            
+            <li><a class="header-nav-link" href="https://ruesin.github.io/php-tree">PHP技能树</a></li>
+            
+            <li><a class="header-nav-link" href="https://www.xinkoukaihe.com">老博客</a></li>
+            
+        </ul>
+    </nav>
+</header>
+    <main class="main">
+      <!-- 内容页 -->
+<section class="section">
+    <div class="post-container">
+        <div class="post-header">
+                <h1>分布式缓存Memcached/memcached/memcache详解及区别</h1>
+                <!-- <div class="post-meta">2014-11-12</div> -->
+        </div>
+        <article class="post-content">
+            <p>先来解释下标题中的三种写法：首字母大写的Memcached，指的是Memcached服务器，就是独立运行Memcached的后台服务器，用于存储缓存数据的“容器”。memcached和memcache是Memcached的客户端，通过二者访问Memcached服务器，向容器存取数据。两者用途一致，但在用法上有稍微差异。</p>
+<p><strong>一、Memcached</strong><br>Memcached 是一个高性能分布式的内存对象缓存系统，通过缓存数据库查询结果，减少数据库访问次数，减少数据库的负载压力，提高动态web应用的性能。</p>
+<p>Memcached 是以守护程序方式运行于一个或多个服务器中，随时接受客户端的连接操作，客户端与 Memcached 服务建立连接，根据请求存取对象，每个被存取的对象都有一个唯一的标识符 key，存取操作均通过这个 key 进行，保存到 Memcached 中的对象实际上是放置内存中的，并不是保存在 cache 文件中的，所以 Memcached 存取数据非常高效。注意，这些对象并不是持久的，服务停止之后，里边的数据就会丢失。</p>
+<p>Memcached本身基于分布式的系统，可独立于网站应用本身，很容易实现服务器间数据共享。在 Memcached 中可以保存的item数据量是没有限制的，只有内存足够。Memcached单进程最大使用内存为2G，要使用更多内存，可以分多个端口开启多个Memcached进程，进行分布式搭建，毕竟单台Memcache的内存容量的有限的。</p>
+<p>但是那些不需要“分布”的，不需要共享的，或者干脆规模小到只有一台服务器的应用，Memcached不会带来任何好处，相反还会拖慢系统效率，因为网络连接同样需要资源。</p>
+<p>由于 Memcache服务器端都是直接通过客户端连接后直接操作，没有任何的验证过程，这样如果服务器是直接暴露在互联网上的话是比较危险，所以 Memcached 应放在防火墙里面。</p>
+<p><strong>二、memcached 和 memcache 的区别</strong><br>memcache最早是在2004年2月开发的，而memcached最早是在2009年1月开发的。所以memcache的历史比memcached久。那是不是可以这么理解： memcached 是 memcache 的升级版？</p>
+<p>安装memcache扩展，直接导入扩展，更改下php.ini即可。但是在安装memcached的时候，你要先安装libmemcached，libmemcached是memcache的C客户端，它具有的优点是低内存，线程安全等特点。在高并发下，稳定性比memcache有明显提高。</p>
+<p>memcache的方法特别少，只有很少一部分基本的操作方法，比 memcached 少很多，具体的可以查询官方手册。</p>
+<p>所以总的来说，二者是没有太多其他区别的，只不过是 memcached 比 memcache 多了一些对守护进程的操作方法，性能更好一些。</p>
+<p><strong>三、三者关系描述</strong><br>Memcached 就比如是一个水库（容器），memcache 是一个塑料管，memcached 是一个PVC管。我们可以通过塑料管或者PVC管为水库上水或者取水，用哪种方式因人而异，而PVC管在输送水的效率上明显比塑料管快，而且可以装阀门、开口做分支等等，比塑料管的花样多。</p>
+<p>说 Memcached 是服务端，很多人都会搅浑这个概念，说memcache不就是装在服务器上的么，不也是服务端么？ Memcached 是可以独立在web服务器之外的任何服务器，甚至可以是集群，而说它是服务端，其实是相对的概念，相对与web服务器的memcache来说是服务端，memcache所在的web服务器相对与用户PC机来说又是服务端。</p>
+<p>另外，我 Windows 搭建的环境，没能成功安装 memcached，很受挫。希望有高手可以指点一二。。</p>
+<p>======================</p>
+<p>• 在 Memcached 中可以保存的item数据量是没有限制的，只有内存足够<br>• Memcached单进程最大使用内存为2G，要使用更多内存，可以分多个端口开启多个Memcached进程<br>• 最大30天的数据过期时间, 设置为永久的也会在这个时间过期，常量REALTIME_MAXDELTA 60*60*24*30 控制<br>• 最大键长为250字节，大于该长度无法存储，常量KEY_MAX_LENGTH 250 控制<br>• 单个item最大数据是1MB，超过1MB数据不予存储，常量POWER_BLOCK 1048576 进行控制，它是默认的slab大小<br>• 最大同时连接数是200，通过 conn_init()中的freetotal 进行控制，最大软连接数是1024，通过settings.maxconns=1024 进行控制<br>• 跟空间占用相关的参数：settings.factor=1.25, settings.chunk_size=48, 影响slab的数据占用和步进方式</p>
+<p>memcache的文档在：<a href="http://pecl.php.net/package/memcache" title="http://pecl.php.net/package/memcache" target="_blank" rel="noopener">http://pecl.php.net/package/memcache</a></p>
+<p>memcached的文档在：<a href="http://pecl.php.net/package/memcached" title="http://pecl.php.net/package/memcached" target="_blank" rel="noopener">http://pecl.php.net/package/memcached</a></p>
+
+        </article>
+    </div>
+</section>
+
+    </main>
+    <footer class="footer"> Copyright 2013 - 2019 Ruesin. All Rights Reserved </footer>
+  </body>
+</html>

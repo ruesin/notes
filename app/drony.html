@@ -1,0 +1,88 @@
+<!DOCTYPE HTML>
+<html>
+  <head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+    <title>Drony使用记录-信口开河</title>
+    <meta name="keywords" content="Ruesin,信口开河">
+    <meta name="description" content="至于你信不信，反正我是信了。">
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+  <body>
+    
+<header class="header">
+    <nav class="navbar">
+        <ul>
+            
+            <li><a class="header-nav-link" href="/">首页</a></li>
+            
+            <li><a class="header-nav-link" href="/categories">分类</a></li>
+            
+            <li><a class="header-nav-link" href="/archives">归档</a></li>
+            
+            <li><a class="header-nav-link" href="/tags">标签</a></li>
+            
+            <li><a class="header-nav-link" href="https://github.com/ruesin/notes">Github</a></li>
+            
+            <li><a class="header-nav-link" href="https://ruesin.github.io/php-tree">PHP技能树</a></li>
+            
+            <li><a class="header-nav-link" href="https://www.xinkoukaihe.com">老博客</a></li>
+            
+        </ul>
+    </nav>
+</header>
+    <main class="main">
+      <!-- 内容页 -->
+<section class="section">
+    <div class="post-container">
+        <div class="post-header">
+                <h1>Drony使用记录</h1>
+                <!-- <div class="post-meta">2021-03-05</div> -->
+        </div>
+        <article class="post-content">
+            <h2 id="介绍"><a href="#介绍" class="headerlink" title="介绍"></a>介绍</h2><p>快手8.0以上，更改了网络请求方式，导致无法通过<a href="./mitmproxy.md">mitmprox</a>正常抓取。</p>
+<p>可以通过drony或其他vpn的方式，将网络请求转发到代理上。</p>
+<p>另外，通过drony比直接在系统设置中管理更方便、灵活。</p>
+<h2 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h2><p>下载地址：</p>
+<p><a href="https://apkfab.com/free-apk-download?q=org.sandrob.drony" target="_blank" rel="noopener">https://apkfab.com/free-apk-download?q=org.sandrob.drony</a></p>
+<p><a href="https://apkcombo.com/apk-downloader/?device=&amp;arches=&amp;sdkInt=&amp;sa=1&amp;lang=en&amp;dpi=480&amp;q=org.sandrob.drony" target="_blank" rel="noopener">https://apkcombo.com/apk-downloader/?device=&amp;arches=&amp;sdkInt=&amp;sa=1&amp;lang=en&amp;dpi=480&amp;q=org.sandrob.drony</a></p>
+<pre><code>$ adb install drony_1.3.155.apk</code></pre><h2 id="配置"><a href="#配置" class="headerlink" title="配置"></a>配置</h2><p>打开<code>Drony</code>后，首屏下方的按钮，显示当前VPN的状态：开（ON）、关（OFF）</p>
+<p>左滑切换到 设置（SETTINGS），点击 无线网络（Wi-Fi）进入 网络列表（Network list），选择当前连接的网络，进入 网络细节（Network detail）。</p>
+<ul>
+<li><p>代理类型（Proxy type）设置为 手动（Manual）</p>
+</li>
+<li><p>主机名（Hostname）、端口号（Port），设置为电脑监听的端口</p>
+</li>
+<li><p>代理类型（Proxy type）设置为 普通http代理（Plain http proxy）</p>
+</li>
+<li><p>过滤默认值（Filter default value）设置为 允许全部（Direct all）</p>
+</li>
+<li><p>点击 规则（Rule），进入编辑规则（不编辑规则也可以开始抓包了）</p>
+</li>
+<li><p>网络ID（Network id） 选择当前 网络SSID</p>
+</li>
+<li><p>行动（Action）选择 本地代理链全部（Local proxy chain）</p>
+</li>
+<li><p>应用程序（Application）选择需要强制代理的APP</p>
+</li>
+<li><p>Hostname &amp; Port，指定被转发的请求，不填表示所有请求都会被转发</p>
+</li>
+</ul>
+<p>保存后返回首页，点击底部的按钮，使其处于 开（ON）状态，表示正在转发请求。</p>
+<blockquote>
+<p>drony只是负责将请求转发到对应的代理服务器，仍然需要常规抓包的配置及证书。</p>
+</blockquote>
+<p><img src="/images/2021/drony_1.png" alt="dront_1.png"></p>
+<p><img src="/images/2021/drony_2.png" alt="dront_2.png"></p>
+<p><img src="/images/2021/drony_3.png" alt="dront_3.png"></p>
+
+        </article>
+    </div>
+</section>
+
+    </main>
+    <footer class="footer"> Copyright 2013 - 2019 Ruesin. All Rights Reserved </footer>
+  </body>
+</html>
