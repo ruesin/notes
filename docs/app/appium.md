@@ -68,12 +68,32 @@ https://github.com/appium/appium-desktop/releases
 启动server
 ```python
 
+import os
+
+from appium.webdriver.appium_service import AppiumService
+
+device_udid = "aaaaaaaa"
+appium_port = "4723"
+bp_port = str(int(appium_port) + 2000)
+
+log_file = os.path.join('/tmp/' + device_udid + '-appium.log')
+
+service = AppiumService()
+service.start(args=['-p', appium_port, '-bp', bp_port, '-U', device_udid,
+                    '--session-override', '--no-reset',
+                    '--log-level', 'error', '--log', log_file], timeout_ms=2000)
+```
+
+执行命令（跳转抖音用户主页）
+```python
 from appium import webdriver
+
+device_udid = "aaaaaaaa"
 
 desired_caps = {
     'platformName': 'Android',
-    'udid': "aaaaaaaaaaa",
-    'deviceName': "aaaaaa",
+    'udid': device_udid,
+    'deviceName': device_udid,
     'platformVersion': "7.0",
     'appPackage': 'com.ss.android.ugc.aweme',
     'appActivity': 'com.ss.android.ugc.aweme.main.MainActivity',
@@ -85,10 +105,7 @@ desired_caps = {
     "resetKeyboard": True,
 }
 _device_session = webdriver.Remote('http://127.0.0.1:4723/wd/hub', desired_caps, direct_connection=True)
-```
 
-执行命令（跳转抖音用户主页）
-```python
 url = "snssdk1128://user/profile/104255897823?refer=web&gd_label=click_wap_profile_bottom&type=need_follow&needlaunchlog=1"
 _device_session.get(url)
 ```
