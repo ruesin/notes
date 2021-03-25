@@ -1,6 +1,6 @@
 ---
 title: appium 使用记录
-date: 
+date: 2021-03-12 00:00:00
 categories: 研究
 tags: 
 - 自动化
