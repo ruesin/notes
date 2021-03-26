@@ -1,6 +1,6 @@
 # 文章
+- [xposed 使用记录](../docs/app/xposed.md) (2021-03-26 14:00:00)
 - [获取抖音网页版签名_signature算法](../docs/app/douyin-web.md) (2021-03-25 00:00:00)
-- [frida 使用记录](../docs/app/frida.md) (2021-03-17 00:00:00)
 - [appium 使用记录](../docs/app/appium.md) (2021-03-12 00:00:00)
 - [puppeteer使用记录](../docs/app/puppeteer.md) (2021-03-07 17:00:00)
 - [Drony使用记录](../docs/app/drony.md) (2021-03-05 10:00:00)
