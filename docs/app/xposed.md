@@ -81,13 +81,9 @@ Xposed 模块是一个普通的 Android 应用，通过 Xposed 框架提供的 H
 APP开发前，需要配置对API的依赖。
 
 ### 添加 XposedBridge API依赖
-#### 方法一：jcenter
-在build.gradle中配置：
+#### 方法一：在线安装
+修改app下的build.gradle：
 ```
-repositories {
-    jcenter();
-}
-
 dependencies {
     ...
     compileOnly 'de.robv.android.xposed:api:82'
@@ -100,7 +96,11 @@ dependencies {
 
 修改app下的build.gradle：
 ```
-compileOnly files('libs/api-82.jar')
+dependencies {
+    ...
+    compileOnly files('libs/api-82.jar')
+    ...
+}
 ```
 
 ### 修改 AndroidManifest.xml 文件
