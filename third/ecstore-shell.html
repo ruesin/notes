@@ -1,0 +1,76 @@
+<!DOCTYPE HTML>
+<html>
+  <head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+    <title>Ecstore 更改 dbschema 后执行 cmd update 不更新数据库-信口开河</title>
+    <meta name="keywords" content="Ruesin,信口开河">
+    <meta name="description" content="至于你信不信，反正我是信了。">
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+  <body>
+    
+<header class="header">
+    <nav class="navbar">
+        <ul>
+            
+            <li><a class="header-nav-link" href="/">首页</a></li>
+            
+            <li><a class="header-nav-link" href="/categories">分类</a></li>
+            
+            <li><a class="header-nav-link" href="/archives">归档</a></li>
+            
+            <li><a class="header-nav-link" href="/tags">标签</a></li>
+            
+            <li><a class="header-nav-link" href="https://github.com/ruesin/notes">Github</a></li>
+            
+            <li><a class="header-nav-link" href="https://ruesin.github.io/php-tree">PHP技能树</a></li>
+            
+            <li><a class="header-nav-link" href="https://www.xinkoukaihe.com">老博客</a></li>
+            
+        </ul>
+    </nav>
+</header>
+    <main class="main">
+      <!-- 内容页 -->
+<section class="section">
+    <div class="post-container">
+        <div class="post-header">
+                <h1>Ecstore 更改 dbschema 后执行 cmd update 不更新数据库</h1>
+                <!-- <div class="post-meta">2015-01-05</div> -->
+        </div>
+        <article class="post-content">
+            <p>不知道大家有没有碰到过，反正我刚接触Ecstore的时候，按照官方教程改了数据库文件，执行cmd update之后，数据库没有变化！</p>
+<p>其实也不能说是不更新，而是第一次改的时候可以更新，再改再update就不好使了，当时遇到这个情况还是非常郁闷的，重启apache服务也不管用，一气之下把电脑重启了，再试、可以了。但总不能每次都要重启下电脑吧？</p>
+<p>后来是发现只要关闭cmd窗口再次打开就可以更新了，就下了结论说是缓存的问题，然后就搁置了，最近又有朋友问到我这个问题，才想起来记录一下，顺便还原一下当时的经历。</p>
+<p>注意：本文所述均为Windows下的操作。</p>
+<p><strong>第一阶段：</strong><br>1.随便改一个表的一个字段，以members表的name字段为例，将dbschema中的name字段改成nameaa，执行cmd update。</p>
+<p><a href="/images/2015/01/ecstore_shell_11.jpg"><img src="/images/2015/01/ecstore_shell_11.jpg" alt="ecstore_shell_11"></a></p>
+<p>2.不关cmd窗口，将dbschema中的nameaa字段改回name，执行cmd update。</p>
+<p><a href="/images/2015/01/ecstore_shell_12.jpg"><img src="/images/2015/01/ecstore_shell_12.jpg" alt="ecstore_shell_12"></a></p>
+<p>可以发现，虽然刷刷刷的走了一大堆的缓存，但是，没有看到更改数据表的语句执行，查看数据库，也没有被更改。</p>
+<p>3.继续不关cmd窗口，执行shell文件中说到的强制更新数据库命令。</p>
+<p><a href="/images/2015/01/ecstore_shell_13.jpg"><img src="/images/2015/01/ecstore_shell_13.jpg" alt="ecstore_shell_13"></a></p>
+<p>发现，还是没有更新。</p>
+<p>4.关闭cmd，重新打开，执行update，可以了。</p>
+<p><a href="/images/2015/01/ecstore_shell_14.jpg"><img src="/images/2015/01/ecstore_shell_14.jpg" alt="ecstore_shell_14"></a></p>
+<p>第一阶段总结：<br>关闭cmd重新打开是可以正常更新数据库的，结论就是每次更新数据库，要重新打开一下cmd窗口。<br>但是，shell文件中，明明白白说得很清楚，有强制刷新的命令，是不是因为我操作的第二步骤，导致后面的强制刷新也不行呢？那就把2跳过执行下试试。</p>
+<p><strong>第二阶段：</strong><br>1.同第一阶段 1</p>
+<p>2.继续不关cmd窗口，执行shell文件中说到的强制更新数据库命令。</p>
+<p><a href="/images/2015/01/ecstore_shell_22.jpg"><img src="/images/2015/01/ecstore_shell_22.jpg" alt="ecstore_shell_22"></a></p>
+<p>跟第一阶段的2一样，虽然刷刷刷的走了一大堆的缓存，但是，没有看到更改数据表的语句执行，查看数据库，也没有被更改。</p>
+<p>第二阶段总结：<br>强制更新数据库命令不管用。</p>
+<p><strong>第三阶段：</strong><br>看dbschema中有一个 version ，是不是他控制的呢？尝试更改 version ，然后重新来一遍第一阶段的步骤，还是不行。</p>
+<p>最后总结，看来是shell命令真的缓存了，具体背后怎么走的流程，暂时没去翻看，而我们想要实现每次的updata都能成功，目前也只能关闭重新打开cmd窗口了。</p>
+<p>PS：这个问题好像只在Windows下有问题，服务器上我操作时没碰到过这情况。。<br>PS：后来我发现，其他的更改在update之前也要关闭重新打开一下，再后来就慢慢养成了每次更新之后都直接关闭的习惯。<br>PS：执行cmd操作前要记得配置环境变量哦。</p>
+
+        </article>
+    </div>
+</section>
+
+    </main>
+    <footer class="footer"> Copyright 2013 - 2019 Ruesin. All Rights Reserved </footer>
+  </body>
+</html>

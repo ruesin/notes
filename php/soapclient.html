@@ -1,0 +1,65 @@
+<!DOCTYPE HTML>
+<html>
+  <head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+    <title>本地 SoapClient 响应时间过长-信口开河</title>
+    <meta name="keywords" content="Ruesin,信口开河">
+    <meta name="description" content="至于你信不信，反正我是信了。">
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+  <body>
+    
+<header class="header">
+    <nav class="navbar">
+        <ul>
+            
+            <li><a class="header-nav-link" href="/">首页</a></li>
+            
+            <li><a class="header-nav-link" href="/categories">分类</a></li>
+            
+            <li><a class="header-nav-link" href="/archives">归档</a></li>
+            
+            <li><a class="header-nav-link" href="/tags">标签</a></li>
+            
+            <li><a class="header-nav-link" href="https://github.com/ruesin/notes">Github</a></li>
+            
+            <li><a class="header-nav-link" href="https://ruesin.github.io/php-tree">PHP技能树</a></li>
+            
+            <li><a class="header-nav-link" href="https://www.xinkoukaihe.com">老博客</a></li>
+            
+        </ul>
+    </nav>
+</header>
+    <main class="main">
+      <!-- 内容页 -->
+<section class="section">
+    <div class="post-container">
+        <div class="post-header">
+                <h1>本地 SoapClient 响应时间过长</h1>
+                <!-- <div class="post-meta">2015-07-29</div> -->
+        </div>
+        <article class="post-content">
+            <p>本地搭建的环境开发一直没问题的，但是前两天做一个soap接口的时候，出现了匪夷所思的事情。</p>
+<p>本地调试，每次刷新一下页面都要十几秒，太恶心了，开发者工具没有发现请求外部数据，难道是封装的代码中有问题？遂准备用 fiddler 看下，然后诡异的事情就发生了——页面秒刷了。。。</p>
+<p>对比线上的，一样的代码，响应迅速，那么应该就是我本地环境的问题了。</p>
+<p>先看了host文件，没问题。</p>
+<p>然后一步步翻查代码，查到了问题所在，是实例化 SoapClient 类的时候耗了太多时间。但是这是用的php自带的类库，按说应该没问题啊。</p>
+<p><a href="/images/2015/07/soapclient.jpg"><img src="/images/2015/07/soapclient.jpg" alt="soapclient"></a></p>
+<p>看了下apache日志，发现在重启apache的时候会有两个警告，理论上是应该不影响的啊。</p>
+<p>AH00548: NameVirtualHost has no effect and will be removed in the next release E:/host/Apache2.4/conf/vhosts.conf:2<br>AH00558: httpd.exe: Could not reliably determine the server’s fully qualified domain name, using fe80::fdce:4909:f353:5321. Set the ‘ServerName’ directive globally to suppress this message</p>
+<p>注释掉 NameVirtualHost *:80</p>
+<p>设置 ServerName localhost</p>
+<p>再次重启apache服务，刷新页面，秒刷！！！</p>
+<p>以为万事大吉了，没想到还是有问题，在firefox上是可以每次都秒刷的，但是在chrome上刷新大概10次左右就会有一次长响应。打开fiddler后就不会出现这问题，着实诡异。。</p>
+
+        </article>
+    </div>
+</section>
+
+    </main>
+    <footer class="footer"> Copyright 2013 - 2019 Ruesin. All Rights Reserved </footer>
+  </body>
+</html>

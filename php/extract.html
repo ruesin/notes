@@ -1,0 +1,75 @@
+<!DOCTYPE HTML>
+<html>
+  <head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+    <title>PHP函数extract()详细介绍-信口开河</title>
+    <meta name="keywords" content="Ruesin,信口开河">
+    <meta name="description" content="至于你信不信，反正我是信了。">
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+  <body>
+    
+<header class="header">
+    <nav class="navbar">
+        <ul>
+            
+            <li><a class="header-nav-link" href="/">首页</a></li>
+            
+            <li><a class="header-nav-link" href="/categories">分类</a></li>
+            
+            <li><a class="header-nav-link" href="/archives">归档</a></li>
+            
+            <li><a class="header-nav-link" href="/tags">标签</a></li>
+            
+            <li><a class="header-nav-link" href="https://github.com/ruesin/notes">Github</a></li>
+            
+            <li><a class="header-nav-link" href="https://ruesin.github.io/php-tree">PHP技能树</a></li>
+            
+            <li><a class="header-nav-link" href="https://www.xinkoukaihe.com">老博客</a></li>
+            
+        </ul>
+    </nav>
+</header>
+    <main class="main">
+      <!-- 内容页 -->
+<section class="section">
+    <div class="post-container">
+        <div class="post-header">
+                <h1>PHP函数extract()详细介绍</h1>
+                <!-- <div class="post-meta">2014-06-11</div> -->
+        </div>
+        <article class="post-content">
+            <p>前些日子接了个ecmall的项目，虽然跟ecstore比起来，代码差得不是一点半点，但也是有可圈可点的地方的。</p>
+<p>这不就让我认识了个不熟悉甚至说是没用过的php内置函数extract()。</p>
+<p>官方的解释是:从数组中把变量导入到当前的符号表中。对于数组中的每个元素，键名用于变量名，键值用于变量值。</p>
+<p>有时候直接看官方的例子可能不太明了，加个例子就OK了。</p>
+<pre><code>$arr=array(
+    &quot;fields&quot;         =&gt; &quot;g.*,v.attr_value&quot;,
+    &quot;conditions&quot;    =&gt; &quot;g.type_id=1 and v.part_id=1&quot;,
+    &quot;join&quot;            =&gt; &quot;belongs_to_partattr&quot;,
+    &#39;order&#39;            =&gt; &quot;g.sort_order&quot;,
+    &#39;limit&#39;          =&gt; 3,
+    &#39;count&#39;          =&gt; true,
+);
+print_r(extract($arr));
+echo &quot;&lt;br&gt;&quot;;
+print_r($conditions);</code></pre><p>说白了就是把数组换成了N个变量，变量名是键名，变量值是键值。</p>
+<p>类似于下面的效果:</p>
+<pre><code>foreach($arr as $k=&gt;$v){
+    $$k=$v;
+}
+echo $conditions.&quot;&lt;br&gt;&quot;;</code></pre><p>注意:extract函数返回的是成功设置的变量数目。</p>
+<p>总共有三个参数，一般只会用到第一个.其他参数请参考官方文档。</p>
+<p><a href="/images/2014/06/extract.jpg"><img src="/images/2014/06/extract.jpg" alt="extract"></a></p>
+
+        </article>
+    </div>
+</section>
+
+    </main>
+    <footer class="footer"> Copyright 2013 - 2019 Ruesin. All Rights Reserved </footer>
+  </body>
+</html>

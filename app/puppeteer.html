@@ -1,0 +1,70 @@
+<!DOCTYPE HTML>
+<html>
+  <head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+    <title>puppeteer使用记录-信口开河</title>
+    <meta name="keywords" content="Ruesin,信口开河">
+    <meta name="description" content="至于你信不信，反正我是信了。">
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+  <body>
+    
+<header class="header">
+    <nav class="navbar">
+        <ul>
+            
+            <li><a class="header-nav-link" href="/">首页</a></li>
+            
+            <li><a class="header-nav-link" href="/categories">分类</a></li>
+            
+            <li><a class="header-nav-link" href="/archives">归档</a></li>
+            
+            <li><a class="header-nav-link" href="/tags">标签</a></li>
+            
+            <li><a class="header-nav-link" href="https://github.com/ruesin/notes">Github</a></li>
+            
+            <li><a class="header-nav-link" href="https://ruesin.github.io/php-tree">PHP技能树</a></li>
+            
+            <li><a class="header-nav-link" href="https://www.xinkoukaihe.com">老博客</a></li>
+            
+        </ul>
+    </nav>
+</header>
+    <main class="main">
+      <!-- 内容页 -->
+<section class="section">
+    <div class="post-container">
+        <div class="post-header">
+                <h1>puppeteer使用记录</h1>
+                <!-- <div class="post-meta">2021-03-07</div> -->
+        </div>
+        <article class="post-content">
+            <h2 id="介绍"><a href="#介绍" class="headerlink" title="介绍"></a>介绍</h2><p>puppeteer 是谷歌退出的针对Chrome Headless特性，通过JS调用Chrome DevTools开放的接口与Chrome通信，puppeteer对复杂的Chrome DevTools接口进行了更易用的封装。</p>
+<p>在爬虫、测试自动化等方面使用非常方便，作为无头浏览器，是真正运行的无界面渲染的浏览器，可以使程序如真人操作一样执行。</p>
+<h2 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h2><pre><code>$ npm i --save puppeteer</code></pre><h2 id="测试"><a href="#测试" class="headerlink" title="测试"></a>测试</h2><p>打开百度首页，并截图。</p>
+<pre><code class="js">const puppeteer = require(&#39;puppeteer&#39;);
+(async () =&gt; {
+    const browser = await puppeteer.launch();
+    const page = await browser.newPage();
+    await page.goto(&#39;http://www.baidu.com&#39;);
+    await page.screenshot({path: &#39;baidu.png&#39;});
+    await browser.close();
+})();</code></pre>
+<h2 id="Demo"><a href="#Demo" class="headerlink" title="Demo"></a>Demo</h2><p><a href="https://github.com/metmit/easyPuppeteer" target="_blank" rel="noopener">easyPuppeteer</a></p>
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><ul>
+<li><a href="https://github.com/puppeteer/puppeteer" target="_blank" rel="noopener">https://github.com/puppeteer/puppeteer</a></li>
+<li><a href="https://www.kancloud.cn/luponu/puppeteer/870133" target="_blank" rel="noopener">https://www.kancloud.cn/luponu/puppeteer/870133</a></li>
+<li><a href="https://chromedevtools.github.io/devtools-protocol/tot/Network/#method-getCookies" target="_blank" rel="noopener">https://chromedevtools.github.io/devtools-protocol/tot/Network/#method-getCookies</a></li>
+</ul>
+
+        </article>
+    </div>
+</section>
+
+    </main>
+    <footer class="footer"> Copyright 2013 - 2019 Ruesin. All Rights Reserved </footer>
+  </body>
+</html>

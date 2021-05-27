@@ -1,0 +1,131 @@
+<!DOCTYPE HTML>
+<html>
+  <head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+    <title>Git 基本概念、操作及用法-信口开河</title>
+    <meta name="keywords" content="Ruesin,信口开河">
+    <meta name="description" content="至于你信不信，反正我是信了。">
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+  <body>
+    
+<header class="header">
+    <nav class="navbar">
+        <ul>
+            
+            <li><a class="header-nav-link" href="/">首页</a></li>
+            
+            <li><a class="header-nav-link" href="/categories">分类</a></li>
+            
+            <li><a class="header-nav-link" href="/archives">归档</a></li>
+            
+            <li><a class="header-nav-link" href="/tags">标签</a></li>
+            
+            <li><a class="header-nav-link" href="https://github.com/ruesin/notes">Github</a></li>
+            
+            <li><a class="header-nav-link" href="https://ruesin.github.io/php-tree">PHP技能树</a></li>
+            
+            <li><a class="header-nav-link" href="https://www.xinkoukaihe.com">老博客</a></li>
+            
+        </ul>
+    </nav>
+</header>
+    <main class="main">
+      <!-- 内容页 -->
+<section class="section">
+    <div class="post-container">
+        <div class="post-header">
+                <h1>Git 基本概念、操作及用法</h1>
+                <!-- <div class="post-meta">2015-06-25</div> -->
+        </div>
+        <article class="post-content">
+            <p>Git是一款免费、开源的分布式版本控制系统，用于敏捷高效地处理任何或小或大的项目。与常用的版本控制工具 CVS, Subversion 等不同，它采用了分布式版本库的方式，不必服务器端软件支持，开发者可以提交到本地，每个开发者通过克隆，在本地机器上拷贝一个完整的Git仓库，使源代码的发布和交流极其方便。Git 最为出色的是它的合并跟踪（merge tracing）能力。</p>
+<p><strong>一、安装</strong></p>
+<p>sudo apt-get install git</p>
+<p>windows下可以使用msysgit</p>
+<p>安装完之后设置用户和邮箱</p>
+<p>git config –global user.name Ruesin<br>git config –global user.email <a href="mailto:ruesin@163.com" target="_blank" rel="noopener">ruesin@163.com</a></p>
+<p>还有其他配置</p>
+<p>git config –global color.ui true ## 显示颜色</p>
+<p>git config –global alias.st status ## 配置别名</p>
+<p><strong>二、创建版本库</strong></p>
+<p>mkdir ruesinGit<br>cd ruesinGit</p>
+<p>创建版本库可以直接本地创建一个新的，也可以从克隆一个已存在的版本库</p>
+<p>git init ##初始化创建本地版本库</p>
+<p>git clone ssh:… ## 克隆一个已存在的版本库</p>
+<p><strong>三、本地基本操作</strong></p>
+<p>git status #查看差异文件以及是否有提交<br>git diff #查看文件具体修改了哪<br>git log #查看提交日志 –pretty=oneline 只显示一行<br>git reflog ## 记录操作到日志，可以看到每个版本号里到操作</p>
+<p>git add test.txt ## 添加到暂存区<br>git commit -m ‘版本注释’ ## 提交到版本库</p>
+<p>git checkout — file ## 丢弃工作区的修改，实际是用版本库里的版本替换工作区的版本<br>git reset HEAD file ## 撤销掉暂存区中的修改，重新放回工作区<br>git reset –hard HEAD^ #回跳到一个版本<br>git reset –hard 257ec2c044 #跳到指定版本 可以往后往前</p>
+<p>rm file<br>git rm file ## 删除版本库中的文件</p>
+<p><strong>四、分支操作</strong></p>
+<p>git checkout -b dev #创建并切换到dev分支</p>
+<p>git branch dev ## 创建 dev 分支<br>git checkout dev ## 切换到 dev 分支</p>
+<p>git branch #查看当前分支<br>* dev # 当前分支<br>master</p>
+<p>在dev分支下操作</p>
+<p>vi test.txt<br>git add test.txt<br>git commit -m “branch test”</p>
+<p>git checkout master ## 切换回master分支<br>cat test.txt ## 查看test.txt 文件内容 没有任何更改</p>
+<p>git merge dev ## 将 dev 分支合并到 当前分支 master</p>
+<p>git branch -d dev ## 删除dev分支</p>
+<p>如果在两个分支下都编辑连test.txt文件同一位置，合并的时候就会冲突，这时候就需要手工去修复了。</p>
+<p>看一下冲突的文件，打开之后回发现冲突的内容Git用&lt;&lt;&lt;&lt;&lt;&lt;&lt;，=======，&gt;&gt;&gt;&gt;&gt;&gt;&gt;标记出来了。</p>
+<p>将冲突的地方修复一下，再次添加、提交即可。</p>
+<p>git默认使用到是快速合并Fast forward，在这种模式下，删除分支后，会丢掉分支信息。可以使用 –no-ff 参数禁用Fast forward模式，这样Git就会在merge时生成一个新的commit，这样，从分支历史上就可以看出分支信息。</p>
+<p>git merge –no-ff -m “merge with no-ff” dev ## 合并并提交分支</p>
+<p>git log –graph –pretty=oneline –abbrev-commit ## 查看分支合并到路线</p>
+<p>修复Bug时可以通过创建一个临时分支来修复，修复成功后再将临时分支删掉。但是，你现在正在dev分支上工作，并且只做到了一半，为了保证项目的正常运行，还不能提交。</p>
+<p>这时候就需要 stash 功能了。</p>
+<p>git stash ## 把当前工作现场“储藏”起来</p>
+<p>git status 查看工作区，就是干净的（除非有没有被Git管理的文件）</p>
+<p>找到要修复Bug的分支，假设是 master分支，从 master 创建临时分支，进行修复、提交、合并、删除临时分支。</p>
+<p>然后回到 dev 分支，进行现场恢复。</p>
+<p>git stash list ## 查看存储的“现场”列表<br>stash@{0}: WIP on dev: 6224937 add merge</p>
+<p>git stash pop ## 恢复并删除</p>
+<p>## git stash apply ## 恢复<br>## git stash drop ## 删除</p>
+<p>## git stash apply stash@{0} ## 恢复指定的场景</p>
+<p>开发新功能时与修复BUG一样，最好也是创建一个新分支，这样新功能如果要舍弃或者怎样的都不会干涉到主分支。</p>
+<p>git branch -D <name> ## 强行删除一个没有被合并过的分支</name></p>
+<p><strong>五、连接远程仓库进行多人协作工作</strong></p>
+<p>先看下个人文件夹下是否有 .ssh ，没有的话需要创建一个 SSH Key， .ssh 中有两个文件 id_rsa（私钥） 和 id_rsa.pub（公钥），我们需要用到公钥。</p>
+<p>ssh-keygen -t rsa -C <a href="mailto:ruesin@163.com" target="_blank" rel="noopener">ruesin@163.com</a></p>
+<p>登录github — setting — SSH Key — Add ，将公钥添加上，保证只有自己可以提交。</p>
+<p>然后创建远程一个仓库 testgit 。</p>
+<p>在创建版本库时有说到两种创建方式，第一种形式是现在本地创建了版本库，写了很多东西，关联并推送到远程仓库。</p>
+<p>git push -u origin master ## 将 master 关联并推送到远程</p>
+<p>推送之前是要先把本地库（分支）和远程库关联的，由于远程库是空的，第一次推送master分支时，加上-u参数，Git不但会把本地的master分支内容推送的远程新的master分支，还会把本地的master分支和远程的master分支关联起来。</p>
+<p>git push origin master ## 将 master 推送到远程</p>
+<p>git remote add origin git@server-name:path/repo-name.git ## 关联远程库</p>
+<p>前面说到是先有本地库，后有远程库的时候，另外一种形式是先创建远程库，然后，从远程库克隆。</p>
+<p>git clone <a href="https://github.com/Ruesin/testgit.git" target="_blank" rel="noopener">https://github.com/Ruesin/testgit.git</a></p>
+<p>Git支持多种协议，默认的git://使用ssh，但也可以使用https等其他协议。使用https除了速度慢以外，还有个最大的麻烦是每次推送都必须输入口令，通过ssh支持的原生git协议速度最快。</p>
+<p>git remote ## 查看远程库信息</p>
+<p>git remote -v ## 查看远程库信息</p>
+<p>git branch –set-upstream-to=origin/dev</p>
+<p>从本地推送分支，使用git push origin branch-name，如果推送失败，先用git pull抓取远程的新提交</p>
+<p>git pull ## 拉取远程数据 更新至本地<br>git push origin master #推送本地master到远程origin</p>
+<p>在本地创建和远程分支对应的分支，使用git checkout -b branch-name origin/branch-name，本地和远程分支的名称最好一致；</p>
+<p>如果git pull提示“no tracking information”，则说明本地分支和远程分支的链接关系没有创建，用命令 git branch –set-upstream branch-name origin/branch-name。</p>
+<p>有时候配置文件、缓存文件什么的我们是不需要推送拉取的，在Git工作区的根目录下创建一个特殊的.gitignore文件，然后把要忽略的文件名填进去，Git就会自动忽略这些文件。GitHub中各种忽略推送的配置文件：<a href="https://github.com/github/gitignore" target="_blank" rel="noopener">https://github.com/github/gitignore</a></p>
+<p><strong>六、标签管理</strong></p>
+<p>发布一个版本时，我们通常先在版本库中打一个标签，这样，就唯一确定了打标签时刻的版本。将来无论什么时候，取某个标签的版本，就是把那个打标签的时刻的历史版本取出来。所以，标签也是版本库的一个快照。</p>
+<p>git checkout master ## 切换到 master 分支<br>git tag v1.0 ## 打上 v1.0 标签</p>
+<p>git tag ## 查看所有标签 标签不是按时间顺序列出，而是按字母排序的</p>
+<p>git show v1.0 ## 查看标签信息</p>
+<p>git log –pretty=oneline –abbrev-commit ## 查看历史版本<br>git tag v0.9 6224937 ## 打标签到指定版本</p>
+<p>git tag -a v0.1 -m “version 0.1 released” 3628164 ## 创建带有说明的标签，用-a指定标签名，-m指定说明文字</p>
+<p>git tag -s v0.2 -m “signed version 0.2 released” fec145a ## 通过-s用私钥签名一个标签</p>
+<p>签名采用PGP签名，因此，必须首先安装gpg（GnuPG），如果没有找到gpg，或者没有gpg密钥对，就会报错</p>
+<p>参考：<a href="http://www.liaoxuefeng.com/wiki/0013739516305929606dd18361248578c67b8067c8c017b000" target="_blank" rel="noopener">http://www.liaoxuefeng.com/wiki/0013739516305929606dd18361248578c67b8067c8c017b000</a></p>
+<p>手册：<a href="http://pan.baidu.com/s/1bndfEDx" target="_blank" rel="noopener">http://pan.baidu.com/s/1bndfEDx</a></p>
+
+        </article>
+    </div>
+</section>
+
+    </main>
+    <footer class="footer"> Copyright 2013 - 2019 Ruesin. All Rights Reserved </footer>
+  </body>
+</html>

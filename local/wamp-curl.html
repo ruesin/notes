@@ -1,0 +1,59 @@
+<!DOCTYPE HTML>
+<html>
+  <head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+    <title>wamp在win64位下PHP环境无法开启php_curl扩展组件-信口开河</title>
+    <meta name="keywords" content="Ruesin,信口开河">
+    <meta name="description" content="至于你信不信，反正我是信了。">
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+  <body>
+    
+<header class="header">
+    <nav class="navbar">
+        <ul>
+            
+            <li><a class="header-nav-link" href="/">首页</a></li>
+            
+            <li><a class="header-nav-link" href="/categories">分类</a></li>
+            
+            <li><a class="header-nav-link" href="/archives">归档</a></li>
+            
+            <li><a class="header-nav-link" href="/tags">标签</a></li>
+            
+            <li><a class="header-nav-link" href="https://github.com/ruesin/notes">Github</a></li>
+            
+            <li><a class="header-nav-link" href="https://ruesin.github.io/php-tree">PHP技能树</a></li>
+            
+            <li><a class="header-nav-link" href="https://www.xinkoukaihe.com">老博客</a></li>
+            
+        </ul>
+    </nav>
+</header>
+    <main class="main">
+      <!-- 内容页 -->
+<section class="section">
+    <div class="post-container">
+        <div class="post-header">
+                <h1>wamp在win64位下PHP环境无法开启php_curl扩展组件</h1>
+                <!-- <div class="post-meta">2014-07-11</div> -->
+        </div>
+        <article class="post-content">
+            <p>工作中用到了Curl，去Wamp设置里勾选开启Curl后，检测环境还是没有开启，php程序显示Call to undefined function curl_init()错误。<br>以为是wamp设置的bug，去php.ini里看了下，扩展已经开启了。其实出现这种情况一般都是因为没有加载到php的扩展文件导致的。<br>逐步检查：<br>1.配置文件已修改<br>extension=php_curl.dll<br>2.扩展目录中存在扩展文件<br>php_curl.dll<br>3.php.ini 中扩展目录指向正常<br>extension_dir = “e:/host/bin/php/php5.3.13/ext/”</p>
+<p>检查到这里我就有点百思不得其解了。</p>
+<p>后来考虑是不是这扩展文件有错(这一点实在没有去怀疑过…)，于是去单独下载了个对应版本的64位PHP，将php_curl.dll覆盖，重启服务，正常了。。。</p>
+<p>看来真的是文件有错，总之是解决了。</p>
+<p>具体解决步骤如下：<br>1.配置文件开启php_curl.dll(去掉前面的’;’)。<br>2.下载修复过的php_curl.dll文件，扩展目录下。<br>3.重新启动wamp服务。</p>
+<p>本地开发环境其实没必要自己搭配的，毕竟不是用做服务器的，开发为的不就是快速高效吗，本地高效开发环境我还是比较推荐wamp的，wamp所有的工作都已经帮你配置完成了，拥有非常多的设置选项可以按需选择，非常易用。当然，你也可以手动去修改配置文件。</p>
+
+        </article>
+    </div>
+</section>
+
+    </main>
+    <footer class="footer"> Copyright 2013 - 2019 Ruesin. All Rights Reserved </footer>
+  </body>
+</html>

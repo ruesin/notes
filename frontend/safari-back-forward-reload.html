@@ -1,0 +1,69 @@
+<!DOCTYPE HTML>
+<html>
+  <head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+    <title>safari浏览器下前进后退重载页面-信口开河</title>
+    <meta name="keywords" content="Ruesin,信口开河">
+    <meta name="description" content="至于你信不信，反正我是信了。">
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+  <body>
+    
+<header class="header">
+    <nav class="navbar">
+        <ul>
+            
+            <li><a class="header-nav-link" href="/">首页</a></li>
+            
+            <li><a class="header-nav-link" href="/categories">分类</a></li>
+            
+            <li><a class="header-nav-link" href="/archives">归档</a></li>
+            
+            <li><a class="header-nav-link" href="/tags">标签</a></li>
+            
+            <li><a class="header-nav-link" href="https://github.com/ruesin/notes">Github</a></li>
+            
+            <li><a class="header-nav-link" href="https://ruesin.github.io/php-tree">PHP技能树</a></li>
+            
+            <li><a class="header-nav-link" href="https://www.xinkoukaihe.com">老博客</a></li>
+            
+        </ul>
+    </nav>
+</header>
+    <main class="main">
+      <!-- 内容页 -->
+<section class="section">
+    <div class="post-container">
+        <div class="post-header">
+                <h1>safari浏览器下前进后退重载页面</h1>
+                <!-- <div class="post-meta">2015-10-26</div> -->
+        </div>
+        <article class="post-content">
+            <p>程序中有太多的地方需要处理完事件后，返回到上一页，并且要重载页面，显示最新内容。因为之前一直是做PC端的，这次做的是嵌入到APP中的wap，也习惯性的使用了 history.go(-1);，起先并没有注意到这个细节，后来被他人提醒才发现，在safari下保存成功后退上一步后，页面还是老页面，并没有重新加载。</p>
+<p>经过各种调试、查询，发现是safari的缓存机制的问题，说是为客户体验着想，而在网上查，也大部分都是说怎么设置的，并没有涉及到代码层。由于当时时间紧张，又有其他事情做，便搁置未解决，暂时使用了location.href，但是这样又有了问题，跳转是没事儿了，可是APP上加的后退history.go(-1)，即：使用正常后退时，又出问题了，会返回到实际上是往前的一步。</p>
+<p>想了各种套层，替换历史记录的方法，最终都觉得不是可行的办法，今日又静心搜索了下，找到一种可行的办法，在页面头部加上：</p>
+<script>window.onunload=function(){};</script>
+
+<p>注意：是加在要后退重载的也页面头部，至少目前是好使了。</p>
+<p>下面是网搜的其他办法，有的试了（不好使），有的嫌太繁琐没有试验，仅作留存。</p>
+<p>在页面中加隐藏框架  </p>
+<iframe style="”height:0px;width:0px;visibility:hidden”" src="”about:blank”"></iframe>
+
+<p>头部加meta标签  </p>
+<meta http-equiv="”pragma”" content="”no-cache”">  
+<meta http-equiv="”Cache-Control”" content="”no-store”">  
+<meta http-equiv="”Expires”" content="”0″">
+
+<p>其他杂七杂八的各种方法，就不一一罗列了，有兴趣的朋友可以谷歌、百度。</p>
+
+        </article>
+    </div>
+</section>
+
+    </main>
+    <footer class="footer"> Copyright 2013 - 2019 Ruesin. All Rights Reserved </footer>
+  </body>
+</html>

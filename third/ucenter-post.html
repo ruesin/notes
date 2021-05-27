@@ -1,0 +1,115 @@
+<!DOCTYPE HTML>
+<html>
+  <head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+    <title>Ucenter接口请求数据流程剖析-信口开河</title>
+    <meta name="keywords" content="Ruesin,信口开河">
+    <meta name="description" content="至于你信不信，反正我是信了。">
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+  <body>
+    
+<header class="header">
+    <nav class="navbar">
+        <ul>
+            
+            <li><a class="header-nav-link" href="/">首页</a></li>
+            
+            <li><a class="header-nav-link" href="/categories">分类</a></li>
+            
+            <li><a class="header-nav-link" href="/archives">归档</a></li>
+            
+            <li><a class="header-nav-link" href="/tags">标签</a></li>
+            
+            <li><a class="header-nav-link" href="https://github.com/ruesin/notes">Github</a></li>
+            
+            <li><a class="header-nav-link" href="https://ruesin.github.io/php-tree">PHP技能树</a></li>
+            
+            <li><a class="header-nav-link" href="https://www.xinkoukaihe.com">老博客</a></li>
+            
+        </ul>
+    </nav>
+</header>
+    <main class="main">
+      <!-- 内容页 -->
+<section class="section">
+    <div class="post-container">
+        <div class="post-header">
+                <h1>Ucenter接口请求数据流程剖析</h1>
+                <!-- <div class="post-meta">2014-12-05</div> -->
+        </div>
+        <article class="post-content">
+            <p>有用到Ucenter的朋友想来大部分都会搭建环境、配置应用，而一般也仅仅是停留在使用Ucenter，不涉及到接口的开发，所以除了需要开发时程序员会追程序的流程，应该很少有人会在意这些吧？</p>
+<p>所谓Ucenter，就是指用户中心的意思，也就是多个应用用户打通，实现单点登录。原理也很简单，Ucenter提供各种操作的接口，供多个应用请求，各站点共用一个用户中心，各站点数据共用统一，方便用户管理和使用。</p>
+<p>本文就以新建一个订单接口为例，和大家一起剖析下Ucenter的整个请求的流程，注意前提是已经将应用连通了哦，不太会的朋友可以去用Ucenter指定支持的项目做实验，比如Ecmall、ecshop、discuz等，博主这篇文章就是在Ecmall下完成的。</p>
+<p>1.引用ucenter客户端文件</p>
+<p><code>include (ROOT_PATH . &#39;/uc_client/client.php&#39;);</code>2.创建订单操作类</p>
+<pre><code>class UcPassportOrder
+{
+    function create_order($data){
+        return outer_call(&#39;uc_create_order&#39;, array($data));
+    }
+}</code></pre><p>3.实例化订单操作类并调用创建订单方法</p>
+<pre><code>$Uc = new UcPassportOrder();
+$Uc-&gt;create_order($data);</code></pre><p>4.自动调用client文件里的uc_create_order()方法</p>
+<pre><code>function uc_create_order ($data)
+{
+    $return = call_user_func(UC_API_FUNC, &#39;order&#39;, &#39;create_order&#39;, array(&#39;data&#39;=&gt;$data));
+    return $return;
+}</code></pre><p>5.请求ucenter接口控制器方法。</p>
+<p>根据请求api的方法确定请求的类型是mysql还是post</p>
+<p><code>define(&#39;UC_API_FUNC&#39;, UC_CONNECT == &#39;mysql&#39; ? &#39;uc_api_mysql&#39; : &#39;uc_api_post&#39;);</code>我们这里就已post为例，其实mysql是一样的，只不过post的是远程的，mysql请求的是本地的，其他的方法啦，数据啦完全都是一样的。</p>
+<p>所以我们要请求的是服务端 order控制器下的create_order方法。control/order.php</p>
+<pre><code>class ordercontrol extends base {
+
+    function __construct() {
+        $this-&gt;orderscontrol();
+    }
+
+    function orderscontrol() {
+        parent::__construct();
+        $this-&gt;load(&#39;order&#39;); //加载订单模型
+    }
+
+    function oncreate_order(){
+        $this-&gt;init_input();
+        $data = $this-&gt;input(&#39;data&#39;);
+        $status = $_ENV[&#39;order&#39;]-&gt;create($data);//请求订单模型里的create方法
+        if($status){
+            return $status;
+        } else {
+            return 0;
+        }
+    }
+}</code></pre><p>6.请求order订单模型下的方法，实现数据操作<br>/model/order.php</p>
+<pre><code>class ordermodel {
+
+    var $db;
+    var $base;
+
+    function __construct(&amp;$base) {
+        $this-&gt;ordermodel($base);
+    }
+
+    function ordermodel(&amp;$base) {
+        $this-&gt;base = $base;
+        $this-&gt;db = $base-&gt;db;
+    }
+
+    function create($data){
+        $return = $this-&gt;db-&gt;insert(&quot;order&quot;,$data);
+        return $return;
+    }
+}</code></pre><p>到此为止，客户端对服务端的请求已经完成，剩下的就是服务端一步步将结果返回给客户端。</p>
+
+        </article>
+    </div>
+</section>
+
+    </main>
+    <footer class="footer"> Copyright 2013 - 2019 Ruesin. All Rights Reserved </footer>
+  </body>
+</html>

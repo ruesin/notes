@@ -1,0 +1,72 @@
+<!DOCTYPE HTML>
+<html>
+  <head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+    <title>Ecstore后台管理新加一种页面模版类型供前台渲染使用-信口开河</title>
+    <meta name="keywords" content="Ruesin,信口开河">
+    <meta name="description" content="至于你信不信，反正我是信了。">
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+  <body>
+    
+<header class="header">
+    <nav class="navbar">
+        <ul>
+            
+            <li><a class="header-nav-link" href="/">首页</a></li>
+            
+            <li><a class="header-nav-link" href="/categories">分类</a></li>
+            
+            <li><a class="header-nav-link" href="/archives">归档</a></li>
+            
+            <li><a class="header-nav-link" href="/tags">标签</a></li>
+            
+            <li><a class="header-nav-link" href="https://github.com/ruesin/notes">Github</a></li>
+            
+            <li><a class="header-nav-link" href="https://ruesin.github.io/php-tree">PHP技能树</a></li>
+            
+            <li><a class="header-nav-link" href="https://www.xinkoukaihe.com">老博客</a></li>
+            
+        </ul>
+    </nav>
+</header>
+    <main class="main">
+      <!-- 内容页 -->
+<section class="section">
+    <div class="post-container">
+        <div class="post-header">
+                <h1>Ecstore后台管理新加一种页面模版类型供前台渲染使用</h1>
+                <!-- <div class="post-meta">2014-09-15</div> -->
+        </div>
+        <article class="post-content">
+            <p>本文写的是在后台模版管理→页面管理→新增页面 时，左侧多加一种页面类型，前台渲染时可以使用相应模版。</p>
+<p>在二次开发的时候可能极少用到此处，因为官方提供的页面模版类型已经基本够用了。但是在新增APP时有可能会用到。</p>
+<p>首先翻看官方自带的这些，可以发现这些是在site APP下控制的，根据Ecstore的惯常手段，肯定不可能这么笨的写死，每次都改这里，肯定是写在扩展中了。</p>
+<p>是有个扩展是网站主题模版的。我们就以抽奖APP做为例子吧。首先在扩展文件中写下埋点。</p>
+<pre><code>&lt;service id=&quot;site.site_theme_tmpl&quot;&gt;
+    &lt;class&gt;draw_theme_tmpl&lt;/class&gt;
+&lt;/service&gt;</code></pre><p>然后在对应埋点文件里添加方法</p>
+<pre><code>public function __get_tmpl_list(){
+    $ctl = array(
+        &#39;draw&#39; =&gt; &#39;抽奖活动详细页&#39;
+    );
+        return $ctl;
+}</code></pre><p>这时我们去看后台→站点→模版列表→页面管理→添加新页面，就可以看到新增的页面类型了。然后我们添加一个页面，随便修改下保存。</p>
+<p><a href="/images/2014/09/set_tmpl1.jpg"><img src="/images/2014/09/set_tmpl1.jpg" alt="set_tmpl1"></a></p>
+<p>在前台渲染方法中加入 $this-&gt;set_tmpl(‘draw’); 即可。</p>
+<p><a href="/images/2014/09/set_tmpl2.jpg"><img src="/images/2014/09/set_tmpl2.jpg" alt="set_tmpl2"></a></p>
+<p>注意，可能有朋友会把这个方法和下面两个方法弄混。</p>
+<p>$this-&gt;page();<br>$this-&gt;set_tmpl_file();</p>
+<p>1.$this-&gt;set_tmpl(‘draw’); //是指定要用哪个类型的模版，如果指定模版文件就用指定的，没有指定就用当前类型下的默认文件；<br>2.$this-&gt;set_tmpl_file(); //是指具体用哪个模版文件<br>3.$this-&gt;page(‘site/index.html’); //是指渲染到哪个页面，用来替换模版中的&lt;{main}&gt;。</p>
+
+        </article>
+    </div>
+</section>
+
+    </main>
+    <footer class="footer"> Copyright 2013 - 2019 Ruesin. All Rights Reserved </footer>
+  </body>
+</html>

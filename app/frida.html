@@ -1,0 +1,92 @@
+<!DOCTYPE HTML>
+<html>
+  <head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+    <title>frida 使用记录-信口开河</title>
+    <meta name="keywords" content="Ruesin,信口开河">
+    <meta name="description" content="至于你信不信，反正我是信了。">
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+  <body>
+    
+<header class="header">
+    <nav class="navbar">
+        <ul>
+            
+            <li><a class="header-nav-link" href="/">首页</a></li>
+            
+            <li><a class="header-nav-link" href="/categories">分类</a></li>
+            
+            <li><a class="header-nav-link" href="/archives">归档</a></li>
+            
+            <li><a class="header-nav-link" href="/tags">标签</a></li>
+            
+            <li><a class="header-nav-link" href="https://github.com/ruesin/notes">Github</a></li>
+            
+            <li><a class="header-nav-link" href="https://ruesin.github.io/php-tree">PHP技能树</a></li>
+            
+            <li><a class="header-nav-link" href="https://www.xinkoukaihe.com">老博客</a></li>
+            
+        </ul>
+    </nav>
+</header>
+    <main class="main">
+      <!-- 内容页 -->
+<section class="section">
+    <div class="post-container">
+        <div class="post-header">
+                <h1>frida 使用记录</h1>
+                <!-- <div class="post-meta">2021-04-09</div> -->
+        </div>
+        <article class="post-content">
+            <h2 id="介绍"><a href="#介绍" class="headerlink" title="介绍"></a>介绍</h2><ul>
+<li>官方文档：<a href="https://frida.re/docs/home/" target="_blank" rel="noopener">https://frida.re/docs/home/</a></li>
+<li>快速开发：<a href="https://github.com/metmit/easyFrida" target="_blank" rel="noopener">https://github.com/metmit/easyFrida</a></li>
+</ul>
+<p>Frida 是一款基于 Python &amp; Javascript 的 Hook 框架，可以运行在Win、Mac、Linux、Android、IOS等平台上。</p>
+<p>和Xposed、hookzz等框架相比，frida 的动态调试更加灵活。</p>
+<p>Frida 使用动态二进制插桩技术，在程序运行期间，插入额外的代码到内存空间，动态监视、修改应用程序，对可执行文件没有任何改变。</p>
+<h2 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h2><p><strong>！！！server与client版本必须保持一致！！！</strong></p>
+<h3 id="安装组件"><a href="#安装组件" class="headerlink" title="安装组件"></a>安装组件</h3><pre><code>$ pip3 install frida-tools==8.0.1
+$ pip3 install frida==12.10.4</code></pre><p>###安装 server</p>
+<p>打开 <a href="https://github.com/frida/frida/releases" target="_blank" rel="noopener">下载页</a> ，找到对应手机架构、对应Client版本的包。</p>
+<p>比如模拟器使用x86架构（frida-server-xx.xx.xx-android-x86.xz）、手机使用arm架构（frida-server-xx.xx.xx-android-arm.xz），注意是否为64位。</p>
+<pre><code>$ wget https://github.com/frida/frida/releases/download/12.10.4/frida-server-12.10.4-android-arm64.xz
+$ tar -xf frida-server-12.10.4-android-arm64.xz
+$ adb push ./frida-server-12.10.4-android-arm64 /data/local/tmp/fs
+$ adb shell
+
+begonia:/ $ su 
+begonia:/ # chmod +x /data/local/tmp/fs</code></pre><h3 id="启动服务"><a href="#启动服务" class="headerlink" title="启动服务"></a>启动服务</h3><pre><code>begonia:/ # /data/local/tmp/fs
+或者
+begonia:/ # /data/local/tmp/fs -l 0.0.0.0:13764</code></pre><h3 id="快速启动"><a href="#快速启动" class="headerlink" title="快速启动"></a>快速启动</h3><pre><code>$ adb shell &lt; ./start.txt</code></pre><h2 id="问题"><a href="#问题" class="headerlink" title="问题"></a>问题</h2><ol>
+<li><p>有时会有SELinux问题：</p>
+<pre><code>begonia:/ # setenforce 0
+setenforce: SELinux is disabled</code></pre></li>
+<li><p>如果server和client版本不一致，保持两段版本一致：</p>
+<pre><code>$ frida-ps -U
+Failed to enumerate processes: unable to communicate with remote frida-server; please ensure that major versions match and that the remote Frida has the feature you are trying to use</code></pre></li>
+<li><p>如果在64位架构上运行了32的服务，替换对应架构版本的服务：</p>
+<pre><code>frida.NotSupportedError: unable to handle 64-bit processes due to build configuration</code></pre></li>
+<li><p>如果已存在进程占用端口，杀死遗留进程：</p>
+<pre><code>Unable to start: Error binding to address 127.0.0.1:27042: Address already in use
+</code></pre></li>
+</ol>
+<p>begonia:/ # ps -A | grep fs<br>begonia:/ # kill 111<br>begonia:/ # /data/local/tmp/fs</p>
+<pre><code>
+5. 如果打开了Magisk Hide，需要关闭Hide：</code></pre><p>frida.NotSupportedError: unable to access zygote64 while preparing for app launch; try disabling Magisk Hide in case it is active<br>```</p>
+<ol start="6">
+<li>尽量不要和Xposed同时hook一个方法。</li>
+</ol>
+
+        </article>
+    </div>
+</section>
+
+    </main>
+    <footer class="footer"> Copyright 2013 - 2019 Ruesin. All Rights Reserved </footer>
+  </body>
+</html>

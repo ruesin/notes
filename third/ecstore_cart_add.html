@@ -1,0 +1,64 @@
+<!DOCTYPE HTML>
+<html>
+  <head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+    <title>Ecstore普通商品加入购物车流程-信口开河</title>
+    <meta name="keywords" content="Ruesin,信口开河">
+    <meta name="description" content="至于你信不信，反正我是信了。">
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+  <body>
+    
+<header class="header">
+    <nav class="navbar">
+        <ul>
+            
+            <li><a class="header-nav-link" href="/">首页</a></li>
+            
+            <li><a class="header-nav-link" href="/categories">分类</a></li>
+            
+            <li><a class="header-nav-link" href="/archives">归档</a></li>
+            
+            <li><a class="header-nav-link" href="/tags">标签</a></li>
+            
+            <li><a class="header-nav-link" href="https://github.com/ruesin/notes">Github</a></li>
+            
+            <li><a class="header-nav-link" href="https://ruesin.github.io/php-tree">PHP技能树</a></li>
+            
+            <li><a class="header-nav-link" href="https://www.xinkoukaihe.com">老博客</a></li>
+            
+        </ul>
+    </nav>
+</header>
+    <main class="main">
+      <!-- 内容页 -->
+<section class="section">
+    <div class="post-container">
+        <div class="post-header">
+                <h1>Ecstore普通商品加入购物车流程</h1>
+                <!-- <div class="post-meta">2014-08-20</div> -->
+        </div>
+        <article class="post-content">
+            <p>做电商开发，怎么能不涉及到购物车和订单？没有接触之前，很多人都以为购物车是非常复杂的，其实购物车数据是很简单的，一般只会记录产品ID、会员标识、购物车标识、货品信息等最基础的数据。<br>本文就通过剖析Ecstore加入购物车的流程，大致梳理下普通电商系统的加入购物车流程。</p>
+<p>注意：<br>1.本文介绍的是普通商品，兑换商品、团购商品等流程大致是一样的，依葫芦画瓢即可。<br>2.Ecstore的普通商品购物车数据保存有两种形式，在用户未登录的情况下是保存在session中的，登录后会自动更新到购物车项目表里。<br>3.涉及到ecstore特有的扩展的，由于本文只是介绍普通商品，大家可以选择性忽略，也可去官方文档查看扩展介绍。</p>
+<p>下图为博主大致画了下Ecstore普通商品加入购物车时的流程图。</p>
+<p><a href="/images/2014/08/ecstore_cart_add.jpg"><img src="/images/2014/08/ecstore_cart_add.jpg" alt="ecstore_cart_add"></a></p>
+<p>1.b2c_ctl_cart add()<br>加入购物车的对外接口，可以直接连接访问的方法。此方法中首先会对POST过来的数据进行各种验证，然后通过扩展get_data()方法处理下POST过来的加入购物车商品的数据。</p>
+<p>2.b2c_cart_objects add_object()<br>算是个统一添加购物车按钮的方法，没有特殊处理，直接调用add_object()。</p>
+<p>3.b2c_cart_object_goods add_object()<br>首先，获取到要加入购物车的数据的标识、会员标识；然后，对要加入购物车的数据进行验证；次之，检查购物车中是否已存在当前商品，确定是插入还是更新；最后调取 b2c_mdl_cart_objects-&gt;save()方法保存数据。</p>
+<p>4.b2c_mdl_cart_objects save()<br>保存数据之前的再次验证保存的信息。</p>
+<p>5.b2c_mdl_cart_objects parent_save()<br>根据是否为快速购买，是否为登录用户，将数据保存至对应的session或数据库中。快速购买商品保存在session中。</p>
+<p>6.b2c_ctl_cart add()<br>加入购物车成功后，会根据不同的类型，有不同的操作。快速购买商品会直接跳转到订单确认页；普通商品回调方法，获取当前购物车的数据情况。</p>
+<p>其实加入购物车的流程是非常简单的，只是在使用过程中“妖魔化”了。无非就是POST数据，验证信息，获取信息，验证信息，保存信息。尽量不直接保存POST数据，严密验证即可。</p>
+
+        </article>
+    </div>
+</section>
+
+    </main>
+    <footer class="footer"> Copyright 2013 - 2019 Ruesin. All Rights Reserved </footer>
+  </body>
+</html>

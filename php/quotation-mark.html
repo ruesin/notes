@@ -1,0 +1,66 @@
+<!DOCTYPE HTML>
+<html>
+  <head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+    <title>php中单引号和双引号的区别-信口开河</title>
+    <meta name="keywords" content="Ruesin,信口开河">
+    <meta name="description" content="至于你信不信，反正我是信了。">
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+  <body>
+    
+<header class="header">
+    <nav class="navbar">
+        <ul>
+            
+            <li><a class="header-nav-link" href="/">首页</a></li>
+            
+            <li><a class="header-nav-link" href="/categories">分类</a></li>
+            
+            <li><a class="header-nav-link" href="/archives">归档</a></li>
+            
+            <li><a class="header-nav-link" href="/tags">标签</a></li>
+            
+            <li><a class="header-nav-link" href="https://github.com/ruesin/notes">Github</a></li>
+            
+            <li><a class="header-nav-link" href="https://ruesin.github.io/php-tree">PHP技能树</a></li>
+            
+            <li><a class="header-nav-link" href="https://www.xinkoukaihe.com">老博客</a></li>
+            
+        </ul>
+    </nav>
+</header>
+    <main class="main">
+      <!-- 内容页 -->
+<section class="section">
+    <div class="post-container">
+        <div class="post-header">
+                <h1>php中单引号和双引号的区别</h1>
+                <!-- <div class="post-meta">2013-12-31</div> -->
+        </div>
+        <article class="post-content">
+            <p>刚接触php的童鞋在看教程时可能会遇到这个问题，教程上有的时候用单引、有的时候用双引，导致很多朋友分不清单引号和双引号的区别，最后会产生单引等于双引的概念。（我曾经有很长一段时间是这样认为的）</p>
+<p>后来听说单引运行速度比双引的快、就开始一直用单引。但具体怎么快一直没深究过。</p>
+<p>前段时间又从基础看了一遍买的书、发现了这点，今天在php吧又看到有朋友问，遂写此文与大家共享下，不足之处还望指正。</p>
+<p>单引与双引在功能上有明显的区别——双引号字符串支持变量的解析和转义字符。</p>
+<p>在解析变量时，解析器会尽可能多地取得“$”后面的字符以组成一个合法的变量名。可以用大括号把变量名括起来，已明确表明一个变量。</p>
+<pre><code>$name=&#39;Ruesin&#39;;
+echo &#39;my name is $name&#39;;      //结果：my name is $name
+echo &quot;my name is $name&quot;;      //结果：my name is Ruesin
+echo &quot;my name is ${name}&quot;;    //结果：my name is Ruesin
+echo &quot;my name is {$name}&quot;;    //结果：my name is Ruesin
+echo &quot;my name is \$name&quot;;      //结果：my name is $name</code></pre><p>如果要在双引号中包含双引号就必须用反斜线进行转义(单引号不转义)</p>
+<p>定义简单的字符串时，使用单引号是更加高效的处理方式。使用双引号时，PHP将浪费一些开销处理转义和变量解析。因此没有特别需求应使用单引号。</p>
+<p>另外、网上还有好多其他的解释、我在这里就不复制了，想要更深入了解的朋友可以去百度一下。</p>
+
+        </article>
+    </div>
+</section>
+
+    </main>
+    <footer class="footer"> Copyright 2013 - 2019 Ruesin. All Rights Reserved </footer>
+  </body>
+</html>

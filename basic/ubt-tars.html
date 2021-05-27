@@ -1,0 +1,256 @@
+<!DOCTYPE HTML>
+<html>
+  <head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+    <title>Ubuntu 16.04 部署 Tars-PHP 环境-信口开河</title>
+    <meta name="keywords" content="Ruesin,信口开河">
+    <meta name="description" content="至于你信不信，反正我是信了。">
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+  <body>
+    
+<header class="header">
+    <nav class="navbar">
+        <ul>
+            
+            <li><a class="header-nav-link" href="/">首页</a></li>
+            
+            <li><a class="header-nav-link" href="/categories">分类</a></li>
+            
+            <li><a class="header-nav-link" href="/archives">归档</a></li>
+            
+            <li><a class="header-nav-link" href="/tags">标签</a></li>
+            
+            <li><a class="header-nav-link" href="https://github.com/ruesin/notes">Github</a></li>
+            
+            <li><a class="header-nav-link" href="https://ruesin.github.io/php-tree">PHP技能树</a></li>
+            
+            <li><a class="header-nav-link" href="https://www.xinkoukaihe.com">老博客</a></li>
+            
+        </ul>
+    </nav>
+</header>
+    <main class="main">
+      <!-- 内容页 -->
+<section class="section">
+    <div class="post-container">
+        <div class="post-header">
+                <h1>Ubuntu 16.04 部署 Tars-PHP 环境</h1>
+                <!-- <div class="post-meta">2018-12-12</div> -->
+        </div>
+        <article class="post-content">
+            <h2 id="准备"><a href="#准备" class="headerlink" title="准备"></a>准备</h2><pre><code>## 本地虚拟机开发时配置ssh，更改源
+vim /etc/ssh/sshd_config
+service ssh restart 
+cp /etc/apt/sources.list /etc/apt/sources.list.bak 
+sed -i &quot;s#cn.archive.ubuntu.com#mirrors.aliyun.com#g&quot; /etc/apt/sources.list 
+sed -i &quot;s#security.ubuntu.com#mirrors.aliyun.com#g&quot; /etc/apt/sources.list 
+
+## 更新 安装必要软件
+apt update
+apt upgrade
+apt install -y gcc binutils make linux-source autoconf g++   
+apt autoremove
+
+apt install -y git bison flex cmake zlib1g zlib1g-dev libncurses5-dev
+
+wget -qO- https://raw.githubusercontent.com/creationix/nvm/v0.33.11/install.sh | bash
+source ~/.bashrc
+nvm install v8.11.3
+npm install -g pm2 --registry=https://registry.npm.taobao.org</code></pre><h2 id="MySQL"><a href="#MySQL" class="headerlink" title="MySQL"></a>MySQL</h2><pre><code># wget https://cdn.mysql.com//Downloads/MySQL-5.6/mysql-5.6.42.tar.gz
+# tar zvxf mysql-5.6.42.tar.gz
+# mv mysql-5.6.42 /usr/local/mysql
+# cd /usr/local/mysql
+# cmake . -DCMAKE_INSTALL_PREFIX=/usr/local/mysql -DWITH_INNOBASE_STORAGE_ENGINE=1 -DMYSQL_USER=mysql -DDEFAULT_CHARSET=utf8 -DDEFAULT_COLLATION=utf8_general_ci
+# make
+# make install
+
+# useradd mysql
+# chown -R mysql:mysql /usr/local/mysql/data/
+
+# cp support-files/mysql.server /etc/init.d/mysqld
+
+# chmod 755 /etc/init.d/mysqld  
+# systemctl enable mysqld.service ## /lib/systemd/systemd-sysv-install enable mysqld
+
+# chmod +x scripts/mysql_install_db
+# ./scripts/mysql_install_db --user=mysql
+
+# vim /usr/local/mysql/my.cnf
+...
+[mysqld]
+innodb_buffer_pool_size = 128M
+
+log_bin
+
+basedir = /usr/local/mysql
+datadir = /usr/local/mysql/data
+
+socket = /tmp/mysql.sock
+
+bind-address=192.168.56.101
+
+join_buffer_size = 128M
+sort_buffer_size = 2M
+read_rnd_buffer_size = 2M
+
+sql_mode=NO_ENGINE_SUBSTITUTION,STRICT_TRANS_TABLES
+...
+
+# service mysqld start
+
+# vim /etc/profile
+...
+PATH=$PATH:/usr/local/mysql/bin
+export PATH
+...
+# source /etc/profile
+
+# ./bin/mysqladmin -u root password &#39;ruesin&#39;
+# ./bin/mysqladmin -u root -h 182.168.56.101 password &#39;ruesin&#39; 
+或
+# ./bin/mysql_secure_installation
+# mysql -u root -p
+mysql&gt; use mysql;
+mysql&gt; UPDATE user SET `host`=&#39;%&#39; WHERE `user`=&#39;root&#39; AND `host`=&#39;localhost&#39;;
+mysql&gt; exit;
+
+# service mysqld restart
+
+# echo &#39;/usr/local/mysql/lib/&#39; &gt;&gt; /etc/ld.so.conf 
+# ldconfig</code></pre><h2 id="Framework"><a href="#Framework" class="headerlink" title="Framework"></a>Framework</h2><pre><code>git clone https://github.com/TarsCloud/Tars.git
+cd Tars
+git submodule update --init --recursive framework
+
+cd framework/build/
+chmod u+x build.sh
+./build.sh prepare
+./build.sh all
+./build.sh install
+
+##Tars数据库环境初始化
+mysql -uroot -pruesin -e &quot;grant all on *.* to &#39;tars&#39;@&#39;%&#39; identified by &#39;tars2015&#39; with grant option;&quot;
+mysql -uroot -pruesin -e &quot;grant all on *.* to &#39;tars&#39;@&#39;localhost&#39; identified by &#39;tars2015&#39; with grant option;&quot;
+mysql -uroot -pruesin -e &quot;grant all on *.* to &#39;tars&#39;@&#39;192.168.56.101&#39; identified by &#39;tars2015&#39; with grant option;&quot;
+mysql -uroot -pruesin -e &quot;flush privileges;&quot;
+
+cd ../sql
+sed -i &quot;s/192.168.2.131/192.168.56.101/g&quot; `grep 192.168.2.131 -rl ./*`
+sed -i &quot;s/db.tars.com/192.168.56.101/g&quot; `grep db.tars.com -rl ./*`
+sed -i &quot;s/10.120.129.226/192.168.56.101/g&quot; `grep 10.120.129.226 -rl ./*`
+
+chmod u+x exec-sql.sh
+sed -i &quot;s/root@appinside/ruesin/g&quot; `grep &#39;root@appinside&#39; -rl ./*`
+./exec-sql.sh
+
+cd ../build
+make framework-tar
+make tarsstat-tar
+make tarsnotify-tar
+make tarsproperty-tar
+make tarslog-tar
+make tarsquerystat-tar
+make tarsqueryproperty-tar
+
+mkdir -p /usr/local/app/tars/
+cp framework.tgz /usr/local/app/tars/
+cd /usr/local/app/tars
+tar xzfv framework.tgz
+
+sed -i &quot;s/192.168.2.131/192.168.56.101/g&quot; `grep 192.168.2.131 -rl ./*`
+sed -i &quot;s/db.tars.com/192.168.56.101/g&quot; `grep db.tars.com -rl ./*`
+sed -i &quot;s/registry.tars.com/192.168.56.101/g&quot; `grep registry.tars.com -rl ./*`
+sed -i &quot;s/web.tars.com/192.168.56.101/g&quot; `grep web.tars.com -rl ./*`
+
+chmod u+x tars_install.sh
+./tars_install.sh
+./tarspatch/util/init.sh</code></pre><h2 id="Web管理"><a href="#Web管理" class="headerlink" title="Web管理"></a>Web管理</h2><pre><code>cd ~/Tars
+git submodule update --init --recursive web
+npm install -g pm2 --registry=https://registry.npm.taobao.org
+cd web
+sed -i &quot;s/registry.tars.com/192.168.56.101/g&quot; `grep registry.tars.com -rl ./config/*`
+sed -i &quot;s/db.tars.com/192.168.56.101/g&quot; `grep db.tars.com -rl ./config/*`
+npm install --registry=https://registry.npm.taobao.org
+npm run prd
+mkdir -p /data/log/tars/
+</code></pre><p><a href="http://192.168.56.101:3000/index.html#/server" target="_blank" rel="noopener">http://192.168.56.101:3000/index.html#/server</a></p>
+<h2 id="运行"><a href="#运行" class="headerlink" title="运行"></a>运行</h2><pre><code>## db_tars 数据库中创建新表：
+
+# mysql -u root -p
+mysql&gt; use db_tars;
+mysql&gt; CREATE TABLE `t_server_notifys` (   `id` int(11) NOT NULL AUTO_INCREMENT,  `application` varchar(128) DEFAULT &#39;&#39;,  `server_name` varchar(128) DEFAULT NULL, `container_name` varchar(128) DEFAULT &#39;&#39; , `node_name` varchar(128) NOT NULL DEFAULT &#39;&#39;,  `set_name` varchar(16) DEFAULT NULL,  `set_area` varchar(16) DEFAULT NULL,  `set_group` varchar(16) DEFAULT NULL,  `server_id` varchar(100) DEFAULT NULL,  `thread_id` varchar(20) DEFAULT NULL,  `command` varchar(50) DEFAULT NULL,  `result` text,  `notifytime` datetime DEFAULT NULL,  PRIMARY KEY (`id`),  KEY `index_name` (`server_name`),  KEY `servernoticetime_i_1` (`notifytime`),  KEY `indx_1_server_id` (`server_id`),  KEY `query_index` (`application`,`server_name`,`node_name`,`set_name`,`set_area`,`set_group`) ) ENGINE=InnoDB DEFAULT CHARSET=utf8;</code></pre><p>部署其他普通基础服务`tars.tarsnotify.NotifyObj, tars.tarsstat.StatObj, tars.tarsproperty.PropertyObj, tars.tarslog.LogObj, tars.tarsquerystat.NoTarsObj, tars.tarsqueryproperty.NoTarsOb<br>注意：tarsquerystat, tarsqueryproperty 使用 非tars 协议。</p>
+<pre><code>mkdir -p /data/web/client/dist/tgz
+cp /root/Tars/framework/build/*.tgz /data/web/client/dist/tgz</code></pre><p>访问 <a href="http://192.168.56.101:3000/tarsnotify.tgz" target="_blank" rel="noopener">http://192.168.56.101:3000/tarsnotify.tgz</a> 等下载。</p>
+<h2 id="PHP"><a href="#PHP" class="headerlink" title="PHP"></a>PHP</h2><pre><code># wget http://hk1.php.net/distributions/php-7.2.7.tar.gz
+# tar zvxf php-7.2.7.tar.gz
+# apt install -y libxml2 libxml2-dev
+# apt install -y libcurl4-openssl-dev pkg-config libssl-dev
+# apt install -y build-essential libexpat1-dev libgeoip-dev libpng-dev libpcre3-dev rcs zlib1g-dev mcrypt libmcrypt-dev libmhash-dev libcurl4-openssl-dev libjpeg-dev libpng-dev libwebp-dev libfreetype6 libfreetype6-dev
+# apt install -y libxslt1.1 libxslt1-dev
+
+# ./configure --prefix=/usr/local/php --with-config-file-path=/usr/local/php \
+--enable-fpm --with-fpm-user=www --with-fpm-group=www \
+--enable-mysqlnd --with-mysqli=mysqlnd --with-pdo-mysql=mysqlnd \
+--with-iconv --with-iconv-dir --enable-pcntl --enable-shmop \
+--enable-simplexml --with-libxml-dir --enable-ftp --enable-zip --enable-soap --with-curl \
+--with-openssl --enable-mbstring  --with-zlib --enable-xml \
+--enable-sockets --enable-inline-optimization \
+--with-png-dir --with-freetype-dir --with-gd --with-jpeg-dir \
+--enable-bcmath \
+--disable-rpath --enable-sysvsem \
+--enable-mbregex --enable-intl   \
+--with-mhash  --with-xmlrpc \
+--with-gettext --disable-fileinfo --enable-opcache --with-xsl
+
+# make
+# make install
+
+# vim /etc/profile
+export PATH=$PATH:/usr/local/php/bin:/usr/local/php/sbin
+# source /etc/profile
+
+# ln -s /usr/local/php/bin/php /usr/bin/php
+
+# cp php.ini-development /usr/local/php/php.ini
+# vim /usr/local/php/php.ini
+...
+error_log = /php_errors.log
+cgi.fix_pathinfo=0
+date.timezone = PRC
+...</code></pre><h2 id="扩展"><a href="#扩展" class="headerlink" title="扩展"></a>扩展</h2><pre><code># git clone https://github.com/TarsPHP/tars-extension.git
+# ...
+# echo &#39;extension=phptars.so&#39; &gt;&gt; /usr/local/php/php.ini
+
+# wget http://pecl.php.net/get/redis-3.1.1.tgz
+#...
+# echo &#39;extension=redis.so&#39; &gt;&gt; /usr/local/php/php.ini
+
+wget http://pecl.php.net/get/swoole-1.9.16.tgz
+...
+echo &#39;extension=swoole.so&#39; &gt;&gt; /usr/local/php/php.ini
+
+# php -r &quot;copy(&#39;https://install.phpcomposer.com/installer&#39;, &#39;composer-setup.php&#39;);&quot;
+# php composer-setup.php
+# php -r &quot;unlink(&#39;composer-setup.php&#39;);&quot;
+# mv composer.phar /usr/bin/composer
+# chmod +x /usr/bin/composer
+# composer config -g repo.packagist composer https://packagist.phpcomposer.com
+</code></pre><h2 id="报错"><a href="#报错" class="headerlink" title="报错"></a>报错</h2><ol>
+<li><p>服务初始化之后，由于不存在数据表<code>t_server_notifys</code>，会报错，创建新表即可。</p>
+</li>
+<li><p>服务监控、特性监控 报错<br><code>{&quot;level&quot;:&quot;error&quot;,&quot;message&quot;:&quot;192.168.56.1||MonitorController.js:58|line #1, Ret= -1  &quot;,&quot;timestamp&quot;:&quot;2018-11-16 16:51:41.434”}</code><br>初次安装的时候，没数据，可能出现这种情况。</p>
+</li>
+</ol>
+<p>参考:<br><a href="https://github.com/TarsCloud/Tars/blob/master/Install.zh.md" target="_blank" rel="noopener">https://github.com/TarsCloud/Tars/blob/master/Install.zh.md</a><br><a href="https://github.com/TarsCloud/Tars/blob/master/build/install.sh" target="_blank" rel="noopener">https://github.com/TarsCloud/Tars/blob/master/build/install.sh</a></p>
+
+        </article>
+    </div>
+</section>
+
+    </main>
+    <footer class="footer"> Copyright 2013 - 2019 Ruesin. All Rights Reserved </footer>
+  </body>
+</html>

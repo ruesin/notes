@@ -1,0 +1,63 @@
+<!DOCTYPE HTML>
+<html>
+  <head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+    <title>php可变变量-信口开河</title>
+    <meta name="keywords" content="Ruesin,信口开河">
+    <meta name="description" content="至于你信不信，反正我是信了。">
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+  <body>
+    
+<header class="header">
+    <nav class="navbar">
+        <ul>
+            
+            <li><a class="header-nav-link" href="/">首页</a></li>
+            
+            <li><a class="header-nav-link" href="/categories">分类</a></li>
+            
+            <li><a class="header-nav-link" href="/archives">归档</a></li>
+            
+            <li><a class="header-nav-link" href="/tags">标签</a></li>
+            
+            <li><a class="header-nav-link" href="https://github.com/ruesin/notes">Github</a></li>
+            
+            <li><a class="header-nav-link" href="https://ruesin.github.io/php-tree">PHP技能树</a></li>
+            
+            <li><a class="header-nav-link" href="https://www.xinkoukaihe.com">老博客</a></li>
+            
+        </ul>
+    </nav>
+</header>
+    <main class="main">
+      <!-- 内容页 -->
+<section class="section">
+    <div class="post-container">
+        <div class="post-header">
+                <h1>php可变变量</h1>
+                <!-- <div class="post-meta">2013-12-31</div> -->
+        </div>
+        <article class="post-content">
+            <p>$$a这样的写法曾经在百度贴吧上看过、也大概知道它的用法、只是一直没用过、也没见过具体的解释。</p>
+<p>昨天看书的时候才知道它的名字——可变变量。</p>
+<p>可变变量的变量名可以动态地设置和使用。一个可变变量使用一个普通变量的值作为该可变变量的变量名。</p>
+<pre><code>$a=&#39;hello&#39;;
+$$a=&#39;world&#39;;
+echo $a;      //输出hello
+echo $$a;     //输出world
+echo ${$a};   //输出world
+echo $hello;  //输出world</code></pre><p>要将可变变量用于数组，必须解决一个模棱两可的问题。这就是当写下$$a[1]时，解析器需要知道是想要$a[1]作为一个变量呢，还是想要$$a作为一个变量并取出该变量中索引为 [1] 的值。解决此问题的语法是，对第一种情况用${$a[1]}，对第二种情况用${$a}[1]。</p>
+<p>注意：在 PHP 的函数和类的方法中，超全局变量不可用作可变变量。</p>
+
+        </article>
+    </div>
+</section>
+
+    </main>
+    <footer class="footer"> Copyright 2013 - 2019 Ruesin. All Rights Reserved </footer>
+  </body>
+</html>

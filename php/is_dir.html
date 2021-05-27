@@ -1,0 +1,83 @@
+<!DOCTYPE HTML>
+<html>
+  <head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+    <title>PHP判断指定目录中的目录和文件。-信口开河</title>
+    <meta name="keywords" content="Ruesin,信口开河">
+    <meta name="description" content="至于你信不信，反正我是信了。">
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+  <body>
+    
+<header class="header">
+    <nav class="navbar">
+        <ul>
+            
+            <li><a class="header-nav-link" href="/">首页</a></li>
+            
+            <li><a class="header-nav-link" href="/categories">分类</a></li>
+            
+            <li><a class="header-nav-link" href="/archives">归档</a></li>
+            
+            <li><a class="header-nav-link" href="/tags">标签</a></li>
+            
+            <li><a class="header-nav-link" href="https://github.com/ruesin/notes">Github</a></li>
+            
+            <li><a class="header-nav-link" href="https://ruesin.github.io/php-tree">PHP技能树</a></li>
+            
+            <li><a class="header-nav-link" href="https://www.xinkoukaihe.com">老博客</a></li>
+            
+        </ul>
+    </nav>
+</header>
+    <main class="main">
+      <!-- 内容页 -->
+<section class="section">
+    <div class="post-container">
+        <div class="post-header">
+                <h1>PHP判断指定目录中的目录和文件。</h1>
+                <!-- <div class="post-meta">2013-12-31</div> -->
+        </div>
+        <article class="post-content">
+            <p>是在百度php吧中看到有人问的，然后在他原本的基础上修改了下。<br>修改后的代码如下：</p>
+<p>判断文件夹是否存在</p>
+<pre><code>&lt;form action=&quot;&quot; method=&quot;post&quot; name=&quot;form&quot;&gt;
+&lt;input type=&quot;text&quot; maxlength=&quot;120&quot; name=&quot;dirs&quot; size=&quot;100&quot; /&gt;
+&lt;input type=&quot;submit&quot; name=&quot;ruesin&quot; value=&quot;进入目录&quot; /&gt;
+&lt;/form&gt;
+
+////php
+if(isset($_POST[&#39;phplgx&#39;]) &amp;&amp; !empty($_POST[&#39;dirs&#39;])){
+    $dirpath=trim($_POST[&#39;dirs&#39;]);
+    if(file_exists($dirpath)){
+        $dir=opendir($dirpath);
+        while(false!==($file=readdir($dir))){
+            if($file!=&quot;.&quot;&amp;&amp; $file!=&quot;..&quot;){
+                if(is_dir($dirpath.&quot;/&quot;.$file)){
+                    echo &quot;文件夹$file&quot;;
+                }else{
+                    echo &quot;文件$file&quot;;
+                }
+            }
+        }
+    }else{
+        echo &quot;您输入的目录不正确!请重新输入&quot;;
+    }
+}else{
+    echo &quot;输入目录不能为空。&quot;;
+}
+</code></pre><p>主要改了两个地方。</p>
+<p>1、修改前if(isset($_POST[‘phplgx’]) &amp;&amp; empty($_POST[‘dirs’])) 判断的时候没有判断提交的目录为空 修改后if(isset($_POST[‘phplgx’]) &amp;&amp; !empty($_POST[‘dirs’]))</p>
+<p>2、修改前if(is_dir($file)) 修改后if(is_dir($dirpath.”/”.$file))<br>原因很简单：在w3school查一下is_dir的用法说明就很容易懂了——如果文件名存在并且为目录，则返回 true。如果 file 是一个相对路径，则按照当前工作目录检查其相对路径。</p>
+
+        </article>
+    </div>
+</section>
+
+    </main>
+    <footer class="footer"> Copyright 2013 - 2019 Ruesin. All Rights Reserved </footer>
+  </body>
+</html>

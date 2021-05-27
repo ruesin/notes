@@ -1,0 +1,215 @@
+<!DOCTYPE HTML>
+<html>
+  <head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+    <title>让你在终端飞起来 - Mac版-信口开河</title>
+    <meta name="keywords" content="Ruesin,信口开河">
+    <meta name="description" content="至于你信不信，反正我是信了。">
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+  <body>
+    
+<header class="header">
+    <nav class="navbar">
+        <ul>
+            
+            <li><a class="header-nav-link" href="/">首页</a></li>
+            
+            <li><a class="header-nav-link" href="/categories">分类</a></li>
+            
+            <li><a class="header-nav-link" href="/archives">归档</a></li>
+            
+            <li><a class="header-nav-link" href="/tags">标签</a></li>
+            
+            <li><a class="header-nav-link" href="https://github.com/ruesin/notes">Github</a></li>
+            
+            <li><a class="header-nav-link" href="https://ruesin.github.io/php-tree">PHP技能树</a></li>
+            
+            <li><a class="header-nav-link" href="https://www.xinkoukaihe.com">老博客</a></li>
+            
+        </ul>
+    </nav>
+</header>
+    <main class="main">
+      <!-- 内容页 -->
+<section class="section">
+    <div class="post-container">
+        <div class="post-header">
+                <h1>让你在终端飞起来 - Mac版</h1>
+                <!-- <div class="post-meta">2016-01-26</div> -->
+        </div>
+        <article class="post-content">
+            <p>首先，要知道mac默认使用的shell是主流的bash，对于shell的理解版本等，网上资料一大堆，不做赘述。</p>
+<p>当然，如果你坚持使用mac自带默认终端，无可非议。至少我刚使用的时候用了好久，但是mac默认终端也是让人很不爽的，不能补全命令让人很是蛋疼，解决办法：</p>
+<p><code>$ nano .inputrc</code>添加一下三行</p>
+<pre><code>set completion-ignore-case on
+set show-all-if-ambiguous on
+TAB： menu-complete</code></pre><p>好了，下面开始进入正题。<br>开头也说了，mac的shell版本是bash，还是很好使的，但是不足以让我们飞起来，我们要用的是zsh。可以使用 cat /etc/shells 看系统预装的shell。可以看到，mac下是预装了zsh的，省去了安装的麻烦。</p>
+<p>zsh只能说是飞机，要飞起来还得有催化剂——oh my zsh。<br>1、克隆 oh my zsh 到本地</p>
+<p><code>git clone git://github.com/robbyrussell/oh-my-zsh.git ~/.oh-my-zsh</code>2、创建zsh 配置文件</p>
+<p><code>cp ~/.oh-my-zsh/templates/zshrc.zsh-template ~/.zshrc</code>3、设置zsh默认shell</p>
+<p><code>chsh -s /bin/zsh</code>4、重启终端即可</p>
+<p>环境变量、别名等全局终端的就可以写在 ~/.zshrc 中了，跟bash下的 ~/.bash_profile 一个道理。</p>
+<p>zsh 的主题在 ~/.oh-my-zsh/themes 目录下，可以修改配置文件中 ZSH_THEME 的值选择自己想要的主题。</p>
+<p>也可以参考这里：<a href="https://github.com/robbyrussell/oh-my-zsh/wiki/themes" target="_blank" rel="noopener">https://github.com/robbyrussell/oh-my-zsh/wiki/themes</a></p>
+<p>就想vim一样，好用的不仅仅是工具本身，更重要的是插件。先说两个我比较喜欢的插件：autojump、incr(Incremental)。</p>
+<p>安装autojump：brew install autojump</p>
+<p>修改 .zshrc 配置文件，添加要使用的插件：plugins=(git autojump incr)</p>
+<p>在 ~/.oh-my-zsh/custom/plugins 目录下创建 incr 目录，并在 incr 目录下创建 incr.plugin.zsh 配置文件，文件内容为：<a href="http://mimosa-pudica.net/src/incr-0.2.zsh" target="_blank" rel="noopener">http://mimosa-pudica.net/src/incr-0.2.zsh</a></p>
+<pre><code>
+# Incremental completion for zsh
+# by y.fujii , public domain
+
+autoload -U compinit
+zle -N self-insert self-insert-incr
+zle -N vi-cmd-mode-incr
+zle -N vi-backward-delete-char-incr
+zle -N backward-delete-char-incr
+zle -N expand-or-complete-prefix-incr
+compinit
+
+bindkey -M viins &#39;^[&#39; vi-cmd-mode-incr
+bindkey -M viins &#39;^h&#39; vi-backward-delete-char-incr
+bindkey -M viins &#39;^?&#39; vi-backward-delete-char-incr
+bindkey -M viins &#39;^i&#39; expand-or-complete-prefix-incr
+bindkey -M emacs &#39;^h&#39; backward-delete-char-incr
+bindkey -M emacs &#39;^?&#39; backward-delete-char-incr
+bindkey -M emacs &#39;^i&#39; expand-or-complete-prefix-incr
+
+unsetopt automenu
+compdef -d scp
+compdef -d tar
+compdef -d make
+compdef -d java
+compdef -d svn
+compdef -d cvs
+
+# TODO:
+#     cp dir/
+
+now_predict=0
+
+function limit-completion
+{
+    if ((compstate[nmatches] &lt;= 1)); then         zle -M &quot;&quot;     elif ((compstate[list_lines] &gt; 6)); then
+        compstate[list]=&quot;&quot;
+        zle -M &quot;too many matches.&quot;
+    fi
+}
+
+function correct-prediction
+{
+    if ((now_predict == 1)); then
+        if [[ &quot;$BUFFER&quot; != &quot;$buffer_prd&quot; ]] || ((CURSOR != cursor_org)); then
+            now_predict=0
+        fi
+    fi
+}
+
+function remove-prediction
+{
+    if ((now_predict == 1)); then
+        BUFFER=&quot;$buffer_org&quot;
+        now_predict=0
+    fi
+}
+
+function show-prediction
+{
+    # assert(now_predict == 0)
+    if
+        ((PENDING == 0)) &amp;&amp;
+        ((CURSOR &gt; 1)) &amp;&amp;
+        [[ &quot;$PREBUFFER&quot; == &quot;&quot; ]] &amp;&amp;
+        [[ &quot;$BUFFER[CURSOR]&quot; != &quot; &quot; ]]
+    then
+        cursor_org=&quot;$CURSOR&quot;
+        buffer_org=&quot;$BUFFER&quot;
+        comppostfuncs=(limit-completion)
+        zle complete-word
+        cursor_prd=&quot;$CURSOR&quot;
+        buffer_prd=&quot;$BUFFER&quot;
+        if [[ &quot;$buffer_org[1,cursor_org]&quot; == &quot;$buffer_prd[1,cursor_org]&quot; ]]; then
+            CURSOR=&quot;$cursor_org&quot;
+            if [[ &quot;$buffer_org&quot; != &quot;$buffer_prd&quot; ]] || ((cursor_org != cursor_prd)); then
+                now_predict=1
+            fi
+        else
+            BUFFER=&quot;$buffer_org&quot;
+            CURSOR=&quot;$cursor_org&quot;
+        fi
+        echo -n &quot;\e[32m&quot;
+    else
+        zle -M &quot;&quot;
+    fi
+}
+
+function preexec
+{
+    echo -n &quot;\e[39m&quot;
+}
+
+function vi-cmd-mode-incr
+{
+    correct-prediction
+    remove-prediction
+    zle vi-cmd-mode
+}
+
+function self-insert-incr
+{
+    correct-prediction
+    remove-prediction
+    if zle .self-insert; then
+        show-prediction
+    fi
+}
+
+function vi-backward-delete-char-incr
+{
+    correct-prediction
+    remove-prediction
+    if zle vi-backward-delete-char; then
+        show-prediction
+    fi
+}
+
+function backward-delete-char-incr
+{
+    correct-prediction
+    remove-prediction
+    if zle backward-delete-char; then
+        show-prediction
+    fi
+}
+
+function expand-or-complete-prefix-incr
+{
+    correct-prediction
+    if ((now_predict == 1)); then
+        CURSOR=&quot;$cursor_prd&quot;
+        now_predict=0
+        comppostfuncs=(limit-completion)
+        zle list-choices
+    else
+        remove-prediction
+        zle expand-or-complete-prefix
+    fi
+}
+</code></pre><p>然后重启终端或者重新加载下配置文件即可。</p>
+<p>当然，如果到现在你还没过瘾，还可以再安装iterm2，可以各种快捷键配置也是很爽的，也可以修改配色方案：<a href="http://ethanschoonover.com/solarized" target="_blank" rel="noopener">http://ethanschoonover.com/solarized</a></p>
+<p>不过我在oh my zsh 中已经选了自己中意的主题，对主题也没有特别的要求，就懒得再折腾了。</p>
+<p>最后上一张我现在的主题图。</p>
+<p><a href="/images/2016/01/mac-zsh.png"><img src="/images/2016/01/mac-zsh.png" alt="mac-zsh"></a></p>
+
+        </article>
+    </div>
+</section>
+
+    </main>
+    <footer class="footer"> Copyright 2013 - 2019 Ruesin. All Rights Reserved </footer>
+  </body>
+</html>

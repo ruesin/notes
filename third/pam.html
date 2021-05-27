@@ -1,0 +1,64 @@
+<!DOCTYPE HTML>
+<html>
+  <head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+    <title>ecstore 授权以及后台跳过激活验证-信口开河</title>
+    <meta name="keywords" content="Ruesin,信口开河">
+    <meta name="description" content="至于你信不信，反正我是信了。">
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+  <body>
+    
+<header class="header">
+    <nav class="navbar">
+        <ul>
+            
+            <li><a class="header-nav-link" href="/">首页</a></li>
+            
+            <li><a class="header-nav-link" href="/categories">分类</a></li>
+            
+            <li><a class="header-nav-link" href="/archives">归档</a></li>
+            
+            <li><a class="header-nav-link" href="/tags">标签</a></li>
+            
+            <li><a class="header-nav-link" href="https://github.com/ruesin/notes">Github</a></li>
+            
+            <li><a class="header-nav-link" href="https://ruesin.github.io/php-tree">PHP技能树</a></li>
+            
+            <li><a class="header-nav-link" href="https://www.xinkoukaihe.com">老博客</a></li>
+            
+        </ul>
+    </nav>
+</header>
+    <main class="main">
+      <!-- 内容页 -->
+<section class="section">
+    <div class="post-container">
+        <div class="post-header">
+                <h1>ecstore 授权以及后台跳过激活验证</h1>
+                <!-- <div class="post-meta">2014-06-14</div> -->
+        </div>
+        <article class="post-content">
+            <p>shopexID<br>商派的id，用来生成证书.<br>注册: <a href="http://my.shopex.cn/index.php?ctl=ent&amp;act=register" target="_blank" rel="noopener">http://my.shopex.cn/index.php?ctl=ent&amp;act=register</a></p>
+<p>授权文件.在配置文件下，config这个文件必须有可写权限，在激活的时候会生成授权文件.里面的证书id.<br>config/certi.php</p>
+<p>证书:通常是利用shopexID 生成的.</p>
+<p>节点：<br>app/base/cmd inactive_node_id 取消节点<br>app/base/cmd active_node_id 激活节点</p>
+<p>kvstore/setting/base/035172bd070e9c3469d50ea80b020fee.php</p>
+<p>注意:证书、节点直接影响与ocs绑定.<br>排查方法：<a href="http://open.shopex.cn/journal/rpc" target="_blank" rel="noopener">http://open.shopex.cn/journal/rpc</a> 查看ocs信息日志 输入msg_id</p>
+<p>删除授权文件，直接，退出直接 就会需要激活码 激活….</p>
+<p>矩阵记录绑定产品的请求url的，这个是更新不了，只能重新生成证书 节点…<br>1.取消节点.<br>2.删除kv文件.<br>3.删除授权证书</p>
+<p>待激活…</p>
+<p>激活后 授权证书、节点、证书 都会新生成</p>
+<p>跳过激活码：(修改文件)<br>desktop/lib/cert/certcheck.php 32/130 直接return(else的地方也直接返回)<br>desktop/controller/passport.php 注释代码.登录之前的预先验证</p>
+
+        </article>
+    </div>
+</section>
+
+    </main>
+    <footer class="footer"> Copyright 2013 - 2019 Ruesin. All Rights Reserved </footer>
+  </body>
+</html>

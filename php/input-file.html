@@ -1,0 +1,108 @@
+<!DOCTYPE HTML>
+<html>
+  <head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+    <title>php+jquery 无刷新上传图片-信口开河</title>
+    <meta name="keywords" content="Ruesin,信口开河">
+    <meta name="description" content="至于你信不信，反正我是信了。">
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+  <body>
+    
+<header class="header">
+    <nav class="navbar">
+        <ul>
+            
+            <li><a class="header-nav-link" href="/">首页</a></li>
+            
+            <li><a class="header-nav-link" href="/categories">分类</a></li>
+            
+            <li><a class="header-nav-link" href="/archives">归档</a></li>
+            
+            <li><a class="header-nav-link" href="/tags">标签</a></li>
+            
+            <li><a class="header-nav-link" href="https://github.com/ruesin/notes">Github</a></li>
+            
+            <li><a class="header-nav-link" href="https://ruesin.github.io/php-tree">PHP技能树</a></li>
+            
+            <li><a class="header-nav-link" href="https://www.xinkoukaihe.com">老博客</a></li>
+            
+        </ul>
+    </nav>
+</header>
+    <main class="main">
+      <!-- 内容页 -->
+<section class="section">
+    <div class="post-container">
+        <div class="post-header">
+                <h1>php+jquery 无刷新上传图片</h1>
+                <!-- <div class="post-meta">2014-10-13</div> -->
+        </div>
+        <article class="post-content">
+            <p>项目中我们经常会用到图片（文件）上传功能，简单粗暴的方法就是直接自带的input file，高端华丽点的就是swfupload。本文是为了优化了下用户体验前提下对自带组件进行简单的加工。粗制滥造只为给各位起到抛砖引玉的作用。<br><strong>html</strong></p>
+<pre><code>&lt;div id=&quot;upImgBox&quot;&gt;
+    &lt;img id=&quot;upImgImage&quot; src=&quot;/public/images/upload-pic.png&quot; width=&quot;135&quot; height=&quot;110&quot; /&gt;
+&lt;/div&gt;
+&lt;style&gt;
+    .upImgBox{position:relative;width:135px}
+    .upImgImage{}
+    .upImgFile{position:absolute; top:0; left:0px; width:135px; height:110px; filter:alpha(opacity:0);opacity: 0;}
+&lt;/style&gt;
+&lt;script src=&quot;/public/js/jquery.min.js&quot;&gt;&lt;/script&gt;
+&lt;script src=&quot;/public/js/jquery.form.js&quot;&gt;&lt;/script&gt;
+&lt;script&gt;
+    $(&#39;#upImgFile&#39;).change(function(){
+        $(&#39;#myForm&#39;).ajaxSubmit({
+            type:&quot;post&quot;,
+            url:&#39;index.php?ctl=image&amp;act=upImg&#39;,
+            dataType: &#39;json&#39;, 
+            success:function(res){
+                alert(res.msg);
+                $(&#39;#upImgImage&#39;).attr(&#39;src&#39;,res.img);
+            }
+        });
+    });
+&lt;/script&gt;
+</code></pre><p><a href="/images/2014/10/input_file1.jpg"><img src="/images/2014/10/input_file1.jpg" alt="input_file1"></a></p>
+<p><strong>PHP</strong></p>
+<pre><code>public function upImg(){
+    $res[&#39;num&#39;] = -1;
+    if(!empty($_FILES)){
+        $fileTypes = array(&quot;image/gif&quot;,&quot;image/jpeg&quot;);
+
+        $upload_name = $_FILES[&quot;file&quot;][&quot;name&quot;];
+        $upload_type = $_FILES[&quot;file&quot;][&quot;type&quot;];
+        $upload_size = $_FILES[&quot;file&quot;][&quot;size&quot;];
+
+        $tmp_name    = $_FILES[&quot;file&quot;][&quot;tmp_name&quot;];
+
+        $server_name = &quot;/upload/&quot;.date(&quot;Y/m&quot;).&quot;/&quot;.$upload_name;
+
+        if(in_array($upload_type,$fileTypes)){
+            $server_file = $_SERVER[&#39;DOCUMENT_ROOT&#39;].iconv(&quot;UTF-8&quot;,&quot;gb2312&quot;, $server_name);//防止文件名称中文乱码
+            if(move_uploaded_file($tmp_name,$server_file)){
+                $res[&#39;num&#39;] = 1;
+                $res[&#39;msg&#39;] = &#39;上传成功!&#39;;
+                $res[&#39;img&#39;] = $server_name;
+            }else{
+                $res[&#39;msg&#39;] = &#39;上传失败!&#39;;
+            }
+        }else{
+            $res[&#39;msg&#39;] = &#39;不支持此文件类型，请重新选择!&#39;;
+        }
+    }else{
+        $res[&#39;msg&#39;] = &#39;请选择文件!&#39;;
+    }
+    echo json_encode($res);      
+}</code></pre>
+        </article>
+    </div>
+</section>
+
+    </main>
+    <footer class="footer"> Copyright 2013 - 2019 Ruesin. All Rights Reserved </footer>
+  </body>
+</html>

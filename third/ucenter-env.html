@@ -1,0 +1,68 @@
+<!DOCTYPE HTML>
+<html>
+  <head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+    <title>Ucenter中全局变量$_ENV的用法-信口开河</title>
+    <meta name="keywords" content="Ruesin,信口开河">
+    <meta name="description" content="至于你信不信，反正我是信了。">
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+  <body>
+    
+<header class="header">
+    <nav class="navbar">
+        <ul>
+            
+            <li><a class="header-nav-link" href="/">首页</a></li>
+            
+            <li><a class="header-nav-link" href="/categories">分类</a></li>
+            
+            <li><a class="header-nav-link" href="/archives">归档</a></li>
+            
+            <li><a class="header-nav-link" href="/tags">标签</a></li>
+            
+            <li><a class="header-nav-link" href="https://github.com/ruesin/notes">Github</a></li>
+            
+            <li><a class="header-nav-link" href="https://ruesin.github.io/php-tree">PHP技能树</a></li>
+            
+            <li><a class="header-nav-link" href="https://www.xinkoukaihe.com">老博客</a></li>
+            
+        </ul>
+    </nav>
+</header>
+    <main class="main">
+      <!-- 内容页 -->
+<section class="section">
+    <div class="post-container">
+        <div class="post-header">
+                <h1>Ucenter中全局变量$_ENV的用法</h1>
+                <!-- <div class="post-meta">2014-11-09</div> -->
+        </div>
+        <article class="post-content">
+            <p>二开ucenter，翻看代码，追到 /client/control/user.php ，看到注册会员时的这段代码。</p>
+<p>$uid = $_ENV[‘user’]-&gt;add_user($username, $password, $email,$imdomain,0, $questionid, $answer);</p>
+<p>额，不止一次的承认自己的基础知识不够扎实，看到这里的$_ENV，竟然还要去查一下。</p>
+<p>有兴趣的可以去查一下官方手册，这里大概解释一下，$_ENV是PHP中的一个包含服务器端环境变量的数组。它是PHP中一个超级全局变量，我们可以在PHP程序的任何地方直接访问它。它与$HTTP_ENV_VARS包含相同的信息，但$HTTP_ENV_VARS不是一个超全局变量。</p>
+<p>那么，它在ucenter的用法是什么呢？</p>
+<p>看到不明变量的时候，首先就是去打印一下了，在这里我们会看到数组包含两个对象（user、note），如果这是包含model的大数组的话，为什么只包含了这两个对象呢？而在之前，打印的话又是空的，很显然，这个全局变量数组在不同的地方有不同的值。</p>
+<p>我在想，这里的变量是不是跟使用 $_POST[‘user’] 时差不多？是自定义的一个值？是给 $_EVN 设置一个key，存储进去我们实例化的对象，从而达到，在程序的任何地方都可以直接访问，这样就无须在函数中使用global关键字了，避免了全局变量的污染。</p>
+<p>继续追踪代码，果然验证了我的理论，在 uc_client/model/base.php 中，load()方法定义了 $_ENV[$model] 并赋值，所以我们在不同的地方打印 $_ENV 的话，会打印出不同的值。</p>
+<pre><code>function load($model, $base = NULL) {
+    $base = $base ? $base : $this;
+    if(empty($_ENV[$model])) {
+        require_once UC_ROOT.&quot;./model/$model.php&quot;;
+        eval(&#39;$_ENV[$model] = new &#39;.$model.&#39;model($base);&#39;);
+    }
+    return $_ENV[$model];
+}</code></pre>
+        </article>
+    </div>
+</section>
+
+    </main>
+    <footer class="footer"> Copyright 2013 - 2019 Ruesin. All Rights Reserved </footer>
+  </body>
+</html>

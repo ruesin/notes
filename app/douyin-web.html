@@ -1,0 +1,109 @@
+<!DOCTYPE HTML>
+<html>
+  <head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+    <title>获取抖音网页版签名_signature算法-信口开河</title>
+    <meta name="keywords" content="Ruesin,信口开河">
+    <meta name="description" content="至于你信不信，反正我是信了。">
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+  <body>
+    
+<header class="header">
+    <nav class="navbar">
+        <ul>
+            
+            <li><a class="header-nav-link" href="/">首页</a></li>
+            
+            <li><a class="header-nav-link" href="/categories">分类</a></li>
+            
+            <li><a class="header-nav-link" href="/archives">归档</a></li>
+            
+            <li><a class="header-nav-link" href="/tags">标签</a></li>
+            
+            <li><a class="header-nav-link" href="https://github.com/ruesin/notes">Github</a></li>
+            
+            <li><a class="header-nav-link" href="https://ruesin.github.io/php-tree">PHP技能树</a></li>
+            
+            <li><a class="header-nav-link" href="https://www.xinkoukaihe.com">老博客</a></li>
+            
+        </ul>
+    </nav>
+</header>
+    <main class="main">
+      <!-- 内容页 -->
+<section class="section">
+    <div class="post-container">
+        <div class="post-header">
+                <h1>获取抖音网页版签名_signature算法</h1>
+                <!-- <div class="post-meta">2021-03-25</div> -->
+        </div>
+        <article class="post-content">
+            <h2 id="查找"><a href="#查找" class="headerlink" title="查找"></a>查找</h2><p>打开页面及控制台：<a href="https://www.iesdouyin.com/share/user/104255897823?sec_uid=MS4wLjABAAAA8U_l6rBzmy7bcy6xOJel4v0RzoR_wfAubGPeJimN__4" target="_blank" rel="noopener">https://www.iesdouyin.com/share/user/104255897823?sec_uid=MS4wLjABAAAA8U_l6rBzmy7bcy6xOJel4v0RzoR_wfAubGPeJimN__4</a></p>
+<h3 id="方法一"><a href="#方法一" class="headerlink" title="方法一"></a>方法一</h3><p>控制台 - “Network”标签下，搜索“_signature”，在“index.xxxxx.js”中赋值的。</p>
+<p><img src="/images/2021/douyin_web_1.png" alt="douyin_web_1.png"></p>
+<p>在“index.xxxxx.js”中搜索“signature = ”，赋值内容为<code>signature = (0, _bytedAcrawler.sign)(nonce);</code>。</p>
+<p><img src="/images/2021/douyin_web_2.png" alt="douyin_web_2.png"></p>
+<h3 id="方法二"><a href="#方法二" class="headerlink" title="方法二"></a>方法二</h3><p>控制台 - “Sources”标签下，添加“XHR/fetch Breakpoints”，值为<code>web/api/v2/aweme/post</code>。</p>
+<p>刷新页面，可以看到调用链“Call Stack”，找到<code>signature = (0, _bytedAcrawler.sign)(nonce);</code></p>
+<p><img src="/images/2021/douyin_web_3.png" alt="douyin_web_3.png"></p>
+<h2 id="分析"><a href="#分析" class="headerlink" title="分析"></a>分析</h2><pre><code class="js">// config = {uid: userId}
+function init(config) {
+  dytk = config.dytk;
+  params.user_id = config.uid;
+  params.sec_uid = _utils2.default.getUrlParam(window.location.href, &quot;sec_uid&quot;);
+  if (params.sec_uid != &quot;&quot;) {
+    delete params.user_id;
+  }
+  config.sec_uid = params.sec_uid;
+  nonce = config.uid;
+  signature = (0, _bytedAcrawler.sign)(nonce);
+}</code></pre>
+<p>在“index.xxxxx.js”中搜索“<em>bytedAcrawler = ”，`var <em>bytedAcrawler = __webpack_require</em></em>(“9bd2804c7e68ac461d65”);`。</p>
+<p>通过<code>__webpack_require__</code>引用了“vendor.xxx.js”中的<code>9bd2804c7e68ac461d65</code>模块。</p>
+<p>由于是webpack打包的JS代码，简单分析加载逻辑：</p>
+<p>“index.xxx.js”是一个自调用的函数，将定义的“modules”都通过<code>__webpack_require__</code>加载到<code>installedModules</code>变量中。通过<code>installedChunks</code>的定义，判断加载后主动调用那些“module”。</p>
+<p>在“index.xxx.js”加载模块时，定义了全局变量<code>window[&quot;webpackJsonp&quot;]</code>。在vendor.xxx.js中，调用了<code>window[&quot;webpackJsonp&quot;].push</code>，实现逻辑是调用<code>webpackJsonpCallback</code>继续向<code>installedModules</code>添加模块，并判断哪些需要主动调用。</p>
+<p>可以理解，两个文件都是加载模块，并主动调用预定义的模块。</p>
+<h2 id="实现"><a href="#实现" class="headerlink" title="实现"></a>实现</h2><p>拖出<code>__webpack_require__</code>方法、<code>9bd2804c7e68ac461d65</code>模块，预加载方法之后即可使用。</p>
+<pre><code class="js">var modules = {
+    &quot;9bd2804c7e68ac461d65&quot;: (function(module, exports) {
+        Function(function(t){return &#39;xxxxxxxxx&#39;}, [Object.defineProperty(exports,&#39;__esModule&#39;,{value:!0})]);
+    }),
+}
+
+var installedModules = {};
+
+function __webpack_require__(moduleId) {
+    if (installedModules[moduleId]) {
+        return installedModules[moduleId].exports;
+    }
+    var module = installedModules[moduleId] = {
+        i: moduleId,
+        l: false,
+        exports: {}
+    };
+    modules[moduleId].call(module.exports, module, module.exports, __webpack_require__);
+    module.l = true;
+    return module.exports;
+}
+
+var _bytedAcrawler = __webpack_require__(&quot;9bd2804c7e68ac461d65&quot;);
+var signature = _bytedAcrawler.sign(&quot;104255897823&quot;);
+console.log(signature)
+</code></pre>
+<blockquote>
+<p>在算法内会读一些浏览器信息、密钥等，如果没有配置会报错 或者 生成的签名不可用。</p>
+</blockquote>
+
+        </article>
+    </div>
+</section>
+
+    </main>
+    <footer class="footer"> Copyright 2013 - 2019 Ruesin. All Rights Reserved </footer>
+  </body>
+</html>

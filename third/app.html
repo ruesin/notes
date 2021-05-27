@@ -1,0 +1,61 @@
+<!DOCTYPE HTML>
+<html>
+  <head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+    <title>Ecstore 2.0 安装默认被隐藏掉的APP-信口开河</title>
+    <meta name="keywords" content="Ruesin,信口开河">
+    <meta name="description" content="至于你信不信，反正我是信了。">
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+  <body>
+    
+<header class="header">
+    <nav class="navbar">
+        <ul>
+            
+            <li><a class="header-nav-link" href="/">首页</a></li>
+            
+            <li><a class="header-nav-link" href="/categories">分类</a></li>
+            
+            <li><a class="header-nav-link" href="/archives">归档</a></li>
+            
+            <li><a class="header-nav-link" href="/tags">标签</a></li>
+            
+            <li><a class="header-nav-link" href="https://github.com/ruesin/notes">Github</a></li>
+            
+            <li><a class="header-nav-link" href="https://ruesin.github.io/php-tree">PHP技能树</a></li>
+            
+            <li><a class="header-nav-link" href="https://www.xinkoukaihe.com">老博客</a></li>
+            
+        </ul>
+    </nav>
+</header>
+    <main class="main">
+      <!-- 内容页 -->
+<section class="section">
+    <div class="post-container">
+        <div class="post-header">
+                <h1>Ecstore 2.0 安装默认被隐藏掉的APP</h1>
+                <!-- <div class="post-meta">2014-08-25</div> -->
+        </div>
+        <article class="post-content">
+            <p>翻看Ecstore 2.0 的APP文件夹，可以发现有几个常用的APP，可是在后台应用中心却看不到。比如：groupactivity（团购）、cps（网站联盟）、 timedbuy （限时抢购）等。但是有做过Ecstore1.2经验的朋友都知道，这些APP在Ecstore1.2中都是正常的，这是什么原因呢？</p>
+<p>原来，这是因为这几个APP是基于Ecstore1.2版本开发的，系统升级2.0之后，有很多方法都被舍弃了，导致这些APP在2.0中存在很多漏洞，看起来好像半成品一样，但是官方为了给开发者提供开发借鉴，并没有把这些APP删除掉，而是简单的隐藏掉，避免引起不必要的麻烦。</p>
+<p>那如果我们想要安装这些被隐藏的APP要怎么做呢？</p>
+<p>有经验的朋友可能会立马想到命令行安装。</p>
+<p>对的，这是一个简单粗暴有力的方法，直接 cmd install groupactivity ， 安装成功。虽然在后台应用中心还是看不到被安装的APP，但是此APP已经可以使用了。（前提是此APP没有漏洞哦o(∩_∩)o）</p>
+<p><a href="/images/2014/08/install.jpg"><img src="/images/2014/08/install.jpg" alt="install"></a><br>第一种方法对于有经验的朋友来说当然是最直接最快捷的办法，但不是所有的人都会（喜欢）用命令行的，又考虑到后期维护的问题，我们能不能把隐藏掉的APP在应用中心显示出来呢？答案当然是肯定的！（这不废话嘛，能隐藏肯定能显示。-_-:）</p>
+<p>修改[ecstore_path]/config/deploy.xml，将<br><app id="”groupactivity”" default="”false”" locked="”true”" hidden="”true”"><br>修改为<br><app id="”groupactivity”" default="”false”" locked="”true”" hidden="”false”"><br>然后登录后台，应用中心就可以看到团购APP了。</app></app></p>
+<p><a href="/images/2014/08/hidden.jpg"><img src="/images/2014/08/hidden.jpg" alt="hidden"></a><br>注：这些APP是官方的弃子，擅自使用，后果自负哦。</p>
+
+        </article>
+    </div>
+</section>
+
+    </main>
+    <footer class="footer"> Copyright 2013 - 2019 Ruesin. All Rights Reserved </footer>
+  </body>
+</html>

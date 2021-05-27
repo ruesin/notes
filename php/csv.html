@@ -1,0 +1,83 @@
+<!DOCTYPE HTML>
+<html>
+  <head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+    <title>PHP通过将Excel转为csv文本读取(写入)表格(数据库)，实现数据的导入导出-信口开河</title>
+    <meta name="keywords" content="Ruesin,信口开河">
+    <meta name="description" content="至于你信不信，反正我是信了。">
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+  <body>
+    
+<header class="header">
+    <nav class="navbar">
+        <ul>
+            
+            <li><a class="header-nav-link" href="/">首页</a></li>
+            
+            <li><a class="header-nav-link" href="/categories">分类</a></li>
+            
+            <li><a class="header-nav-link" href="/archives">归档</a></li>
+            
+            <li><a class="header-nav-link" href="/tags">标签</a></li>
+            
+            <li><a class="header-nav-link" href="https://github.com/ruesin/notes">Github</a></li>
+            
+            <li><a class="header-nav-link" href="https://ruesin.github.io/php-tree">PHP技能树</a></li>
+            
+            <li><a class="header-nav-link" href="https://www.xinkoukaihe.com">老博客</a></li>
+            
+        </ul>
+    </nav>
+</header>
+    <main class="main">
+      <!-- 内容页 -->
+<section class="section">
+    <div class="post-container">
+        <div class="post-header">
+                <h1>PHP通过将Excel转为csv文本读取(写入)表格(数据库)，实现数据的导入导出</h1>
+                <!-- <div class="post-meta">2014-09-16</div> -->
+        </div>
+        <article class="post-content">
+            <p>项目开发中经常碰到的就是数数据的导出备份和导入还原，对开发人员来说当然是直接对数据库操作了。但是大部分非开发人员、用户是不会进行数据库操作的，有时还需要导出表格查看管理等。这时候就需要开发人员做导出导入的功能了。</p>
+<p>而最常见的方法就是将数据导出为.csv格式的，既可以用excel打开，又可以将本地的excel数据导入到线上。</p>
+<p>当然，也有方法可以直接操作excel，就是使用PHP自定义类phpExcelReader、PHPExcel等。本文主要是写通过将Excel另存为csv之后的操作，咱时不对此方法进行过多赘述。</p>
+<p>CSV是逗号分隔值的英文缩写，通常都是纯文本文件。CSV格式是分隔的数据格式，有字段/列分隔的逗号字符和记录/行分隔换行符。通常CSV文件可以用EXCEL正常打开，所以才有了将数据导出为csv格式的方法。</p>
+<p>PHP自带的csv函数有——读取：fgetcsv()，写入：fputcsv()。</p>
+<p>fgetcsv() 函数从文件指针中读入一行并解析 CSV 字段。解析读入的行并找出 CSV 格式的字段，然后返回一个包含这些字段的数组。</p>
+<pre><code>$file = fopen(ROOT_DIR.&#39;/taobao.csv&#39;,&#39;r&#39;);
+while ($row = fgetcsv($file)) {
+    $list[] = $row;
+}
+fclose($file)</code></pre><p>fputcsv() 函数将行格式化为 CSV 并写入一个打开的文件。</p>
+<p>该函数返回写入字符串的长度。若出错，则返回 false。</p>
+<p>fputcsv() 将一行（用 fields 数组传递）格式化为 CSV 格式并写入由 file 指定的文件。</p>
+<pre><code>$arr = array(
+    &#39;0&#39; =&gt; array(
+        &#39;0&#39; =&gt; &#39;Ruesin&#39;,
+        &#39;1&#39; =&gt; &#39;boy&#39;,
+        &#39;2&#39; =&gt; &#39;24&#39;,
+    ),
+    &#39;1&#39; =&gt; array(
+        &#39;0&#39; =&gt; &#39;Linney&#39;,
+        &#39;1&#39; =&gt; &#39;girl&#39;,
+        &#39;2&#39; =&gt; &#39;23&#39;,
+    )
+);
+$file = fopen(&quot;taobao.csv&quot;,&quot;w&quot;);
+foreach ($arr as $line){
+    fputcsv($file,$line);
+}
+fclose($file);</code></pre><p>至于其他的剩下的就是各种数组的操作了，有兴趣的朋友可以去看下本博有关PHP数组的部分文章。</p>
+
+        </article>
+    </div>
+</section>
+
+    </main>
+    <footer class="footer"> Copyright 2013 - 2019 Ruesin. All Rights Reserved </footer>
+  </body>
+</html>

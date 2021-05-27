@@ -1,0 +1,71 @@
+<!DOCTYPE HTML>
+<html>
+  <head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+    <title>PHP取整，四舍五入取整、向上取整、向下取整、小数截取。-信口开河</title>
+    <meta name="keywords" content="Ruesin,信口开河">
+    <meta name="description" content="至于你信不信，反正我是信了。">
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+  <body>
+    
+<header class="header">
+    <nav class="navbar">
+        <ul>
+            
+            <li><a class="header-nav-link" href="/">首页</a></li>
+            
+            <li><a class="header-nav-link" href="/categories">分类</a></li>
+            
+            <li><a class="header-nav-link" href="/archives">归档</a></li>
+            
+            <li><a class="header-nav-link" href="/tags">标签</a></li>
+            
+            <li><a class="header-nav-link" href="https://github.com/ruesin/notes">Github</a></li>
+            
+            <li><a class="header-nav-link" href="https://ruesin.github.io/php-tree">PHP技能树</a></li>
+            
+            <li><a class="header-nav-link" href="https://www.xinkoukaihe.com">老博客</a></li>
+            
+        </ul>
+    </nav>
+</header>
+    <main class="main">
+      <!-- 内容页 -->
+<section class="section">
+    <div class="post-container">
+        <div class="post-header">
+                <h1>PHP取整，四舍五入取整、向上取整、向下取整、小数截取。</h1>
+                <!-- <div class="post-meta">2014-08-11</div> -->
+        </div>
+        <article class="post-content">
+            <p>PHP取整数函数常用的四种方法：<br>1.直接取整，舍弃小数，保留整数：intval()；2.四舍五入取整：round()；3.向上取整，有小数就加1：ceil()；4.向下取整：floor()。</p>
+<p>一、intval—对变数转成整数型态<br>intval如果是字符型的会自动转换为0。</p>
+<pre><code>intval(3.14159);  // 3
+intval(3.64159);  // 3
+intval(&#39;ruesin&#39;); //0</code></pre><p>二、四舍五入：round()</p>
+<p>根据参数2指定精度将参数1进行四舍五入。参数2可以是负数或零（默认值）。</p>
+<pre><code>round(3.14159);      // 3
+round(3.64159);      // 4
+round(3.64159, 0);   // 4
+round(3.64159, 2);   // 3.64
+round(5.64159, 3);   // 3.642
+round(364159, -2);   // 364200</code></pre><p>三、向上取整，有小数就加1：ceil()</p>
+<p>返回不小于 value 的下一个整数，value 如果有小数部分则进一位。</p>
+<p>这个方法，在我们写分页类计算页数时经常会用到。</p>
+<pre><code>ceil(3.14159);  // 4
+ceil(3.64159);  // 4</code></pre><p>四、向下取整：floor()</p>
+<p>返回不大于 value 的下一个整数，将 value 的小数部分舍去取整。</p>
+<pre><code>floor(3.14159);    // 3
+floor(3.64159);    // 3</code></pre>
+        </article>
+    </div>
+</section>
+
+    </main>
+    <footer class="footer"> Copyright 2013 - 2019 Ruesin. All Rights Reserved </footer>
+  </body>
+</html>

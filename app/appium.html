@@ -1,0 +1,127 @@
+<!DOCTYPE HTML>
+<html>
+  <head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+    <title>appium 使用记录-信口开河</title>
+    <meta name="keywords" content="Ruesin,信口开河">
+    <meta name="description" content="至于你信不信，反正我是信了。">
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+  <body>
+    
+<header class="header">
+    <nav class="navbar">
+        <ul>
+            
+            <li><a class="header-nav-link" href="/">首页</a></li>
+            
+            <li><a class="header-nav-link" href="/categories">分类</a></li>
+            
+            <li><a class="header-nav-link" href="/archives">归档</a></li>
+            
+            <li><a class="header-nav-link" href="/tags">标签</a></li>
+            
+            <li><a class="header-nav-link" href="https://github.com/ruesin/notes">Github</a></li>
+            
+            <li><a class="header-nav-link" href="https://ruesin.github.io/php-tree">PHP技能树</a></li>
+            
+            <li><a class="header-nav-link" href="https://www.xinkoukaihe.com">老博客</a></li>
+            
+        </ul>
+    </nav>
+</header>
+    <main class="main">
+      <!-- 内容页 -->
+<section class="section">
+    <div class="post-container">
+        <div class="post-header">
+                <h1>appium 使用记录</h1>
+                <!-- <div class="post-meta">2021-03-12</div> -->
+        </div>
+        <article class="post-content">
+            <h2 id="介绍"><a href="#介绍" class="headerlink" title="介绍"></a>介绍</h2><p>Appium 是一个开源、跨平台的自动化测试工具，可以用来测试原生、移动 Web 和混合应用。</p>
+<p>Appium 使用了系统自带的自动化框架。不需要把 Appium 或者第三方的代码编译进应用中，保证测试使用的应用与最终发布的应用是一致的。</p>
+<p>系统自带的自动化框架：</p>
+<ul>
+<li>iOS 9.3 及以上: 苹果的 XCUITest</li>
+<li>iOS 9.3 及以下: 苹果的 UIAutomation</li>
+<li>Android 4.3+: 谷歌的 UiAutomator / UiAutomator2</li>
+<li>Android 2.3+: 谷歌的 Instrumentation. (通过绑定独立的项目—— Selendroid 提供对 Instrumentation 的支持)</li>
+<li>Windows: 微软的 WinAppDriver</li>
+</ul>
+<p>Appium 把系统提供的框架封装进一套 API —— WebDriver API 中。WebDriver（也叫「Selenium WebDriver」）规定了一个客户端-服务器协议（称为 JSON Wire Protocol），按照这种客户端-服务器架构，可以使用任何语言编写的客户端向服务器发送适当的 HTTP 请求。</p>
+<p>客户端程序库不过是一个简单的 HTTP 客户端，只要客户端能够发送HTTP请求给服务端，那么客户端用什么语言来实现都是可以的，Appium 客户端支持 Selenium WebDriver 支持的所有语言，更可以使用Selenium WebDriver的Api。</p>
+<h2 id="原理"><a href="#原理" class="headerlink" title="原理"></a>原理</h2><p>Appium 是一个经典的客户端/服务器架构，服务端核心是一个暴露 REST API 的 用Node.js 写的 WEB 服务器，接受来自客户端的连接，监听命令并在移动设备上执行，答复 HTTP 响应来描述执行结果。</p>
+<p>客户端程序想服务器发送一个POST /session 请求，请求中包含一个被称作「预期能力（Desired Capabilities）」的 JSON 对象。服务器将开启一个自动化会话，返回一个会话ID，之后的所有自动化都在这一个会话的上下文中执行。</p>
+<p>预期能力（Desired Capabilities）是一些发送给 Appium 服务器的键值对集合，它告诉服务器我们想要启动什么类型的自动化会话。也有许多能力（Capabilities）可以修改服务器在自动化过程中行为。</p>
+<p>除了使用脚本请求服务器的方式自动化，还可以安装Appium Desktop，是一个Appium 服务器的图形界面封装，它打包了 Appium 服务器运行需要的所有东西，它们还提供一个 Inspector 使你可以查看应用程序的层级结构，可以在调试时使用。</p>
+<p>客户端发送自动化请求到服务端之后，服务端将命令通过socket连接发送到手机，再将命令转换为手机自动化命令执行。</p>
+<p>安卓设备上socket服务器是通过bootstrap.jar创建的，bootstrap本身就是一个测试脚本，运行后就会创建一个socket服务，接收appium服务器发送过来的请求。</p>
+<p>运行原理：</p>
+<ol>
+<li><p>客户端请求服务端，发送配置信息、建立session连接。</p>
+</li>
+<li><p>服务端推送bootstrap.jar到设备、安装appium-settings和uiautomator2。</p>
+</li>
+<li><p>uiautomator运行bootstrap.jar（appium-settings），启动socket服务，用于Appium和手机建立连接，将appium的命令转换为uiautomator命令。</p>
+</li>
+</ol>
+<h2 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h2><p>安装Appium-Server</p>
+<pre><code>$ npm install -g appium
+$ appium</code></pre><p>安装Appium-client<br><a href="http://appium.io/docs/en/about-appium/appium-clients/index.html" target="_blank" rel="noopener">http://appium.io/docs/en/about-appium/appium-clients/index.html</a></p>
+<pre><code>$ pip install Appium-Python-Client</code></pre><p>安装Appium-Desktop<br><a href="https://github.com/appium/appium-desktop/releases" target="_blank" rel="noopener">https://github.com/appium/appium-desktop/releases</a></p>
+<h2 id="使用"><a href="#使用" class="headerlink" title="使用"></a>使用</h2><p>启动server</p>
+<pre><code class="python">
+import os
+
+from appium.webdriver.appium_service import AppiumService
+
+device_udid = &quot;aaaaaaaa&quot;
+appium_port = &quot;4723&quot;
+bp_port = str(int(appium_port) + 2000)
+
+log_file = os.path.join(&#39;/tmp/&#39; + device_udid + &#39;-appium.log&#39;)
+
+service = AppiumService()
+service.start(args=[&#39;-p&#39;, appium_port, &#39;-bp&#39;, bp_port, &#39;-U&#39;, device_udid,
+                    &#39;--session-override&#39;, &#39;--no-reset&#39;,
+                    &#39;--log-level&#39;, &#39;error&#39;, &#39;--log&#39;, log_file], timeout_ms=2000)</code></pre>
+<p>执行命令（跳转抖音用户主页）</p>
+<pre><code class="python">from appium import webdriver
+
+device_udid = &quot;aaaaaaaa&quot;
+
+desired_caps = {
+    &#39;platformName&#39;: &#39;Android&#39;,
+    &#39;udid&#39;: device_udid,
+    &#39;deviceName&#39;: device_udid,
+    &#39;platformVersion&#39;: &quot;7.0&quot;,
+    &#39;appPackage&#39;: &#39;com.ss.android.ugc.aweme&#39;,
+    &#39;appActivity&#39;: &#39;com.ss.android.ugc.aweme.main.MainActivity&#39;,
+    &quot;noReset&quot;: True,
+    &quot;newCommandTimeout&quot;: 600000,
+    &quot;autoAcceptAlerts&quot;: True,
+    &quot;recreateChromeDriverSessions&quot;: True,
+    &quot;unicodeKeyboard&quot;: True,
+    &quot;resetKeyboard&quot;: True,
+}
+_device_session = webdriver.Remote(&#39;http://127.0.0.1:4723/wd/hub&#39;, desired_caps, direct_connection=True)
+
+url = &quot;snssdk1128://user/profile/104255897823?refer=web&amp;gd_label=click_wap_profile_bottom&amp;type=need_follow&amp;needlaunchlog=1&quot;
+_device_session.get(url)</code></pre>
+<h2 id="文档"><a href="#文档" class="headerlink" title="文档"></a>文档</h2><ul>
+<li><a href="http://appium.io/docs/cn/about-appium/intro/" target="_blank" rel="noopener">http://appium.io/docs/cn/about-appium/intro/</a></li>
+<li><a href="https://github.com/metmit/easyAppium" target="_blank" rel="noopener">https://github.com/metmit/easyAppium</a></li>
+</ul>
+
+        </article>
+    </div>
+</section>
+
+    </main>
+    <footer class="footer"> Copyright 2013 - 2019 Ruesin. All Rights Reserved </footer>
+  </body>
+</html>

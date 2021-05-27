@@ -1,0 +1,80 @@
+<!DOCTYPE HTML>
+<html>
+  <head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+    <title>Windows下php+redis安装-信口开河</title>
+    <meta name="keywords" content="Ruesin,信口开河">
+    <meta name="description" content="至于你信不信，反正我是信了。">
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+  <body>
+    
+<header class="header">
+    <nav class="navbar">
+        <ul>
+            
+            <li><a class="header-nav-link" href="/">首页</a></li>
+            
+            <li><a class="header-nav-link" href="/categories">分类</a></li>
+            
+            <li><a class="header-nav-link" href="/archives">归档</a></li>
+            
+            <li><a class="header-nav-link" href="/tags">标签</a></li>
+            
+            <li><a class="header-nav-link" href="https://github.com/ruesin/notes">Github</a></li>
+            
+            <li><a class="header-nav-link" href="https://ruesin.github.io/php-tree">PHP技能树</a></li>
+            
+            <li><a class="header-nav-link" href="https://www.xinkoukaihe.com">老博客</a></li>
+            
+        </ul>
+    </nav>
+</header>
+    <main class="main">
+      <!-- 内容页 -->
+<section class="section">
+    <div class="post-container">
+        <div class="post-header">
+                <h1>Windows下php+redis安装</h1>
+                <!-- <div class="post-meta">2015-04-15</div> -->
+        </div>
+        <article class="post-content">
+            <p>有个项目需要在加载页面的时候执行大量的数据处理，按正常套路走的话速度会比较慢，而这时redis就是比较适合的选择了。</p>
+<p>本地Windows下php的redis扩展安装过程，如下所示。</p>
+<p>下载安装包，将安装包解压后看以看到几个文件：</p>
+<p><a href="/images/2015/04/redis_file.jpg"><img src="/images/2015/04/redis_file.jpg" alt="redis_file"></a></p>
+<p>最后两个start文件是我自己添加的，稍后会看到用途的。</p>
+<p><strong>redis-server.exe</strong>：服务程序<br><strong>redis-check-dump.exe</strong>：本地数据库检查<br><strong>redis-check-aof.exe</strong>：更新日志检查<br>r<strong>edis-benchmark.exe</strong>：性能测试，用以模拟同时由N个客户端发送M个 SETs/GETs 查询 (类似于 Apache 的ab 工具).</p>
+<p>网上有人说还需要自己写conf文件，我下载的包里就有这个文件，直接忽略过了。</p>
+<p>启动redis服务：<strong>redis-server.exe Redis.conf</strong></p>
+<p><a href="/images/2015/04/redis_server_start.jpg"><img src="/images/2015/04/redis_server_start.jpg" alt="redis_server_start"></a></p>
+<p>启动cmd窗口要一直开着，关闭后则Redis服务关闭。<br>对于这里我之前好像写过一篇博文，里面有说用vb不显示cmd窗口的，本文最后会贴出。</p>
+<p>服务启动后，就需要设置客户端了：<strong>redis-cli.exe -h 127.0.0.1 -p 6379</strong></p>
+<p><a href="/images/2015/04/redis_client_start.jpg"><img src="/images/2015/04/redis_client_start.jpg" alt="redis_client_start"></a></p>
+<p>至此，redis服务已经设置完毕，剩下的就是php扩展的开启，下载对应版本的扩展文件，在php.ini中添加扩展：</p>
+<pre><code>extension=php_igbinary.dll
+extension=php_redis.dll</code></pre><p>phpinfo();查看redis扩展开启情况。</p>
+<p><a href="/images/2015/04/php_redis.jpg"><img src="/images/2015/04/php_redis.jpg" alt="php_redis"></a></p>
+<pre><code>$redis = new Redis();
+$redis-&gt;connect(&quot;127.0.0.1&quot;, &quot;6379&quot;);
+$redis-&gt;set(&quot;name&quot;, &quot;Ruesin&quot;);
+echo $redis-&gt;get(&quot;name&quot;);
+//Ruesin
+//这时的name已经写入到缓存，就算你现在删掉set，打印出来的也是Ruesin</code></pre><p>PS：<br>我们本地测试时一直开着个cmd窗口总是不爽的，特别是处女座的同学们。so、我用vb处理了下。<br>创建 start.bat</p>
+<pre><code>cd E:\host\Redis1
+E:
+redis-server.exe Redis.conf</code></pre><p>创建 start.vbe</p>
+<pre><code>set ws=wscript.createobject(&quot;wscript.shell&quot;)
+ws.run &quot;start.bat /start&quot;,0</code></pre><p>需要启用服务的时候只需要点击一下start.vbe即可，当然如果想要开机启动的话，可以创建一个快捷方式，放到启动文件夹里。</p>
+
+        </article>
+    </div>
+</section>
+
+    </main>
+    <footer class="footer"> Copyright 2013 - 2019 Ruesin. All Rights Reserved </footer>
+  </body>
+</html>

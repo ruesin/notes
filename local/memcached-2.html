@@ -1,0 +1,63 @@
+<!DOCTYPE HTML>
+<html>
+  <head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+    <title>Windows下分布式缓存Memcached环境的搭建安装配置-信口开河</title>
+    <meta name="keywords" content="Ruesin,信口开河">
+    <meta name="description" content="至于你信不信，反正我是信了。">
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+  <body>
+    
+<header class="header">
+    <nav class="navbar">
+        <ul>
+            
+            <li><a class="header-nav-link" href="/">首页</a></li>
+            
+            <li><a class="header-nav-link" href="/categories">分类</a></li>
+            
+            <li><a class="header-nav-link" href="/archives">归档</a></li>
+            
+            <li><a class="header-nav-link" href="/tags">标签</a></li>
+            
+            <li><a class="header-nav-link" href="https://github.com/ruesin/notes">Github</a></li>
+            
+            <li><a class="header-nav-link" href="https://ruesin.github.io/php-tree">PHP技能树</a></li>
+            
+            <li><a class="header-nav-link" href="https://www.xinkoukaihe.com">老博客</a></li>
+            
+        </ul>
+    </nav>
+</header>
+    <main class="main">
+      <!-- 内容页 -->
+<section class="section">
+    <div class="post-container">
+        <div class="post-header">
+                <h1>Windows下分布式缓存Memcached环境的搭建安装配置</h1>
+                <!-- <div class="post-meta">2014-11-12</div> -->
+        </div>
+        <article class="post-content">
+            <p>现在谈 Memcached 已经没有什么新意了，翻过来覆过去无非就那么点东西（基础），本文也仅仅是为了做个记录而已。在Windows下搭建 Memcached 的开发调试环境，网上随便一搜一大堆，说得也都千篇一律，也就不浪费大家的时间了，直接切入正题，写Memcached和memcache的安装过程，至于原理、理论什么的放在《<a href="http://old.ruesin.com/system/server/memcached-184.html" target="_blank" rel="noopener">分布式缓存Memcached/memcached/memcache详解及区别</a>》这篇文章里，避免了读者的阅读疲劳。</p>
+<p><strong>服务端的Memcached安装：</strong><br>1. 下载memcache的windows稳定版，解压放某个盘下面，比如在 e:\host\bin\memcached<br>2. 在命令行模式下输入 ‘e:\host\bin\memcached\memcached.exe -d install’ 安装<br>3. 再输入： ‘e:\host\bin\memcached\memcached.exe -d start’ 启动。</p>
+<p>以后memcached将作为windows的一个服务每次开机时自动启动。这样服务器端已经安装完毕了。</p>
+<p><strong>php扩展组件的memcache的安装：</strong><br>1. 下载php_memcache.dll，请自己查找对应的php版本的文件<br>2. 在 php.ini 中添加 ‘extension=php_memcache.dll’<br>3. 重启Apache服务，输出phpinfo，如果有memcache，那么就说明安装成功！</p>
+<p><strong>memcached的基本设置：</strong><br>-p 监听的端口<br>-l 连接的IP地址, 默认是本机<br>-d start 启动memcached服务<br>-d restart 重起memcached服务<br>-d stop|shutdown 关闭正在运行的memcached服务<br>-d install 安装memcached服务<br>-d uninstall 卸载memcached服务<br>-u 以的身份运行 (仅在以root运行的时候有效)<br>-m 最大内存使用，单位MB。默认64MB<br>-M 内存耗尽时返回错误，而不是删除项<br>-c 最大同时连接数，默认是1024<br>-f 块大小增长因子，默认是1.25<br>-n 最小分配空间，key+value+flags默认是48<br>-h 显示帮助</p>
+<p><strong>测试：</strong><br>$mem = new Memcache;<br>$mem-&gt;connect(“127.0.0.1″, 11211); //连接Memcached服务器，默认端口为11211<br>$mem-&gt;set(‘key’, ‘Old value’); //存值<br>$val = $mem-&gt;get(‘key’); //取值<br>echo ‘Old Value:’.$val . “<br>”;</p>
+<p>$mem-&gt;replace(‘key’, ‘Replace value’); //替换数据<br>$val = $mem-&gt;get(‘key’);<br>echo “Replace value: ” . $val . “<br>”;</p>
+<p>$mem-&gt;delete(‘key’); //删除数据<br>$val = $mem-&gt;get(‘key’);<br>echo “No value: ” . $val . “<br>”;</p>
+<p>$mem-&gt;flush(); //清除所有数据</p>
+<p>$mem-&gt;close(); //关闭连接</p>
+
+        </article>
+    </div>
+</section>
+
+    </main>
+    <footer class="footer"> Copyright 2013 - 2019 Ruesin. All Rights Reserved </footer>
+  </body>
+</html>

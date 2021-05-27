@@ -1,0 +1,95 @@
+<!DOCTYPE HTML>
+<html>
+  <head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+    <title>Ubuntu 下编译安装 memcached 服务 及 PHP memcache扩展-信口开河</title>
+    <meta name="keywords" content="Ruesin,信口开河">
+    <meta name="description" content="至于你信不信，反正我是信了。">
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+  <body>
+    
+<header class="header">
+    <nav class="navbar">
+        <ul>
+            
+            <li><a class="header-nav-link" href="/">首页</a></li>
+            
+            <li><a class="header-nav-link" href="/categories">分类</a></li>
+            
+            <li><a class="header-nav-link" href="/archives">归档</a></li>
+            
+            <li><a class="header-nav-link" href="/tags">标签</a></li>
+            
+            <li><a class="header-nav-link" href="https://github.com/ruesin/notes">Github</a></li>
+            
+            <li><a class="header-nav-link" href="https://ruesin.github.io/php-tree">PHP技能树</a></li>
+            
+            <li><a class="header-nav-link" href="https://www.xinkoukaihe.com">老博客</a></li>
+            
+        </ul>
+    </nav>
+</header>
+    <main class="main">
+      <!-- 内容页 -->
+<section class="section">
+    <div class="post-container">
+        <div class="post-header">
+                <h1>Ubuntu 下编译安装 memcached 服务 及 PHP memcache扩展</h1>
+                <!-- <div class="post-meta">2016-01-26</div> -->
+        </div>
+        <article class="post-content">
+            <p>对于memcache的介绍就不再做过多赘述，之前写过一个windows下的安装及介绍，有兴趣的朋友可以去翻一翻。</p>
+<p>一、安装memcached服务。</p>
+<p>先装memcached依赖 lievent 官网：<a href="http://libevent.org/" target="_blank" rel="noopener">http://libevent.org/</a></p>
+<pre><code>wget https://sourceforge.net/projects/levent/files/libevent/libevent-2.0/libevent-2.0.22-stable.tar.gz
+tar zvxf libevent-2.0.22-stable.tar.gz
+sudo ./configure --prefix=/usr/local
+sudo make
+sudo make install</code></pre><p>编译安装 memcached 服务 官网：<a href="http://memcached.org/downloads" target="_blank" rel="noopener">http://memcached.org/downloads</a></p>
+<pre><code>wget http://memcached.org/files/memcached-1.4.25.tar.gz
+tar zvxf memcached-1.4.25.tar.gz
+sudo ./configure  --prefix=/usr/local/memcached --with-libevent=/usr/local
+sudo make
+sudo make install</code></pre><p>启动服务</p>
+<p><code>/usr/local/memcached/bin/memcached -d -m  128 -u root -p  11211</code>二、memcache扩展，php有两个版本的memcached 扩展。</p>
+<p>1. 基于libmemcached的memcache扩展：<a href="https://launchpad.net/libmemcached/+download" target="_blank" rel="noopener">https://launchpad.net/libmemcached/+download</a></p>
+<pre><code>wget https://launchpad.net/libmemcached/1.0/1.0.18/+download/libmemcached-1.0.18.tar.gz
+tar zvxf libmemcached-1.0.18.tar.gz
+sudo ./configure --prefix=/usr/local/libmemcached --with-memcached
+sudo make
+sudo make install</code></pre><p>下载memcached扩展：<a href="https://pecl.php.net/package/memcached" target="_blank" rel="noopener">https://pecl.php.net/package/memcached</a></p>
+<pre><code>wget https://pecl.php.net/get/memcached-2.2.0.tgz
+tar zvxf memcached-2.2.0.tgz
+sudo /usr/local/php/bin/phpize
+sudo ./configure --with-libmemcached-dir=/usr/local/libmemcached --with-php-config=/usr/local/php/bin/php-config --enable-memcached --enable-memcached-json --enable-memcached-igbinary --disable-memcached-sasl</code></pre><p>找不到php扩展的话可以使用 whereis php-config。</p>
+<p>因为在编译的时候，加了对json和igbinary的支持，而之前没有安装igbinary扩展，导致报错：error: Cannot find igbinary.h</p>
+<p>编译PHP的igbinary扩展。</p>
+<pre><code>wget http://pecl.php.net/get/igbinary-1.1.1.tgz
+tar zvxf igbinary-1.1.1.tgz
+sudo ./configure --with-php-config=/usr/local/php/bin/php-config
+sudo make
+sudo  make install</code></pre><p>再次重新编译安装即可。</p>
+<pre><code>Installing shared extensions:     /usr/local/php/lib/php/extensions/no-debug-non-zts-20131226/
+Installing header files:          /usr/local/php/include/php/</code></pre><p>最后memcache扩展被安装在，我的对应编译版本的扩展目录里。</p>
+<p><code>Installing shared extensions:     /usr/local/php/lib/php/extensions/no-debug-non-zts-20131226/</code>修改配置文件，添加php扩展</p>
+<pre><code>sudo vi /usr/local/php/php.ini
+extension=&quot;/usr/local/php/lib/php/extensions/no-debug-non-zts-20131226/memcached.so&quot;</code></pre><p>2. memcache 扩展，可以下载包安装，也可以按照官方文档说的，使用peel安装。</p>
+<p>下载地址：<a href="http://pecl.php.net/get/memcache" target="_blank" rel="noopener">http://pecl.php.net/get/memcache</a></p>
+<pre><code>tar zxvf memcache-3.0.3.tgz
+sudo /usr/local/php/bin/phpize
+./configure --with-php-config=/usr/local/php/bin/php-config
+sudo make
+sudo make install</code></pre><p>然后修改php.ini添加extension = “memcache.so”就可以了</p>
+
+        </article>
+    </div>
+</section>
+
+    </main>
+    <footer class="footer"> Copyright 2013 - 2019 Ruesin. All Rights Reserved </footer>
+  </body>
+</html>

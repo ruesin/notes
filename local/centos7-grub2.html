@@ -1,0 +1,70 @@
+<!DOCTYPE HTML>
+<html>
+  <head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+    <title>Centos7 + Windows7 双系统，通过修改grub2，重新添加 Win7 启动引导项-信口开河</title>
+    <meta name="keywords" content="Ruesin,信口开河">
+    <meta name="description" content="至于你信不信，反正我是信了。">
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+  <body>
+    
+<header class="header">
+    <nav class="navbar">
+        <ul>
+            
+            <li><a class="header-nav-link" href="/">首页</a></li>
+            
+            <li><a class="header-nav-link" href="/categories">分类</a></li>
+            
+            <li><a class="header-nav-link" href="/archives">归档</a></li>
+            
+            <li><a class="header-nav-link" href="/tags">标签</a></li>
+            
+            <li><a class="header-nav-link" href="https://github.com/ruesin/notes">Github</a></li>
+            
+            <li><a class="header-nav-link" href="https://ruesin.github.io/php-tree">PHP技能树</a></li>
+            
+            <li><a class="header-nav-link" href="https://www.xinkoukaihe.com">老博客</a></li>
+            
+        </ul>
+    </nav>
+</header>
+    <main class="main">
+      <!-- 内容页 -->
+<section class="section">
+    <div class="post-container">
+        <div class="post-header">
+                <h1>Centos7 + Windows7 双系统，通过修改grub2，重新添加 Win7 启动引导项</h1>
+                <!-- <div class="post-meta">2014-12-23</div> -->
+        </div>
+        <article class="post-content">
+            <p>家里几个老电脑闲着实在是浪费，于是决定折腾centos玩，玩坏了也不心疼。<br>当然，为了考虑家里其他人的偶尔使用，肯定是得装双系统了。<br>废话不多说，按照以往的经验，Windows 7 装起，然后装 CentOs 7，CentOS 7 的改变还真的不少，至少安装时就感觉跟以前版本有很大不同。<br>装好后重启，发现启动项里没有 Windows？！第一反应就是磁盘分区的时候，我引导盘那么弄好，赶紧近PE，一看Win的系统还在，修复下引导项，重启，可以正常启动Windows7了，可是这样一来Centos又没了。<br>重装下Centos吧，到分区那里特别留心了下，没什么问题，安装完成，重启，又没 Win 了！难道这个版本的centos是直接冲掉grub而不是添加？<br>好吧，我去手动添加上win的启动。。。</p>
+<p>当然，我们可以直接修改grub的配置文件 /boot/grub2/grub.cfg 。但是看到里面有警告：不要编辑这个文件，他是通过grub2-mkconfig 使用配置文件模版和设置自动生成的。</p>
+<p><a href="/images/2014/12/grub2.jpg"><img src="/images/2014/12/grub2.jpg" alt="grub2"></a><br>so、修改这个文件虽然可以达到效果，但是在系统执行grub2-mkconfig之后你修改的配置就会失效。<br>所以，我们要去修改模版文件，然后执行 grub2-mkconfig 自动重建grub2引导。</p>
+<pre><code>$ sudo vi /etc/grub.d/40_custom
+
+#!/bin/sh
+exec tail -n +3 $0
+# This file provides an easy way to add custom menu entries.  Simply type the
+# menu entries you want to add after this comment.  Be careful not to change
+# the &#39;exec tail&#39; line above.
+menuentry &#39;Windows7&#39;{
+set root=(hd0,1)
+chainloader +1
+}
+
+$ grub2-mkconfig -o /boot/grub2/grub.cfg
+$ reboot</code></pre><p>注意，grub2中第一块磁盘的第一个分区是(hd0,1)，而不是(hd0,0)，这一点跟grub有稍许不同，还有不要自作聪明的改sda什么的。。。</p>
+
+        </article>
+    </div>
+</section>
+
+    </main>
+    <footer class="footer"> Copyright 2013 - 2019 Ruesin. All Rights Reserved </footer>
+  </body>
+</html>

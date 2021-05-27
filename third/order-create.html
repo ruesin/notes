@@ -1,0 +1,63 @@
+<!DOCTYPE HTML>
+<html>
+  <head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+    <title>Ecstore 订单生成流程-信口开河</title>
+    <meta name="keywords" content="Ruesin,信口开河">
+    <meta name="description" content="至于你信不信，反正我是信了。">
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+  <body>
+    
+<header class="header">
+    <nav class="navbar">
+        <ul>
+            
+            <li><a class="header-nav-link" href="/">首页</a></li>
+            
+            <li><a class="header-nav-link" href="/categories">分类</a></li>
+            
+            <li><a class="header-nav-link" href="/archives">归档</a></li>
+            
+            <li><a class="header-nav-link" href="/tags">标签</a></li>
+            
+            <li><a class="header-nav-link" href="https://github.com/ruesin/notes">Github</a></li>
+            
+            <li><a class="header-nav-link" href="https://ruesin.github.io/php-tree">PHP技能树</a></li>
+            
+            <li><a class="header-nav-link" href="https://www.xinkoukaihe.com">老博客</a></li>
+            
+        </ul>
+    </nav>
+</header>
+    <main class="main">
+      <!-- 内容页 -->
+<section class="section">
+    <div class="post-container">
+        <div class="post-header">
+                <h1>Ecstore 订单生成流程</h1>
+                <!-- <div class="post-meta">2014-09-09</div> -->
+        </div>
+        <article class="post-content">
+            <p>前面几篇文章已经介绍了Ecstore从加入购物车到读取购物车的流程，也做了购物车的各种校验，那么下面要做的就是生成订单了。</p>
+<p>生成订单流程总的为四步：获取购物车流程，格式化购物车数据，写入订单表，清除购物车数据。</p>
+<p>生成订单的操作的入口是b2c_ctl_site_order-&gt;create()。</p>
+<p><a href="/images/2014/09/order_create.jpg"><img src="/images/2014/09/order_create.jpg" alt="order_create"></a></p>
+<p>1.b2c_mdl_cart-&gt;get_objects()<br>获取购物车的所有数据。</p>
+<p>2.b2c_order_create-&gt;generate()<br>订单标准数据生成。根据传过来的购物车数据、POST数据，生成订单所需要的标准数据。</p>
+<p>会先后调用两个方法：1._chgdata 格式化订单数据，比如积分信息、各子订单数据、订单优惠信息等；2.S(b2c_order.beforecreate)-&gt;generate() 调用订单生成前的操作埋点。</p>
+<p>3.b2c_order_create-&gt;save()<br>将订单的各项数据分别保存到响应的表里，没有过多的可以描述的地方。只需要注意是不止是往一个表中写数据！</p>
+<p>4.b2c_mdl_cart_bojects-&gt;remove_object()<br>订单生成成功后，清除购物车响应的数据。<br>在这里会判断是否为快速购买，因为快速购买的数据是直接保存在session中的，如果是快速购买，直接清除对应的session就行了。如果不是快速购买，会根据是否为清空购物车做一步或两步操作。<br>调用埋点S(b2c_cart_object_apps) 的 delete()删除指定的购物车项。更新购物车cookie数据。</p>
+<p>万年不变的原则，从购物车到订单，每一步都要做数据校验！</p>
+
+        </article>
+    </div>
+</section>
+
+    </main>
+    <footer class="footer"> Copyright 2013 - 2019 Ruesin. All Rights Reserved </footer>
+  </body>
+</html>

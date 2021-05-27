@@ -1,0 +1,254 @@
+<!DOCTYPE HTML>
+<html>
+  <head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+    <title>MacOS 编译安装 PHP + Nginx + Mysql-信口开河</title>
+    <meta name="keywords" content="Ruesin,信口开河">
+    <meta name="description" content="至于你信不信，反正我是信了。">
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+  <body>
+    
+<header class="header">
+    <nav class="navbar">
+        <ul>
+            
+            <li><a class="header-nav-link" href="/">首页</a></li>
+            
+            <li><a class="header-nav-link" href="/categories">分类</a></li>
+            
+            <li><a class="header-nav-link" href="/archives">归档</a></li>
+            
+            <li><a class="header-nav-link" href="/tags">标签</a></li>
+            
+            <li><a class="header-nav-link" href="https://github.com/ruesin/notes">Github</a></li>
+            
+            <li><a class="header-nav-link" href="https://ruesin.github.io/php-tree">PHP技能树</a></li>
+            
+            <li><a class="header-nav-link" href="https://www.xinkoukaihe.com">老博客</a></li>
+            
+        </ul>
+    </nav>
+</header>
+    <main class="main">
+      <!-- 内容页 -->
+<section class="section">
+    <div class="post-container">
+        <div class="post-header">
+                <h1>MacOS 编译安装 PHP + Nginx + Mysql</h1>
+                <!-- <div class="post-meta">2018-12-12</div> -->
+        </div>
+        <article class="post-content">
+            <p>MacOS 源码编译安装开发环境， PHP7.2 + Nginx1.14 + Mysql5.7 + Redis3.2。</p>
+<h2 id="一、准备"><a href="#一、准备" class="headerlink" title="一、准备"></a>一、准备</h2><pre><code>## xcode
+$ xcode-select -install`
+
+## brew
+$ ruby -e &quot;$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)&quot;
+
+$ brew install wget
+$ brew install autoconf
+$ brew install m4
+
+$ ssh-keygen -t rsa -C &quot;ruesin@gmail.com&quot;
+$ git config --global user.name &quot;Ruesin&quot;
+$ git config --global user.email &quot;ruesin@gmail.com”
+
+$ mkdir -p /Users/sin/src
+$ cd src
+$ wget http://nginx.org/download/nginx-1.14.0.tar.gz
+$ wget ftp://ftp.csx.cam.ac.uk/pub/software/programming/pcre/pcre-8.42.tar.gz
+$ wget http://zlib.net/zlib-1.2.11.tar.gz
+$ wget https://www.openssl.org/source/openssl-1.0.1u.tar.gz
+
+$ wget https://cdn.mysql.com//Downloads/MySQL-5.7/mysql-5.7.23-macos10.13-x86_64.tar.gz
+
+$ wget http://hk1.php.net/distributions/php-7.2.7.tar.gz
+</code></pre><h2 id="二、Nginx"><a href="#二、Nginx" class="headerlink" title="二、Nginx"></a>二、Nginx</h2><pre><code>$ tar zvxf nginx-1.14.0.tar.gz 
+
+$ ./configure --user=_www --group=_www --prefix=/usr/local/nginx  --with-http_stub_status_module --with-http_realip_module  --with-http_ssl_module --with-http_gzip_static_module --with-zlib=/Users/sin/src/zlib-1.2.11 --with-openssl=/Users/sin/src/openssl-1.0.1u --with-pcre=&quot;/Users/sin/src/pcre-8.42&quot;
+$ sudo make
+$ sudo make install</code></pre><pre><code>$ sudo /usr/local/nginx/sbin/nginx
+$ sudo ln -s /usr/local/nginx/sbin/nginx /usr/local/bin/nginx
+
+$ cd /usr/local/nginx/conf/
+$ sudo mkdir vhost
+...
+user sin staff;
+include vhost/*.conf;
+...</code></pre><pre><code>$ sudo vim vhost/test.conf
+server {
+        listen       80;
+        server_name  local.test.com;
+        #access_log  /usr/local/nginx/logs/test.access.log;
+        #error_log /usr/local/nginx/logs/test.error.log;
+
+        set $root /Users/sin/projects/test;
+        root    $root;
+
+        index index.php;
+        location / {
+            if (!-e $request_filename) {
+                 rewrite ^/(.*)$ /index.php/$1;
+            }
+        }
+
+        location ~ \.php {
+            fastcgi_pass   127.0.0.1:9000;
+            fastcgi_index  index.php;
+            include        fastcgi.conf;
+            set $real_script_name $fastcgi_script_name;
+            if ($fastcgi_script_name ~ &quot;^(.+?\.php)(/.+)$&quot;) {
+                set $real_script_name $1;
+                set $path_info $2;
+            }
+            fastcgi_param SCRIPT_FILENAME $document_root$real_script_name;
+            fastcgi_param SCRIPT_NAME $real_script_name;
+            fastcgi_param PATH_INFO $path_info;
+        }
+}
+...
+
+$ sudo vim /etc/hosts
+...
+127.0.0.1 local.test.com
+...
+</code></pre><p>错误：</p>
+<pre><code>ld: symbol(s) not found for architecture x86_64
+clang: error: linker command failed with exit code 1 (use -v to see invocation)
+make[1]: *** [objs/nginx] Error 1
+make: *** [build] Error 2</code></pre><p>openssl/config 脚本检测系统是否64位，但是会根据$KERNEL_BITS来判断是否开启x86_64编译，默认不开启，所以生成的openssl库文件是32位的，最后在Makefile中链接到nginx时会报错。</p>
+<p>可以在configure之前export KERNEL_BITS=64。或者执行完 ./configure 后, 修改 Makefile 文件后再make:</p>
+<pre><code>$ vim objs/Makefile
+...
+./config --prefix=/Users/sin/Downloads/openssl-1.0.1u/.openssl no-shared no-threads
+改成
+./Configure darwin64-x86_64-cc –prefix=/Users/xxx/Downloads/openssl-1.0.1u/.openssl no-shared no-threads
+...</code></pre><h2 id="三、MySQL"><a href="#三、MySQL" class="headerlink" title="三、MySQL"></a>三、MySQL</h2><pre><code>$ tar zvxf mysql-5.7.23-macos10.13-x86_64.tar.gz 
+
+$ sudo mv mysql-5.7.23-macos10.13-x86_64 /usr/local/mysql
+$ cd /usr/local/mysql
+$ sudo chown -R _mysql:_mysql .
+
+# 初始化MySQL，生成root临时密码
+$ sudo bin/mysqld --initialize --user=_mysql
+
+$ sudo cp support-files/mysql.server /usr/local/bin/mysqld
+$ sudo vim /etc/my.cnf
+...
+[mysqld]
+user=_mysql
+...
+$ sudo mysqld&amp;
+
+$ bin/mysql -u root -p
+mysql&gt; ALTER USER &#39;root&#39;@&#39;localhost&#39; IDENTIFIED BY &#39;root&#39;;</code></pre><p>参考：<br><a href="https://dev.mysql.com/doc/refman/5.7/en/binary-installation.html" target="_blank" rel="noopener">https://dev.mysql.com/doc/refman/5.7/en/binary-installation.html</a></p>
+<h2 id="四、PHP"><a href="#四、PHP" class="headerlink" title="四、PHP"></a>四、PHP</h2><pre><code>$ tar zvxf php-7.2.7.tar.gz 
+
+$ ./configure --prefix=/usr/local/php --enable-fpm --with-pdo-mysql \
+--enable-mysqlnd --with-mysqli=mysqlnd --with-pdo-mysql=mysqlnd --with-config-file-path=/usr/local/php  \
+--with-config-file-scan-dir=/usr/local/php/etc/conf.d \
+--with-iconv --enable-pcntl --enable-shmop --enable-simplexml --enable-ftp --enable-zip --enable-soap --with-curl \
+--with-openssl=/usr/local/opt/openssl --enable-mbstring  --with-libzip=/usr/local/opt/libzip --with-zlib --enable-xml \
+--enable-sockets --enable-inline-optimization \
+--with-png-dir --with-freetype-dir=/usr/local/opt/freetype --with-gd --with-jpeg-dir=/usr/local \
+--enable-bcmath \
+--with-libxml-dir \
+--disable-rpath --enable-sysvsem \
+--enable-mbregex --enable-intl   \
+--with-mhash  --with-xmlrpc \
+--enable-opcache --with-xsl=/usr/local/opt/libxslt --with-gettext=/usr/local/opt/gettext
+
+$ make
+$ sudo make install</code></pre><pre><code>$ sudo cp ./php.ini-development /usr/local/php/php.ini
+$ sudo cp /usr/local/php/etc/php-fpm.conf.default /usr/local/php/etc/php-fpm.conf
+$ cd /usr/local/php/etc/php-fpm.d/
+$ sudo cp www.conf.default www.conf
+$ sudo vim www.conf
+...
+user = sin
+group = staff
+...
+
+$ vim ~/.bash_profile
+...
+export PATH=/usr/local/php/bin:/usr/local/php/sbin:${PATH}
+...
+
+$ source ~/.bash_profile
+$ sudo php-fpm</code></pre><p>问题：<br>4.1<br><code>configure: error: Cannot find OpenSSL&#39;s &lt;evp.h&gt;</code></p>
+<pre><code>$ brew install openssl</code></pre><p>4.2</p>
+<pre><code>checking whether to enable JIS-mapped Japanese font support in GD... no
+If configure fails try --with-webp-dir=&lt;DIR&gt;
+configure: error: jpeglib.h not found.</code></pre><pre><code>$ sudo find / -name &#39;jpeglib.h&#39;
+/usr/local/include/jpeglib.h
+/usr/local/Cellar/jpeg/9c/include/jpeglib.h</code></pre><p>4.3</p>
+<pre><code>If configure fails try --with-xpm-dir=&lt;DIR&gt;
+configure: error: freetype-config not found</code></pre><pre><code>$ sudo find / -name &#39;freetype*&#39;
+$ brew install freetype</code></pre><p>4.5<br><code>warning: pointer is missing a nullability type specifier</code><br><code>$ brew install libxslt</code></p>
+<p>4.6<br><code>configure: error: Please reinstall the libzip distribution</code><br><code>$ brew install libzip</code></p>
+<p>4.7<br><code>configure: error: Please reinstall the iconv library.</code><br>经排查是gettext导致的<br><code>$ brew link --overwrite gettext —force</code></p>
+<p>4.8<br><code>configure: error: Unable to detect ICU prefix or no failed. Please verify ICU install prefix and make sure icu-config works.</code></p>
+<pre><code>$ brew install icu4c
+$ brew link icu4c --force</code></pre><p>4.9<br><code>configure: error: Cannot locate header file libintl.h</code></p>
+<pre><code>$ sudo find / -name &#39;libintl.h&#39;
+/usr/local/Cellar/gettext/0.19.8.1/include/libintl.h</code></pre><h2 id="五、扩展"><a href="#五、扩展" class="headerlink" title="五、扩展"></a>五、扩展</h2><h3 id="5-1-swoole"><a href="#5-1-swoole" class="headerlink" title="5.1 swoole"></a>5.1 swoole</h3><pre><code>$ wget http://pecl.php.net/get/swoole-1.9.23.tgz
+$ phpize
+$ ./configure
+$ make
+$ sudo make install
+$ echo &#39;extension=swoole.so&#39; | sudo tee -a /usr/local/php/php.ini</code></pre><h3 id="5-2-redis"><a href="#5-2-redis" class="headerlink" title="5.2 redis"></a>5.2 redis</h3><pre><code>$ wget http://pecl.php.net/get/redis-3.1.1.tgz
+$ tar zvxf redis-3.1.1.tgz
+$ cd redis-3.1.1
+$ phpize
+$ ./configure --with-php-config=/usr/local/php/bin/php-config
+$ make
+$ sudo make install
+$ echo &#39;extension=redis.so&#39; | sudo tee -a /usr/local/php/php.ini</code></pre><h3 id="5-3-mongodb"><a href="#5-3-mongodb" class="headerlink" title="5.3 mongodb"></a>5.3 mongodb</h3><pre><code>$ wget http://pecl.php.net/get/mongodb-1.3.0.tgz
+$ tar zvxf mongodb-1.3.0.tgz
+$ cd mongodb-1.3.0
+$ phpize
+$ ./configure --with-php-config=/usr/local/php/bin/php-config --with-openssl-dir=/usr/local/opt/openssl
+$ make
+$ sudo make install
+$ echo &#39;extension=mongodb.so&#39; | sudo tee -a /usr/local/php/php.ini</code></pre><h3 id="5-4-yaf"><a href="#5-4-yaf" class="headerlink" title="5.4 yaf"></a>5.4 yaf</h3><pre><code>$ wget http://pecl.php.net/get/yaf-3.0.7.tgz
+$ ./configure --with-php-config=/usr/local/php/bin/php-config
+$ make
+$ sudo make install</code></pre><h3 id="5-2-compser"><a href="#5-2-compser" class="headerlink" title="5.2 compser"></a>5.2 compser</h3><pre><code>$ wget https://getcomposer.org/download/1.7.2/composer.phar
+$ sudo mv composer.phar /usr/local/bin/composer
+$ chmod +x /usr/local/bin/composer</code></pre><h2 id="其他"><a href="#其他" class="headerlink" title="其他"></a>其他</h2><h3 id="1-终端样式"><a href="#1-终端样式" class="headerlink" title="1. 终端样式"></a>1. 终端样式</h3><pre><code>$ vim ~/.bash_profile
+...
+function git-branch-name {
+  #git symbolic-ref HEAD 2&gt;/dev/null | cut -d&quot;/&quot; -f 3
+  git symbolic-ref HEAD 2&gt;/dev/null | sed &#39;s#refs/heads/##g&#39;
+}
+function git-branch-prompt {
+  local branch=`git-branch-name`
+  if [ $branch ]; then printf &quot; [%s]&quot; $branch; fi
+}
+PS1=&quot;\[\e[31m\]\$ \[\e[m\]\[\033[01;34m\]\w\[\033[00m\]\[\033[0;32m\]\$(git-branch-prompt)\[\033[0m\]\n\[\e[31m\]\$ \[\e[m\]&quot;
+...</code></pre><h3 id="2-Redis"><a href="#2-Redis" class="headerlink" title="2. Redis"></a>2. Redis</h3><pre><code>$ wget http://download.redis.io/releases/redis-3.2.5.tar.gz
+$ tar zvxf redis-3.2.5.tar.gz
+$ cd redis-3.2.5
+$ make
+$ sudo make install
+$ redis-server --version
+$ sudo sudo mkdir -p /usr/local/redis
+# sudo cp /root/src/redis-3.2.5/redis.conf /usr/local/redis
+# sudo vim /usr/local/redis/redis.conf
+...
+daemonize yes
+dir /usr/local/redis
+...
+$ sudo redis-server /usr/local/redis/redis.conf</code></pre>
+        </article>
+    </div>
+</section>
+
+    </main>
+    <footer class="footer"> Copyright 2013 - 2019 Ruesin. All Rights Reserved </footer>
+  </body>
+</html>

@@ -1,0 +1,129 @@
+<!DOCTYPE HTML>
+<html>
+  <head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+    <title>xposed 使用记录-信口开河</title>
+    <meta name="keywords" content="Ruesin,信口开河">
+    <meta name="description" content="至于你信不信，反正我是信了。">
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+  <body>
+    
+<header class="header">
+    <nav class="navbar">
+        <ul>
+            
+            <li><a class="header-nav-link" href="/">首页</a></li>
+            
+            <li><a class="header-nav-link" href="/categories">分类</a></li>
+            
+            <li><a class="header-nav-link" href="/archives">归档</a></li>
+            
+            <li><a class="header-nav-link" href="/tags">标签</a></li>
+            
+            <li><a class="header-nav-link" href="https://github.com/ruesin/notes">Github</a></li>
+            
+            <li><a class="header-nav-link" href="https://ruesin.github.io/php-tree">PHP技能树</a></li>
+            
+            <li><a class="header-nav-link" href="https://www.xinkoukaihe.com">老博客</a></li>
+            
+        </ul>
+    </nav>
+</header>
+    <main class="main">
+      <!-- 内容页 -->
+<section class="section">
+    <div class="post-container">
+        <div class="post-header">
+                <h1>xposed 使用记录</h1>
+                <!-- <div class="post-meta">2021-03-26</div> -->
+        </div>
+        <article class="post-content">
+            <h2 id="介绍"><a href="#介绍" class="headerlink" title="介绍"></a>介绍</h2><p>Xposed 是 Android 平台上著名的 Java 层 Hook 框架，通过在安装 Xposed 框架、编写 Xposed 模块，可以对任意 Android 应用的 Java 方法进行 Hook。</p>
+<p>Android运行的核心是zygote进程，zygote 进程是 Android 系统中第一个拥有 Java 运行环境的进程，它是由 init 进程通过解析 init.rc 文件创建出来的，从 init 进程 fork 而来。</p>
+<p>zygote 进程的可执行文件是 /system/bin/app_process，通过替换 app_process 文件，在其中加载了 XposedBridge.jar 这个 Dex 代码包，它包含 Xposed 的 Java 层实现代码和提供给 Xposed 模块的 API 代码。</p>
+<p>所有运行在 Java 虚拟机中的系统服务以及应用都是由 zygote 进程克隆出来的，被克隆出来的子进程将继承 zygote 进程的所有资源。</p>
+<p>通过替换app_process文件，就可以将 Xposed 代码继承到 Android 应用进程中，从而实现将 Xposed 代码加载到每一个进程中的目的。</p>
+<p>在 Hook 一个指定方法时，提供要 Hook 方法的名字、参数列表类型和方法所在类型，和一个用于处理 Hook 的回调方法（XC_MethodHook），这个回调用于修改原始方法的逻辑。</p>
+<p>Xposed 取得这个方法的反射对象，然后将反射对象和回调方法一起传递给 Xposed 的 Native 层代码，注册为Native层函数，当执行到该方法时，虚拟机会先执行Native层函数，转发给回调方法，然后执行Java层函数。</p>
+<p>Xposed 模块是一个普通的 Android 应用，通过 Xposed 框架提供的 Hook API 对任意应用的 Java 方法进行 Hook。</p>
+<p>在设备上安装 Xposed 框架和模块，然后在 Xposed 框架应用中启用这个模块，重新启动设备后，Xposed 模块将被激活，当任意的应用运行起来后，模块的 Hook 代码将会在这个应用进程中被加载，然后执行，从而对这个应用的 Java 方法进行指定 Hook 操作。</p>
+<h2 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h2><ul>
+<li>Xposed：<a href="https://github.com/rovo89/Xposed" target="_blank" rel="noopener">https://github.com/rovo89/Xposed</a></li>
+<li>XposedInstaller：<a href="https://github.com/rovo89/XposedInstaller" target="_blank" rel="noopener">https://github.com/rovo89/XposedInstaller</a></li>
+<li>XposedInstaller：<a href="https://repo.xposed.info/module/de.robv.android.xposed.installer" target="_blank" rel="noopener">https://repo.xposed.info/module/de.robv.android.xposed.installer</a></li>
+</ul>
+<h3 id="Xposed"><a href="#Xposed" class="headerlink" title="Xposed"></a>Xposed</h3><ol>
+<li>从 <a href="https://repo.xposed.info/module/de.robv.android.xposed.installer" target="_blank" rel="noopener">https://repo.xposed.info/module/de.robv.android.xposed.installer</a> 下载管理器<code>XposedInstaller_3.1.5.apk</code></li>
+<li>安装管理器到设备<code>adb install XposedInstaller_3.1.5.apk</code></li>
+<li>打开<code>xposedInstaller</code>，首页点击框架右侧的“云”，选择“install”。</li>
+</ol>
+<p>也可以选择离线安装：</p>
+<pre><code>$ wget http://dl-xda.xposed.info/framework/sdk24/arm64/xposed-v89-sdk24-arm64.zip
+$ adb push xposed-v89-sdk24-arm64.zip /data/local/tmp/
+$ adb shell
+
+$ su
+# cd /data/local/tmp
+# find / -name &#39;de.robv.android.xposed.installer&#39;
+/config/sdcardfs/de.robv.android.xposed.installer
+/data/media/0/Android/data/de.robv.android.xposed.installer
+/data/misc/profiles/cur/0/de.robv.android.xposed.installer
+/data/misc/profiles/ref/de.robv.android.xposed.installer
+/data/data/de.robv.android.xposed.installer
+/data/user_de/0/de.robv.android.xposed.installer
+/mnt/runtime/write/emulated/0/Android/data/de.robv.android.xposed.installer
+/mnt/runtime/read/emulated/0/Android/data/de.robv.android.xposed.installer
+/mnt/runtime/default/emulated/0/Android/data/de.robv.android.xposed.installer
+/storage/emulated/0/Android/data/de.robv.android.xposed.installer
+
+# cp xposed-v89-sdk24-arm64.zip /data/media/0/Android/data/de.robv.android.xposed.installer/cache/downloads/framework/</code></pre><h3 id="EdXposed"><a href="#EdXposed" class="headerlink" title="EdXposed"></a>EdXposed</h3><p>Xposed对8.0及之后版本支持不好，选择使用Edxposed。</p>
+<ul>
+<li>下载Magisk：<a href="https://github.com/topjohnwu/Magisk/releases" target="_blank" rel="noopener">https://github.com/topjohnwu/Magisk/releases</a></li>
+<li>下载Riru：<a href="https://github.com/RikkaApps/Riru/releases" target="_blank" rel="noopener">https://github.com/RikkaApps/Riru/releases</a></li>
+<li>下载EdXposed：<a href="https://github.com/ElderDrivers/EdXposed/releases" target="_blank" rel="noopener">https://github.com/ElderDrivers/EdXposed/releases</a></li>
+<li>下载EdXposedManager：<a href="https://github.com/ElderDrivers/EdXposedManager/releases" target="_blank" rel="noopener">https://github.com/ElderDrivers/EdXposedManager/releases</a></li>
+</ul>
+<ol>
+<li>安装Magisk：<code>adb install Magisk-v22.0.apk</code></li>
+<li>推送riru、EdXposed到手机，在 Magisk 底部第四个菜单中，本地导入安装 riru、EdXposed。（也可以选择在线安装）</li>
+<li>安装EdXposedManager：<code>adb install EdXposedManager-4.6.2-46200-org.meowcat.edxposed.manager-release.apk</code></li>
+<li>重启手机</li>
+</ol>
+<p>Xposed 或 EdXposed 安装成功后，安装Xposed模块，在Xposed Installer 或 EdXposedManager 中启用模块，重启手机即可。</p>
+<h2 id="模块"><a href="#模块" class="headerlink" title="模块"></a>模块</h2><p>Xposed 模块是一个普通的 Android 应用，通过 Xposed 框架提供的 Hook API 对任意应用的 Java 方法进行 Hook。</p>
+<p>APP开发前，需要配置对API的依赖。</p>
+<h3 id="添加-XposedBridge-API依赖"><a href="#添加-XposedBridge-API依赖" class="headerlink" title="添加 XposedBridge API依赖"></a>添加 XposedBridge API依赖</h3><h4 id="方法一：在线安装"><a href="#方法一：在线安装" class="headerlink" title="方法一：在线安装"></a>方法一：在线安装</h4><p>修改app下的build.gradle：</p>
+<pre><code>dependencies {
+    ...
+    compileOnly &#39;de.robv.android.xposed:api:82&#39;
+    ...
+}</code></pre><h4 id="方法二：离线安装"><a href="#方法二：离线安装" class="headerlink" title="方法二：离线安装"></a>方法二：离线安装</h4><p>下载<code>api-82.jar</code>：<a href="https://bintray.com/rovo89/de.robv.android.xposed/api" target="_blank" rel="noopener">https://bintray.com/rovo89/de.robv.android.xposed/api</a> 到<code>/app/libs</code>中，右键”Add As Library”添加这个jar包。</p>
+<p>修改app下的build.gradle：</p>
+<pre><code>dependencies {
+    ...
+    compileOnly files(&#39;libs/api-82.jar&#39;)
+    ...
+}</code></pre><h3 id="修改-AndroidManifest-xml-文件"><a href="#修改-AndroidManifest-xml-文件" class="headerlink" title="修改 AndroidManifest.xml 文件"></a>修改 AndroidManifest.xml 文件</h3><p>在Application标签里面加三个meta-data：</p>
+<pre><code>&lt;!-- 是否是xposed模块，xposed根据这个来判断是否是模块 --&gt;
+&lt;meta-data android:name=&quot;xposedmodule&quot; android:value=&quot;true&quot; /&gt;
+
+&lt;!-- 模块描述，显示在xposed模块列表那里第二行 --&gt;
+&lt;meta-data android:name=&quot;xposeddescription&quot; android:value=&quot;Xposed模块示例&quot; /&gt;
+
+&lt;!-- 最低xposed版本号(lib文件名可知) --&gt;
+&lt;meta-data android:name=&quot;xposedminversion&quot; android:value=&quot;30&quot; /&gt;</code></pre><h3 id="编写hook类"><a href="#编写hook类" class="headerlink" title="编写hook类"></a>编写hook类</h3><p>创建<code>com.metmit.xp.HookMain</code>类，实现IXposedHookLoadPackage接口，重写handleLoadPackage方法。</p>
+<h3 id="xposed-init文件"><a href="#xposed-init文件" class="headerlink" title="xposed_init文件"></a>xposed_init文件</h3><p>在<code>main</code>目录下创建<code>assets</code>目录，在<code>assets</code>目录下创建<code>xposed_init</code>文件。这个就是模块的入口，将相关<code>hook</code>类的全限定名称写入此文件中，如有多个类，则每行写一个：</p>
+<pre><code>com.metmit.xp.HookMain</code></pre><p>快速上手使用Xposed：<a href="https://github.com/metmit/easyXposed" target="_blank" rel="noopener">https://github.com/metmit/easyXposed</a></p>
+
+        </article>
+    </div>
+</section>
+
+    </main>
+    <footer class="footer"> Copyright 2013 - 2019 Ruesin. All Rights Reserved </footer>
+  </body>
+</html>
